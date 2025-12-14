@@ -1,0 +1,9 @@
+{
+  "name": "Daily Task Bar",
+  "version": "0.1",
+  "author": "(your name)",
+  "description": "Shows selected decks as tasks with progress bars for today",
+  "requirements": {
+    "anki": ">=2.1"
+  }
+}

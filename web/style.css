@@ -1,0 +1,135 @@
+:root {
+    --bg-color: #282c34;
+    --bg-color-light: #3a404a;
+    --border-color: #4a5162;
+    --text-color: #abb2bf;
+    --text-color-subtle: #828997;
+    --accent-color: #61afef;
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 2em;
+    line-height: 1.6;
+}
+
+h1 {
+    color: var(--accent-color);
+    margin: 0;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1em;
+    margin-bottom: 1.5em;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Remove default list styling */
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+/* Add indentation for nested lists */
+ul ul {
+    padding-left: 20px;
+}
+
+li {
+    margin: 4px 0;
+}
+
+.deck-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.deck-item:hover {
+    background-color: var(--bg-color-light);
+}
+
+label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-left: 8px;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+    min-width: 16px;
+    min-height: 16px;
+    margin-left: 8px;
+}
+
+.counts {
+    color: var(--text-color-subtle);
+    font-size: 0.9em;
+    margin-left: 1em;
+}
+
+/* --- Collapsible Tree Styles --- */
+.toggle {
+    cursor: pointer;
+    font-size: 0.8em;
+    width: 16px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.nested-list {
+    display: none; /* Hide children by default */
+}
+
+.expanded > .nested-list {
+    display: block; /* Show children when expanded */
+}
+
+.expanded > .deck-item .toggle {
+    transform: rotate(90deg); /* Rotate the toggle icon */
+}
+
+/* --- Button Styles --- */
+.btn {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 0.6em 1.2em;
+    border-radius: 5px;
+    font-family: var(--font-family);
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn:hover {
+    background-color: #82c8fa; /* A lighter shade of the accent color */
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
