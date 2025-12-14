@@ -59,10 +59,12 @@ li {
 
 .deck-item {
     display: flex;
-    align-items: center;
-    padding: 8px 12px;
+    align-items: flex-start;
+    padding: 6px 8px;
     border-radius: 5px;
     transition: background-color 0.2s ease-in-out;
+    margin-left: -8px; /* Counteract padding for full-width hover */
+    width: calc(100% + 16px);
 }
 
 .deck-item:hover {
@@ -72,17 +74,17 @@ li {
 label {
     cursor: pointer;
     display: flex;
-    align-items: center;
     justify-content: space-between;
     width: 100%;
-    margin-left: 8px;
+    padding-top: 2px; /* Align text with checkbox */
 }
 
 input[type="checkbox"] {
     cursor: pointer;
     min-width: 16px;
     min-height: 16px;
-    margin-left: 8px;
+    margin-right: 8px;
+    margin-top: 4px; /* Align with text */
 }
 
 .counts {
@@ -91,13 +93,15 @@ input[type="checkbox"] {
     margin-left: 1em;
 }
 
-/* --- Collapsible Tree Styles --- */
 .toggle {
     cursor: pointer;
-    font-size: 0.8em;
-    width: 16px;
+    font-size: 0.9em;
+    width: 20px;
+    display: inline-block;
     text-align: center;
     transition: transform 0.2s ease-in-out;
+    margin-right: 4px;
+    padding-top: 2px;
 }
 
 .nested-list {
@@ -108,8 +112,8 @@ input[type="checkbox"] {
     display: block; /* Show children when expanded */
 }
 
-.expanded > .deck-item .toggle {
-    transform: rotate(90deg); /* Rotate the toggle icon */
+.parent-deck:not(.expanded) > .nested-list {
+    display: none;
 }
 
 /* --- Button Styles --- */
