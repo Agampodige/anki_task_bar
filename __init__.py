@@ -1,5 +1,5 @@
 from aqt import mw
-from aqt.qt import QAction, QShortcut, QKeySequence
+from aqt.qt import QAction, QShortcut, QKeySequence, Qt
 from aqt import gui_hooks
 from aqt.utils import qconnect  
 from .taskui import Taskbar
@@ -8,6 +8,7 @@ from .taskui import Taskbar
 mw.taskbar_widget = None
 
 def toggle_taskbar():
+    print("Toggle Taskbar Triggered!")
     if mw.taskbar_widget is None:
         mw.taskbar_widget = Taskbar()
         # Center on parent window
@@ -27,13 +28,12 @@ def init_taskbar_menu():
     # Tools Menu
     mw.form.menuTools.addSeparator()
     action = QAction("Open Taskbar Widget", mw)
-    action.setShortcut(QKeySequence("Alt+q")) # Shortcut
+    action.setShortcut(QKeySequence("Ctrl+1")) # Shortcut
+    action.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
     qconnect(action.triggered, toggle_taskbar)
     mw.form.menuTools.addAction(action)
-
-    # Global Shortcut (works in Reviewer too if attached to mw)
-    # Store in mw to prevent garbage collection
-    mw.taskbar_shortcut = QShortcut(QKeySequence("Alt+Q"), mw)
-    qconnect(mw.taskbar_shortcut.activated, toggle_taskbar)
+    
+    # Register action with main window to ensure it catches events
+    mw.addAction(action)
 
 gui_hooks.main_window_did_init.append(init_taskbar_menu)
