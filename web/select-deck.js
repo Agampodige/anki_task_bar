@@ -12,6 +12,17 @@
                      buildTree(childNode, ul);
                  });
                  container.appendChild(ul);
+                // restore previously saved selection
+                if (window.py && typeof window.py.get_task_list_data === 'function') {
+                    window.py.get_task_list_data(function(data) {
+                        if (data && data.selected_decks) {
+                            data.selected_decks.forEach(did => {
+                                const cb = document.getElementById(`deck-${did}`);
+                                if (cb) cb.checked = true;
+                            });
+                        }
+                    });
+                }
              }
          });
      });
@@ -67,3 +78,33 @@
          });
      }
  }
+
+// Save selection button handler - collect checked deck ids and persist
+document.addEventListener('DOMContentLoaded', () => {
+    const saveBtn = document.getElementById('save-selection-btn');
+    if (!saveBtn) return;
+
+    saveBtn.addEventListener('click', () => {
+        const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+            .map(cb => parseInt(cb.value, 10));
+
+        // call python bridge to save
+        if (window.py && typeof window.py.save_selected_decks === 'function') {
+            window.py.save_selected_decks(checked, function(resp) {
+                try {
+                    if (resp && resp.ok) {
+                        alert('Saved selection. Saved to: ' + (resp.path || 'unknown'));
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('Could not save selection: ' + (resp.error || JSON.stringify(resp)));
+                        console.error('save_selected_decks failed', resp);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+        } else {
+            alert('Save not available in this environment.');
+        }
+    });
+});

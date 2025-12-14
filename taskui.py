@@ -4,6 +4,7 @@ from aqt import mw
 import json
 import traceback
 from typing import List, Dict, Any
+import tempfile
 
 
         
@@ -58,6 +59,9 @@ class Bridge(QObject):
         super().__init__(parent)
         # Keep a reference to the main window if needed for callbacks
         self.window = parent
+        # file used to persist selected decks
+        # resolve to an absolute path so writing works even when __file__ is relative
+        self._data_file = Path(__file__).resolve().parent / "selected_decks.json"
 
     @pyqtSlot(result='QVariant')
     def get_deck_tree(self):
@@ -69,6 +73,121 @@ class Bridge(QObject):
             # Return an empty structure if the collection is not available
             return {"name": "Decks", "id": 0, "children": []}
         return _build_deck_tree()
+
+    @pyqtSlot('QVariant', result='QVariant')
+    def save_selected_decks(self, selected_ids):
+        """Persist a list of selected deck ids to disk."""
+        try:
+            # ensure list of ints
+            selected = [int(x) for x in selected_ids]
+        except Exception:
+            selected = list(selected_ids)
+
+        data = {"selected_decks": selected}
+        # Try a list of candidate locations and pick the first writable one
+        candidates = []
+        # 1) addon folder (next to this file)
+        candidates.append(self._data_file)
+        # 2) profile addons folder
+        try:
+            candidates.append(Path(mw.profilesFolder()) / "addons21" / "anki_task_bar" / "selected_decks.json")
+        except Exception:
+            pass
+        # 3) user's home
+        try:
+            candidates.append(Path.home() / ".anki_task_bar_selected_decks.json")
+        except Exception:
+            pass
+        # 4) temp directory
+        try:
+            candidates.append(Path(tempfile.gettempdir()) / "anki_task_bar_selected_decks.json")
+        except Exception:
+            pass
+
+        errors = []
+        for candidate in candidates:
+            if not candidate:
+                continue
+            try:
+                # ensure parent exists where possible
+                try:
+                    candidate.parent.mkdir(parents=True, exist_ok=True)
+                except Exception:
+                    pass
+                candidate.write_text(json.dumps(data))
+                # remember where we saved
+                self._data_file = candidate
+                return {"ok": True, "saved": selected, "path": str(candidate)}
+            except Exception as e:
+                errors.append({"path": str(candidate), "error": str(e)})
+                traceback.print_exc()
+
+        # if we get here, none succeeded
+        return {"ok": False, "error": "could not write to candidate locations", "attempts": errors}
+
+    @pyqtSlot(result='QVariant')
+    def get_task_list_data(self):
+        """Return the persisted selected decks and their details for the UI."""
+        # load persisted selection
+        selected = []
+
+        # Try a set of candidate locations in order and use the first one that exists
+        candidates = [self._data_file]
+        try:
+            candidates.append(Path(mw.profilesFolder()) / "addons21" / "anki_task_bar" / "selected_decks.json")
+        except Exception:
+            pass
+        try:
+            candidates.append(Path.home() / ".anki_task_bar_selected_decks.json")
+        except Exception:
+            pass
+        try:
+            candidates.append(Path(tempfile.gettempdir()) / "anki_task_bar_selected_decks.json")
+        except Exception:
+            pass
+
+        for candidate in candidates:
+            if candidate and candidate.is_file():
+                try:
+                    payload = json.loads(candidate.read_text())
+                    selected = payload.get("selected_decks", [])
+                    # keep track of which file we loaded from for debugging
+                    self._last_loaded = str(candidate)
+                    break
+                except Exception:
+                    traceback.print_exc()
+
+        # Build a lookup of deck details from the live deck tree
+        def _flatten(node, acc):
+            acc[str(node["id"])] = {
+                "name": node.get("name", ""),
+                "new": node.get("new", 0),
+                "learn": node.get("learn", 0),
+                "review": node.get("review", 0),
+            }
+            for child in node.get("children", []):
+                _flatten(child, acc)
+
+        deck_tree = _build_deck_tree() if mw.col else {"name": "Decks", "id": 0, "children": []}
+        details = {}
+        _flatten(deck_tree, details)
+
+        # filter selected to only include ones present in details
+        filtered_selected = [int(d) for d in selected if str(d) in details]
+
+        # compute missing ids for debugging
+        missing = [d for d in selected if str(d) not in details]
+
+        result = {
+            "selected_decks": filtered_selected,
+            "deck_details": details,
+            "raw_selected": selected,
+            "missing": missing,
+            "loaded_from": getattr(self, '_last_loaded', None),
+            "details_count": len(details),
+        }
+
+        return result
 
 class Taskbar(QMainWindow):
     def __init__(self):

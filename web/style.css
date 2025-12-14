@@ -137,3 +137,45 @@ input[type="checkbox"] {
 .btn:active {
     transform: translateY(1px);
 }
+
+/* Task list styles */
+.task-list {
+    margin-top: 1em;
+}
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6em 0.8em;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+    margin-bottom: 0.6em;
+}
+.task-item .task-name {
+    flex: 1 1 auto;
+    margin-left: 0.6em;
+}
+.task-item .task-counts {
+    color: var(--text-color-subtle);
+    font-size: 0.9em;
+    margin-left: 1em;
+    white-space: nowrap;
+}
+.task-checkbox {
+    min-width: 18px;
+    min-height: 18px;
+}
+.placeholder {
+    color: var(--text-color-subtle);
+    padding: 1em 0;
+}
+
+.debug {
+    margin-top: 1em;
+    background: rgba(0,0,0,0.12);
+    color: var(--text-color);
+    padding: 0.6em;
+    border-radius: 6px;
+    font-size: 0.85em;
+    overflow: auto;
+}
