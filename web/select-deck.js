@@ -105,23 +105,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // call python bridge to save
         if (window.py && typeof window.py.save_selected_decks === 'function') {
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = 'Saving...';
+
             const jsonStr = JSON.stringify(checked);
             window.py.save_selected_decks(jsonStr, function (jsonResp) {
                 try {
                     const resp = JSON.parse(jsonResp);
                     if (resp && resp.ok) {
-                        alert('Saved selection.');
-                        window.location.href = 'index.html';
+                        saveBtn.innerText = 'Saved!';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 500);
                     } else {
-                        alert('Could not save selection: ' + (resp.error || JSON.stringify(resp)));
                         console.error('save_selected_decks failed', resp);
+                        saveBtn.innerText = 'Error!';
+                        setTimeout(() => saveBtn.innerText = originalText, 2000);
                     }
                 } catch (e) {
                     console.error("Failed to parse save response:", e);
+                    saveBtn.innerText = 'Error!';
                 }
             });
         } else {
-            alert('Save not available in this environment.');
+            console.warn('Save not available in this environment.');
         }
+    });
+
+    // Helper Action Listeners
+    document.getElementById('btn-all')?.addEventListener('click', () => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+    });
+
+    document.getElementById('btn-none')?.addEventListener('click', () => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    });
+
+    document.getElementById('btn-invert')?.addEventListener('click', () => {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = !cb.checked);
     });
 });

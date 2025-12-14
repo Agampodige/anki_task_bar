@@ -191,6 +191,23 @@ class Bridge(QObject):
             mw.moveToState("overview")
             mw.activateWindow()
             tooltip(f"Opening {mw.col.decks.name(did)}...", period=1500)
+            
+            # Auto-close the widget when review starts
+            if self.parent():
+                self.parent().hide()
+
         except Exception as e:
             print(f"Error in start_review: {e}")
             traceback.print_exc()
+
+    @pyqtSlot()
+    def close_window(self):
+        if self.parent():
+            self.parent().hide()
+
+    @pyqtSlot()
+    def drag_window(self):
+        # Trigger native window drag
+        # This requires the mouse button to be held down, which it is during the JS mousedown event.
+        if self.parent() and self.parent().windowHandle():
+            self.parent().windowHandle().startSystemMove()

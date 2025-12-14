@@ -1,36 +1,53 @@
 :root {
-    --bg-color: #1e1e1e;
+    --bg-color: rgba(30, 30, 30, 0.95);
+    /* Semi-transparent */
     --bg-card: #252526;
     --bg-hover: #2a2d2e;
     --border-color: #3e3e42;
     --text-primary: #e0e0e0;
     --text-secondary: #aaaaaa;
 
-    /* Modern Green Accent */
     --accent-color: #4CAF50;
     --accent-hover: #66bb6a;
-    --accent-dim: rgba(76, 175, 80, 0.2);
 
-    --font-family: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    --radius: 8px;
-    --anim-speed: 0.3s;
+    --font-family: 'Segoe UI', Inter, -apple-system, system-ui, sans-serif;
+    --radius: 12px;
+    /* Restored for inner elements */
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* Prevent scrollbar on main window */
+    background: transparent;
+    /* Let Qt transparency show through */
 }
 
 body {
     font-family: var(--font-family);
-    background-color: var(--bg-color);
     color: var(--text-primary);
-    margin: 0;
-    padding: 24px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+
+    /* The visible container */
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    /* Rounded corners for the widget */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    /* Subtle inner highlight */
 }
 
 h1 {
     color: var(--text-primary);
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-size: 1.4rem;
+    font-weight: 700;
     margin: 0;
+    letter-spacing: -0.5px;
 }
 
 /* --- Header --- */
@@ -38,9 +55,10 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 /* --- Buttons --- */
@@ -50,88 +68,109 @@ h1 {
     border: none;
     padding: 8px 16px;
     border-radius: var(--radius);
-    font-family: var(--font-family);
-    font-weight: 600;
     font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    /* for <a> buttons */
-    transition: background-color 0.2s, transform 0.1s;
-    display: inline-block;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .btn:hover {
     background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.btn:active {
-    transform: scale(0.98);
+.btn.secondary {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
-/* --- Lists --- */
+.btn.secondary:hover {
+    background-color: #333;
+}
+
+.btn.small {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    background-color: var(--bg-hover);
+    border: 1px solid var(--border-color);
+}
+
+.btn.small:hover {
+    background-color: #333;
+}
+
+/* --- Scrollable Content Area --- */
+#task-list-container,
+#deck-tree-container {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 60px;
+    padding-right: 6px;
+}
+
+/* Ensure nested lists in deck selection are indented */
 ul {
     list-style-type: none;
-    padding: 0;
+    /* Remove dots */
+    padding-left: 0;
     margin: 0;
 }
 
 ul ul {
     padding-left: 20px;
-    margin-top: 4px;
-    border-left: 1px solid var(--border-color);
     margin-left: 10px;
+    border-left: 1px solid var(--border-color);
 }
 
-/* --- Deck Tree Items (Selection Screen) --- */
+/* --- Deck Tree --- */
 .deck-item {
     display: flex;
     align-items: center;
-    padding: 10px 14px;
+    padding: 12px 14px;
+    /* More breathing room */
     border-radius: var(--radius);
     background-color: var(--bg-card);
     margin-bottom: 8px;
     border: 1px solid transparent;
-    transition: all 0.2s ease;
     cursor: pointer;
+    width: 100%;
+    /* Fix width */
+    box-sizing: border-box;
+    /* Include padding in width */
+    transition: background-color 0.2s, transform 0.2s;
 }
 
 .deck-item:hover {
     background-color: var(--bg-hover);
-    border-color: var(--border-color);
     transform: translateX(2px);
 }
 
 .deck-item label {
-    flex: 1;
-    cursor: pointer;
     margin-left: 10px;
-    font-weight: 500;
-    display: flex;
-    justify-content: space-between;
-}
-
-.deck-item input[type="checkbox"] {
-    accent-color: var(--accent-color);
-    width: 18px;
-    height: 18px;
     cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
 }
 
+.counts {
+    opacity: 0.6;
+    font-size: 0.85rem;
+    margin-left: auto;
+}
+
+/* Toggle for nested items */
 .toggle {
     display: inline-block;
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
+    width: 20px;
     text-align: center;
-    border-radius: 4px;
-    /* square-ish */
-    margin-right: 8px;
+    margin-right: 5px;
+    cursor: pointer;
     color: var(--text-secondary);
-    transition: background-color 0.2s;
-}
-
-.toggle:hover {
-    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .nested-list {
@@ -142,13 +181,27 @@ ul ul {
     display: block;
 }
 
-.counts {
-    opacity: 0.6;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-/* --- Task List (Main Screen) --- */
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* --- Task List --- */
 .task-list {
     display: flex;
     flex-direction: column;
@@ -159,19 +212,32 @@ ul ul {
     position: relative;
     background-color: var(--bg-card);
     border-radius: var(--radius);
+    /* Rounded tasks */
     overflow: hidden;
-    min-height: 56px;
+    min-height: 60px;
+    /* Slightly taller */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border: 1px solid var(--border-color);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    /* Subtle border */
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.task-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.task-item:active {
+    transform: scale(0.98);
 }
 
 .task-item.completed {
     order: 999;
-    /* Force to bottom */
     opacity: 0.6;
     filter: grayscale(0.8);
 }
@@ -182,16 +248,9 @@ ul ul {
     left: 0;
     bottom: 0;
     background: linear-gradient(90deg, #388E3C, #4CAF50);
-    z-index: 0;
-    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     opacity: 0.35;
-    /* Subtle background fill */
-}
-
-/* Increase fill opacity slightly on completed for satisfaction */
-.task-item.completed .task-progress-bar {
-    opacity: 0.2;
-    background: #4CAF50;
+    z-index: 0;
+    transition: width 0.6s;
 }
 
 .task-content {
@@ -201,19 +260,14 @@ ul ul {
     justify-content: space-between;
     align-items: center;
     padding: 0 16px;
-    width: 100%;
-    box-sizing: border-box;
 }
 
 .task-name {
-    font-size: 1rem;
     font-weight: 600;
 }
 
 .task-counts {
-    font-family: monospace, serif;
-    /* Tabular numbers for alignment */
-    font-size: 0.95rem;
+    font-family: monospace;
     color: var(--text-secondary);
 }
 
@@ -226,24 +280,35 @@ ul ul {
     color: var(--accent-color);
     text-transform: uppercase;
     font-size: 0.75rem;
-    letter-spacing: 1px;
     font-weight: 700;
 }
 
-/* Placeholders/Debug */
-.placeholder {
-    text-align: center;
-    padding: 40px;
-    color: var(--text-secondary);
-    border: 2px dashed var(--border-color);
-    border-radius: var(--radius);
+/* --- Grind Button --- */
+#grind-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    /* Pill shape */
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
 }
 
-.debug {
-    background: #111;
-    color: #0f0;
-    padding: 10px;
-    font-family: monospace;
-    font-size: 0.8rem;
-    margin-top: 20px;
+#grind-btn:hover {
+    background-color: var(--accent-hover);
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+#grind-btn:active {
+    transform: translateX(-50%) translateY(0);
 }

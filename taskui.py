@@ -1,18 +1,18 @@
 from aqt.qt import (
-    QMainWindow,
-    QVBoxLayout,
     QWidget,
+    QVBoxLayout,
     QUrl,
     QWebEngineView,
     QWebChannel,
     Qt,
     QMenu,
     QWebEngineSettings,
+    QMouseEvent,
+    QPoint,
+    QPalette
 )
 from pathlib import Path
 from aqt import mw
-from typing import Dict, Any
-
 from .bridge import Bridge
 
 # -----------------------------
@@ -32,29 +32,52 @@ def find_web_file(start_dir: Path, filename: str, max_up: int = 10) -> Path | No
 
 
 # -----------------------------
-# Main Window
+# Draggable Frameless Window
 # -----------------------------
 
-class Taskbar(QMainWindow):
+class Taskbar(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Taskbar")
-        self.resize(1000, 700)
+        self.resize(500, 600) # Smaller default size for a widget
+
+        # Floating, Frameless, Transparent
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, False)
+        
+        # Ensure palette is transparent
+        pal = self.palette()
+        pal.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.transparent)
+        pal.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.transparent)
+        self.setPalette(pal)
 
         addon_dir = Path(__file__).parent
         self.data_file = addon_dir / "selected_decks.json"
         
-        # Initialize Bridge with data file path and parent
+        # Initialize Bridge
         self.bridge = Bridge(self.data_file, parent=self)
         
         self.channel = QWebChannel()
         self.channel.registerObject("py", self.bridge)
 
         self.web_view = QWebEngineView()
+        # Aggressive transparency settings
+        self.web_view.setStyleSheet("background: transparent; border: none;")
+        self.web_view.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.web_view.page().setBackgroundColor(Qt.GlobalColor.transparent)
+        
+        # Transparent palette for web view
+        wpal = self.web_view.palette()
+        wpal.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.transparent)
+        wpal.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.transparent)
+        self.web_view.setPalette(wpal)
+        
         self.web_view.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.web_view.customContextMenuRequested.connect(self.on_context_menu)
-        
-        # Explicitly enable JS and local access
+
+        # Settings
         settings = self.web_view.settings()
         settings.setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
         settings.setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
@@ -70,22 +93,40 @@ class Taskbar(QMainWindow):
             self.web_view.setHtml("<h1>index.html not found</h1>")
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0) # No margin, CSS handles it
         layout.addWidget(self.web_view)
+        self.setLayout(layout)
 
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
+        # Dragging state
+        self._dragging = False
+        self._drag_start_pos = QPoint()
+
+    # -----------------------------
+    # Drag Handling
+    # -----------------------------
+    def paintEvent(self, event):
+        # Do not paint anything on the container
+        pass
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._dragging = True
+            self._drag_start_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            event.accept()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self._dragging:
+            self.move(event.globalPosition().toPoint() - self._drag_start_pos)
+            event.accept()
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        self._dragging = False
 
     def on_context_menu(self, pos):
+        # Optional: Keep context menu logic if needed
         menu = QMenu()
         reload_action = menu.addAction("Reload")
         reload_action.triggered.connect(self.web_view.reload)
-
-        inspect_action = menu.addAction("Inspect")
-        inspect_action.triggered.connect(
-            lambda: self.web_view.page().triggerAction(
-                self.web_view.page().WebAction.InspectElement
-            )
-        )
-
+        # inspect_action = menu.addAction("Inspect") # Uncomment for debug
+        # inspect_action.triggered.connect(lambda: self.web_view.page().triggerAction(self.web_view.page().WebAction.InspectElement))
         menu.exec(self.web_view.mapToGlobal(pos))

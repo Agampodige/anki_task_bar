@@ -85,5 +85,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
             container.appendChild(ul);
         });
+
+        // Grind Button
+        const grindBtn = document.getElementById('grind-btn');
+        if (grindBtn) {
+            grindBtn.addEventListener('click', () => {
+                if (window.py && typeof window.py.close_window === 'function') {
+                    window.py.close_window();
+                }
+            });
+        }
+
+        // Window Dragging logic
+        document.addEventListener('mousedown', (e) => {
+            // Ignore if clicking interactive elements
+            if (e.target.closest('button') ||
+                e.target.closest('input') ||
+                e.target.closest('a') ||
+                e.target.closest('.deck-item') ||
+                e.target.closest('.task-item') ||
+                e.target.closest('.toggle')) {
+                return;
+            }
+
+            if (window.py && typeof window.py.drag_window === 'function') {
+                window.py.drag_window();
+            }
+        });
     });
 });

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +10,23 @@
     <!-- Custom styles and scripts -->
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="page-header">
-        <h1>Select Decks</h1>
-        <button id="save-selection-btn" class="btn">Save Selection</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="index.html" class="btn secondary" style="padding: 6px 12px;">← Back</a>
+            <h1>Select Decks</h1>
+        </div>
+        <button id="save-selection-btn" class="btn">Save</button>
+    </div>
+
+    <div class="toolbar" style="margin-bottom: 10px; display: flex; gap: 8px;">
+        <button id="btn-all" class="btn small">Select All</button>
+        <button id="btn-none" class="btn small">Deselect All</button>
+        <button id="btn-invert" class="btn small">Invert</button>
     </div>
     <div id="deck-tree-container"></div>
     <script src="select-deck.js"></script>
 </body>
+
 </html>
