@@ -3,12 +3,21 @@ document.addEventListener("DOMContentLoaded", () => {
         window.py = channel.objects.py;
 
         // Fetch the data for the selected decks
-        py.get_task_list_data(function(data) {
-            console.debug('get_task_list_data ->', data);
+        py.get_taskbar_tasks(function (jsonData) {
+            console.debug('get_taskbar_tasks ->', jsonData);
+
+            let data = [];
+            try {
+                data = JSON.parse(jsonData);
+            } catch (e) {
+                console.error("Failed to parse tasks JSON:", e);
+            }
+
             const container = document.getElementById('task-list-container');
-            if (!data || !data.selected_decks || data.selected_decks.length === 0) {
+            container.innerHTML = ""; // clear container first
+
+            if (!data || data.length === 0) {
                 container.innerHTML = '<p class="placeholder">No decks selected. Go to "Manage Decks" to add tasks.</p>';
-                // show debug info so the user can see what the backend returned
                 const dbg = document.createElement('pre');
                 dbg.className = 'debug';
                 dbg.textContent = JSON.stringify(data, null, 2);
@@ -17,45 +26,34 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Create a list to hold the tasks
-                    const ul = document.createElement('ul');
-                    ul.className = 'task-list';
+            const ul = document.createElement('ul');
+            ul.className = 'task-list';
 
-                    // if there are missing ids (selected but no details), show debug info
-                    if (data.missing && data.missing.length) {
-                        const warn = document.createElement('div');
-                        warn.className = 'debug';
-                        warn.textContent = `Missing deck details for IDs: ${data.missing.join(', ')} (loaded_from: ${data.loaded_from || 'unknown'})`;
-                        container.appendChild(warn);
-                    }
-
-            for (const did of data.selected_decks) {
-                const details = data.deck_details[String(did)];
-                if (!details) continue;
-
+            data.forEach(task => {
                 const li = document.createElement('li');
                 li.className = 'task-item';
 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.className = 'task-checkbox';
+                checkbox.checked = task.completed; // auto-check if completed
 
                 const deckName = document.createElement('span');
                 deckName.className = 'task-name';
-                deckName.textContent = details.name;
+                deckName.textContent = task.name;
 
                 const counts = document.createElement('span');
                 counts.className = 'task-counts';
                 counts.innerHTML = `
-                    <span class="count-new">${details.new} New</span>
-                    <span class="count-learn">${details.learn} Learn</span>
-                    <span class="count-review">${details.review} Review</span>
+                    <span class="count-done">${task.done} Done</span>
+                    <span class="count-due">${task.dueNow} Remaining</span>
                 `;
 
                 li.appendChild(checkbox);
                 li.appendChild(deckName);
                 li.appendChild(counts);
                 ul.appendChild(li);
-            }
+            });
 
             container.appendChild(ul);
         });

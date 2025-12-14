@@ -3,12 +3,20 @@ document.addEventListener("DOMContentLoaded", () => {
     new QWebChannel(qt.webChannelTransport, function (channel) {
         window.py = channel.objects.py;
 
-        // Fetch the deck tree and render it
-        py.get_deck_tree(function(deckTree) {
+        // Fetch the deck tree (direct call)
+        py.get_deck_tree(function (jsonTree) {
+            let deckTree = {};
+            try {
+                deckTree = JSON.parse(jsonTree);
+            } catch (e) {
+                console.error("Failed to parse deck tree JSON:", e);
+            }
+
             const container = document.getElementById('deck-tree-container');
+            container.innerHTML = ""; // Clear container first
+
             if (deckTree && deckTree.children) {
                 const ul = document.createElement('ul');
-                // Start building the tree from the root's children
                 deckTree.children.forEach(childNode => {
                     buildTree(childNode, ul);
                 });
@@ -26,16 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
 function buildTree(node, parentElement) {
     const li = document.createElement('li');
 
-    // Create a checkbox for the deck
+    // Checkbox for the deck
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.id = `deck-${node.id}`;
     checkbox.value = node.id;
 
-    // Create a label for the checkbox
+    // Label for checkbox
     const label = document.createElement('label');
     label.htmlFor = `deck-${node.id}`;
-    // Display only the final part of the deck name
     const displayName = node.name.includes('::') ? node.name.split('::').pop() : node.name;
     label.textContent = ` ${displayName}`;
 
@@ -43,7 +50,7 @@ function buildTree(node, parentElement) {
     li.appendChild(label);
     parentElement.appendChild(li);
 
-    // If the deck has children, create a nested list and recurse
+    // Recursively add children if any
     if (node.children && node.children.length > 0) {
         const nestedUl = document.createElement('ul');
         li.appendChild(nestedUl);
