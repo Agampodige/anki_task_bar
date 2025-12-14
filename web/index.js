@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            // Sort: Incomplete first, then Completed
+            data.sort((a, b) => (a.completed === b.completed) ? 0 : a.completed ? 1 : -1);
+
             // Create a list to hold the tasks
             const ul = document.createElement('ul');
             ul.className = 'task-list';
@@ -32,11 +35,19 @@ document.addEventListener("DOMContentLoaded", () => {
             data.forEach(task => {
                 const li = document.createElement('li');
                 li.className = 'task-item';
+                if (task.completed) {
+                    li.classList.add('completed');
+                }
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.className = 'task-checkbox';
-                checkbox.checked = task.completed; // auto-check if completed
+                // Progress Bar Background
+                const progressBar = document.createElement('div');
+                progressBar.className = 'task-progress-bar';
+                const pct = Math.min(Math.max(task.progress * 100, 0), 100);
+                progressBar.style.width = `${pct}%`;
+
+                // Content Container
+                const content = document.createElement('div');
+                content.className = 'task-content';
 
                 const deckName = document.createElement('span');
                 deckName.className = 'task-name';
@@ -44,14 +55,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const counts = document.createElement('span');
                 counts.className = 'task-counts';
-                counts.innerHTML = `
-                    <span class="count-done">${task.done} Done</span>
-                    <span class="count-due">${task.dueNow} Remaining</span>
-                `;
+                // Show "Done / Total" format for clarity
+                const total = task.dueStart;
+                const done = task.done;
 
-                li.appendChild(checkbox);
-                li.appendChild(deckName);
-                li.appendChild(counts);
+                if (task.completed) {
+                    counts.textContent = "Completed";
+                    counts.classList.add('status-completed');
+                } else {
+                    counts.innerHTML = `<span class="highlight">${done}</span> / ${total}`;
+                }
+
+                content.appendChild(deckName);
+                content.appendChild(counts);
+
+                li.appendChild(progressBar);
+                li.appendChild(content);
+
+                // Click to review
+                li.addEventListener('click', () => {
+                    if (window.py && typeof window.py.start_review === 'function') {
+                        // Pass ID as string to be safe with standard Qt types
+                        window.py.start_review(String(task.deckId));
+                    }
+                });
+
                 ul.appendChild(li);
             });
 

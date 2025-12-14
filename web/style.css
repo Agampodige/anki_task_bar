@@ -1,181 +1,249 @@
 :root {
-    --bg-color: #282c34;
-    --bg-color-light: #3a404a;
-    --border-color: #4a5162;
-    --text-color: #abb2bf;
-    --text-color-subtle: #828997;
-    --accent-color: #61afef;
-    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --bg-color: #1e1e1e;
+    --bg-card: #252526;
+    --bg-hover: #2a2d2e;
+    --border-color: #3e3e42;
+    --text-primary: #e0e0e0;
+    --text-secondary: #aaaaaa;
+
+    /* Modern Green Accent */
+    --accent-color: #4CAF50;
+    --accent-hover: #66bb6a;
+    --accent-dim: rgba(76, 175, 80, 0.2);
+
+    --font-family: 'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    --radius: 8px;
+    --anim-speed: 0.3s;
 }
 
 body {
     font-family: var(--font-family);
     background-color: var(--bg-color);
-    color: var(--text-color);
+    color: var(--text-primary);
     margin: 0;
-    padding: 2em;
-    line-height: 1.6;
+    padding: 24px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
 h1 {
-    color: var(--accent-color);
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    font-weight: 600;
     margin: 0;
 }
 
+/* --- Header --- */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1em;
-    margin-bottom: 1.5em;
 }
 
-a {
-    color: var(--accent-color);
-    text-decoration: none;
-    font-weight: bold;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Remove default list styling */
-ul {
-    list-style-type: none;
-    padding-left: 0;
-    margin: 0;
-}
-
-/* Add indentation for nested lists */
-ul ul {
-    padding-left: 20px;
-}
-
-li {
-    margin: 4px 0;
-}
-
-.deck-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 6px 8px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease-in-out;
-    margin-left: -8px; /* Counteract padding for full-width hover */
-    width: calc(100% + 16px);
-}
-
-.deck-item:hover {
-    background-color: var(--bg-color-light);
-}
-
-label {
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    padding-top: 2px; /* Align text with checkbox */
-}
-
-input[type="checkbox"] {
-    cursor: pointer;
-    min-width: 16px;
-    min-height: 16px;
-    margin-right: 8px;
-    margin-top: 4px; /* Align with text */
-}
-
-.counts {
-    color: var(--text-color-subtle);
-    font-size: 0.9em;
-    margin-left: 1em;
-}
-
-.toggle {
-    cursor: pointer;
-    font-size: 0.9em;
-    width: 20px;
-    display: inline-block;
-    text-align: center;
-    transition: transform 0.2s ease-in-out;
-    margin-right: 4px;
-    padding-top: 2px;
-}
-
-.nested-list {
-    display: none; /* Hide children by default */
-}
-
-.expanded > .nested-list {
-    display: block; /* Show children when expanded */
-}
-
-.parent-deck:not(.expanded) > .nested-list {
-    display: none;
-}
-
-/* --- Button Styles --- */
+/* --- Buttons --- */
 .btn {
     background-color: var(--accent-color);
-    color: var(--bg-color);
+    color: #fff;
     border: none;
-    padding: 0.6em 1.2em;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
     font-family: var(--font-family);
-    font-weight: bold;
-    font-size: 0.9em;
+    font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+    text-decoration: none;
+    /* for <a> buttons */
+    transition: background-color 0.2s, transform 0.1s;
+    display: inline-block;
 }
 
 .btn:hover {
-    background-color: #82c8fa; /* A lighter shade of the accent color */
+    background-color: var(--accent-hover);
 }
 
 .btn:active {
-    transform: translateY(1px);
+    transform: scale(0.98);
 }
 
-/* Task list styles */
-.task-list {
-    margin-top: 1em;
+/* --- Lists --- */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
-.task-item {
+
+ul ul {
+    padding-left: 20px;
+    margin-top: 4px;
+    border-left: 1px solid var(--border-color);
+    margin-left: 10px;
+}
+
+/* --- Deck Tree Items (Selection Screen) --- */
+.deck-item {
     display: flex;
     align-items: center;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    background-color: var(--bg-card);
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.deck-item:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-color);
+    transform: translateX(2px);
+}
+
+.deck-item label {
+    flex: 1;
+    cursor: pointer;
+    margin-left: 10px;
+    font-weight: 500;
+    display: flex;
     justify-content: space-between;
-    padding: 0.6em 0.8em;
-    border-radius: 6px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
-    margin-bottom: 0.6em;
 }
-.task-item .task-name {
-    flex: 1 1 auto;
-    margin-left: 0.6em;
+
+.deck-item input[type="checkbox"] {
+    accent-color: var(--accent-color);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
 }
-.task-item .task-counts {
-    color: var(--text-color-subtle);
-    font-size: 0.9em;
-    margin-left: 1em;
-    white-space: nowrap;
+
+.toggle {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    border-radius: 4px;
+    /* square-ish */
+    margin-right: 8px;
+    color: var(--text-secondary);
+    transition: background-color 0.2s;
 }
-.task-checkbox {
-    min-width: 18px;
-    min-height: 18px;
+
+.toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
+
+.nested-list {
+    display: none;
+}
+
+.expanded>.nested-list {
+    display: block;
+}
+
+.counts {
+    opacity: 0.6;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* --- Task List (Main Screen) --- */
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.task-item {
+    position: relative;
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    cursor: pointer;
+}
+
+.task-item.completed {
+    order: 999;
+    /* Force to bottom */
+    opacity: 0.6;
+    filter: grayscale(0.8);
+}
+
+.task-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, #388E3C, #4CAF50);
+    z-index: 0;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 0.35;
+    /* Subtle background fill */
+}
+
+/* Increase fill opacity slightly on completed for satisfaction */
+.task-item.completed .task-progress-bar {
+    opacity: 0.2;
+    background: #4CAF50;
+}
+
+.task-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.task-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.task-counts {
+    font-family: monospace, serif;
+    /* Tabular numbers for alignment */
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.task-counts .highlight {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+.status-completed {
+    color: var(--accent-color);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+/* Placeholders/Debug */
 .placeholder {
-    color: var(--text-color-subtle);
-    padding: 1em 0;
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius);
 }
 
 .debug {
-    margin-top: 1em;
-    background: rgba(0,0,0,0.12);
-    color: var(--text-color);
-    padding: 0.6em;
-    border-radius: 6px;
-    font-size: 0.85em;
-    overflow: auto;
+    background: #111;
+    color: #0f0;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    margin-top: 20px;
 }

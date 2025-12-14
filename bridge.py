@@ -10,6 +10,7 @@ from typing import Dict, Any, List
 # -----------------------------
 
 def _build_deck_tree_helper() -> Dict[str, Any]:
+    # Using Anki's scheduler to get the full tree with counts
     root = mw.col.sched.deck_due_tree()
 
     def convert(node):
@@ -24,35 +25,37 @@ def _build_deck_tree_helper() -> Dict[str, Any]:
 
     return convert(root)
 
+def _get_deck_counts_map() -> Dict[int, int]:
+    """
+    Returns a dictionary mapping Deck ID -> Total Due (New + Learn + Review).
+    Traverses the full tree to ensure we get accurate counts that respect limits.
+    """
+    root = mw.col.sched.deck_due_tree()
+    counts = {}
+
+    def traverse(node):
+        # Sum of all types of work
+        total = node.review_count + node.learn_count + node.new_count
+        counts[node.deck_id] = total
+        for child in node.children:
+            traverse(child)
+
+    traverse(root)
+    return counts
+
 def _is_new_anki_day() -> bool:
     return mw.col.conf.get("anki_task_bar_day") != mw.col.sched.today
 
-def _due_count_for_deck(did: int) -> int:
-    # queue 2 = review, 3 = relearn
-    return (
-        mw.col.db.scalar(
-            """
-            SELECT count()
-            FROM cards
-            WHERE did = ?
-              AND queue IN (2,3)
-              AND due <= ?
-            """,
-            did,
-            mw.col.sched.today,
-        )
-        or 0
-    )
-
-def _ensure_today_snapshot(selected_dids: List[int]) -> Dict[str, int]:
+def _ensure_today_snapshot(selected_dids: List[int], current_counts: Dict[int, int]) -> Dict[str, int]:
+    # If it's a new day, update the snapshot
     if _is_new_anki_day():
         snapshot = {}
         for did in selected_dids:
-            snapshot[str(did)] = _due_count_for_deck(did)
+            snapshot[str(did)] = current_counts.get(did, 0)
 
         mw.col.conf["anki_task_bar_day"] = mw.col.sched.today
         mw.col.conf["anki_task_bar_snapshot"] = snapshot
-        mw.col.setMod()
+        mw.col.setMod() # Mark collection as modified to save config
 
     return mw.col.conf.get("anki_task_bar_snapshot", {})
 
@@ -69,16 +72,36 @@ def _load_selected_decks(data_file: Path) -> List[int]:
 
 def _build_taskbar_tasks_helper(data_file: Path) -> List[dict]:
     selected = _load_selected_decks(data_file)
-    snapshot = _ensure_today_snapshot(selected)
-
+    
+    # improved efficiency: get all counts in one pass
+    current_counts = _get_deck_counts_map()
+    
+    snapshot = _ensure_today_snapshot(selected, current_counts)
+    
+    # Make a mutable copy if needed, or modify directly. 
+    # Since we might update it, let's track if we need to save.
+    snapshot_updated = False
     tasks = []
 
     for did in selected:
         name = mw.col.decks.name(did)
-        due_now = _due_count_for_deck(did)
-        due_start = snapshot.get(str(did), due_now)
+        due_now = current_counts.get(did, 0)
+        
+        stored_start = snapshot.get(str(did), 0)
+        
+        # If user added cards (Custom Study) or modified limits, 
+        # actual due might exceed our morning snapshot.
+        # We track the "peak" due as the start point.
+        if due_now > stored_start:
+            due_start = due_now
+            snapshot[str(did)] = due_now
+            snapshot_updated = True
+        else:
+            due_start = stored_start
 
         done = max(due_start - due_now, 0)
+        
+        # Avoid division by zero
         progress = 1.0 if due_start == 0 else round(done / due_start, 3)
 
         tasks.append(
@@ -92,6 +115,10 @@ def _build_taskbar_tasks_helper(data_file: Path) -> List[dict]:
                 "completed": due_now == 0,
             }
         )
+        
+    if snapshot_updated:
+        mw.col.conf["anki_task_bar_snapshot"] = snapshot
+        mw.col.setMod()
 
     return tasks
 
@@ -114,7 +141,6 @@ class Bridge(QObject):
             traceback.print_exc()
             return "[]"
 
-    # Keeping this if you need deck tree in the future or for other JS parts
     @pyqtSlot(result=str)
     def get_deck_tree(self):
         try:
@@ -140,9 +166,31 @@ class Bridge(QObject):
         try:
             dids = json.loads(json_dids)
             data = {"selected_decks": dids}
+            # Update the snapshot immediately when saving new selection
+            # so progress starts from 'now' for newly added decks
+            current_counts = _get_deck_counts_map()
+            snapshot = mw.col.conf.get("anki_task_bar_snapshot", {})
+            for did in dids:
+                if str(did) not in snapshot:
+                    snapshot[str(did)] = current_counts.get(did, 0)
+            mw.col.conf["anki_task_bar_snapshot"] = snapshot
+            
             self.data_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
             return json.dumps({"ok": True, "path": str(self.data_file)})
         except Exception as e:
             print(f"Error in save_selected_decks: {e}")
             traceback.print_exc()
             return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(str)
+    def start_review(self, did_str):
+        from aqt.utils import tooltip  # Lazy import to avoid circular dependency issues
+        try:
+            did = int(did_str)
+            mw.col.decks.select(did)
+            mw.moveToState("overview")
+            mw.activateWindow()
+            tooltip(f"Opening {mw.col.decks.name(did)}...", period=1500)
+        except Exception as e:
+            print(f"Error in start_review: {e}")
+            traceback.print_exc()
