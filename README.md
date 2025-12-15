@@ -2,7 +2,9 @@
 
 A futuristic, floating task bar for Anki that keeps your spaced repetition goals front and center without being intrusive.
 
-![Anki Task Bar Widget](https://placeholder-image-url.com) *<!-- You can add a screenshot here later -->*
+| | |
+|---|---|
+| ![](img/image2.png) | ![](img/image3.png) | *<!-- You can add a screenshot here later -->*
 
 ## ✨ Features
 
