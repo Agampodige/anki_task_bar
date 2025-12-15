@@ -1,4 +1,4 @@
-# Anki Task Bar Widget
+# Anki Task by Sene
 
 A futuristic, floating task bar for Anki that keeps your spaced repetition goals front and center without being intrusive.
 
