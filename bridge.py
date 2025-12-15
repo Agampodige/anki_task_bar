@@ -4,6 +4,8 @@ import json
 import traceback
 from pathlib import Path
 from typing import Dict, Any, List
+from datetime import date
+from .daily_stats import DailyStatsDB
 
 # -----------------------------
 # Logic Helpers (Private)
@@ -44,18 +46,52 @@ def _get_deck_counts_map() -> Dict[int, int]:
     return counts
 
 def _is_new_anki_day() -> bool:
+    """Check if it's a new Anki day."""
     return mw.col.conf.get("anki_task_bar_day") != mw.col.sched.today
 
-def _ensure_today_snapshot(selected_dids: List[int], current_counts: Dict[int, int]) -> Dict[str, int]:
-    # If it's a new day, update the snapshot
+def _ensure_today_snapshot(selected_dids: List[int], current_counts: Dict[int, int], stats_db=None) -> Dict[str, int]:
+    """
+    Ensure we have a snapshot for today.
+    On a new day, capture the morning counts and save to database.
+    
+    Args:
+        selected_dids: List of selected deck IDs
+        current_counts: Current card counts for all decks
+        stats_db: DailyStatsDB instance for persistence
+    
+    Returns:
+        Dictionary of deck_id -> starting count for today
+    """
+    # If it's a new day, create morning snapshot
     if _is_new_anki_day():
         snapshot = {}
+        today_str = date.today().isoformat()
+        
         for did in selected_dids:
-            snapshot[str(did)] = current_counts.get(did, 0)
+            morning_count = current_counts.get(did, 0)
+            snapshot[str(did)] = morning_count
+            
+            # Save to database for persistence
+            if stats_db:
+                try:
+                    deck_name = mw.col.decks.name(did)
+                    stats_db.save_deck_history(
+                        date_str=today_str,
+                        deck_id=did,
+                        deck_name=deck_name,
+                        cards_due_start=morning_count,
+                        cards_done=0,  # Nothing done yet
+                        progress=0.0,
+                        completed=False
+                    )
+                except Exception as e:
+                    print(f"Error saving morning snapshot to DB: {e}")
 
         mw.col.conf["anki_task_bar_day"] = mw.col.sched.today
         mw.col.conf["anki_task_bar_snapshot"] = snapshot
-        mw.col.setMod() # Mark collection as modified to save config
+        mw.col.setMod()  # Mark collection as modified to save config
+        
+        print(f"Morning snapshot created for {len(snapshot)} decks")
 
     return mw.col.conf.get("anki_task_bar_snapshot", {})
 
@@ -70,13 +106,13 @@ def _load_selected_decks(data_file: Path) -> List[int]:
         traceback.print_exc()
         return []
 
-def _build_taskbar_tasks_helper(data_file: Path) -> List[dict]:
+def _build_taskbar_tasks_helper(data_file: Path, stats_db=None) -> List[dict]:
     selected = _load_selected_decks(data_file)
     
     # improved efficiency: get all counts in one pass
     current_counts = _get_deck_counts_map()
     
-    snapshot = _ensure_today_snapshot(selected, current_counts)
+    snapshot = _ensure_today_snapshot(selected, current_counts, stats_db)
     
     # Make a mutable copy if needed, or modify directly. 
     # Since we might update it, let's track if we need to save.
@@ -130,11 +166,14 @@ class Bridge(QObject):
     def __init__(self, data_file: Path, parent=None):
         super().__init__(parent)
         self.data_file = data_file
+        # Initialize database
+        db_path = data_file.parent / "daily_stats.db"
+        self.stats_db = DailyStatsDB(db_path)
 
     @pyqtSlot(result=str)
     def get_taskbar_tasks(self):
         try:
-            data = _build_taskbar_tasks_helper(self.data_file)
+            data = _build_taskbar_tasks_helper(self.data_file, self.stats_db)
             return json.dumps(data)
         except Exception as e:
             print(f"Error in get_taskbar_tasks: {e}")
@@ -211,3 +250,118 @@ class Bridge(QObject):
         # This requires the mouse button to be held down, which it is during the JS mousedown event.
         if self.parent() and self.parent().windowHandle():
             self.parent().windowHandle().startSystemMove()
+    
+    @pyqtSlot()
+    def save_daily_snapshot(self):
+        """
+        Save current day's progress to database.
+        Called when closing Anki or manually.
+        """
+        try:
+            tasks = _build_taskbar_tasks_helper(self.data_file, self.stats_db)
+            today_str = date.today().isoformat()
+            
+            # Calculate totals
+            total_done = sum(t['done'] for t in tasks)
+            completed_count = sum(1 for t in tasks if t['completed'])
+            
+            # Save daily summary
+            self.stats_db.save_daily_summary(
+                date_str=today_str,
+                total_cards=total_done,
+                decks_completed=completed_count
+            )
+            
+            # Save per-deck history (update with current progress)
+            for task in tasks:
+                self.stats_db.save_deck_history(
+                    date_str=today_str,
+                    deck_id=task['deckId'],
+                    deck_name=task['name'],
+                    cards_due_start=task['dueStart'],
+                    cards_done=task['done'],
+                    progress=task['progress'],
+                    completed=task['completed']
+                )
+            
+            print(f"Daily snapshot saved: {total_done} cards, {completed_count} decks completed")
+            
+        except Exception as e:
+            print(f"Error saving daily snapshot: {e}")
+            traceback.print_exc()
+    
+    @pyqtSlot(int, result=str)
+    def get_daily_stats(self, days=7):
+        """
+        Get daily statistics for the last N days.
+        
+        Args:
+            days: Number of days to retrieve (default 7)
+            
+        Returns:
+            JSON string with daily stats
+        """
+        try:
+            stats = self.stats_db.get_daily_stats(days)
+            return json.dumps(stats)
+        except Exception as e:
+            print(f"Error getting daily stats: {e}")
+            traceback.print_exc()
+            return "[]"
+    
+    @pyqtSlot(int, int, result=str)
+    def get_deck_history(self, deck_id, days=30):
+        """
+        Get history for a specific deck.
+        
+        Args:
+            deck_id: Deck ID
+            days: Number of days to retrieve (default 30)
+            
+        Returns:
+            JSON string with deck history
+        """
+        try:
+            history = self.stats_db.get_deck_history(deck_id, days)
+            return json.dumps(history)
+        except Exception as e:
+            print(f"Error getting deck history: {e}")
+            traceback.print_exc()
+            return "[]"
+    
+    @pyqtSlot(result=str)
+    def get_total_stats(self):
+        """
+        Get aggregate statistics across all time.
+        
+        Returns:
+            JSON string with total stats including streak
+        """
+        try:
+            stats = self.stats_db.get_total_stats()
+            stats['current_streak'] = self.stats_db.get_current_streak()
+            return json.dumps(stats)
+        except Exception as e:
+            print(f"Error getting total stats: {e}")
+            traceback.print_exc()
+            return "{}"
+    
+    @pyqtSlot(str, result=str)
+    def export_data_csv(self, file_path):
+        """
+        Export data to CSV file.
+        
+        Args:
+            file_path: Path where CSV should be saved
+            
+        Returns:
+            JSON with success status
+        """
+        try:
+            output_path = Path(file_path)
+            self.stats_db.export_to_csv(output_path, days=365)
+            return json.dumps({"ok": True, "path": str(output_path)})
+        except Exception as e:
+            print(f"Error exporting CSV: {e}")
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})

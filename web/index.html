@@ -9,15 +9,114 @@
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <!-- Custom styles and scripts -->
     <link rel="stylesheet" href="style.css">
+    <script src="confetti.js"></script>
 </head>
 
 <body>
+    <div id="global-progress-bar">
+        <div id="global-progress-value"></div>
+    </div>
     <div class="page-header">
         <h1>Today's Tasks</h1>
-        <a class="btn" href="select-deck.html">Manage Decks</a>
+        <div class="header-actions">
+            <!-- Analytics Button -->
+            <button id="btn-analytics" class="icon-btn" title="View Analytics">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor"
+                        d="M16,11.78L20.24,4.45L21.97,5.45L16.74,14.5L10.23,10.75L5.46,19H22V21H2V3H4V17.54L9.5,8L16,11.78Z" />
+                </svg>
+            </button>
+            <!-- Stats Button -->
+            <button id="btn-stats" class="icon-btn" title="View Stats">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor"
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
+                </svg>
+            </button>
+            <!-- Manage Decks Button -->
+            <a id="btn-manage" class="icon-btn" href="select-deck.html" title="Manage Decks">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor"
+                        d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+                </svg>
+            </a>
+        </div>
     </div>
 
-    <div id="task-list-container"></div>
+    <!-- Search Bar -->
+    <div style="padding-bottom: 10px;">
+        <div class="search-container">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" class="search-input" placeholder="Search decks..." autocomplete="off"
+                autocorrect="off" spellcheck="false">
+            <span class="search-hint">/</span>
+        </div>
+    </div>
+
+    <!-- Scrollable Content Area -->
+    <div id="main-content-container">
+        <!-- Active Decks -->
+        <div id="task-list-container"></div>
+
+        <!-- Completed Decks Section -->
+        <div id="completed-section" style="display: none;">
+            <div class="section-divider">
+                <span class="section-title">✓ Completed</span>
+            </div>
+            <div id="completed-list-container"></div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Cards Done Today</h2>
+            <div id="total-done-count" class="big-number">0</div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analytics-modal" class="modal hidden">
+        <div class="modal-content analytics-modal">
+            <button class="modal-close" id="analytics-close">&times;</button>
+            <h2>📊 Analytics</h2>
+
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Current Streak</div>
+                    <div class="stat-value" id="current-streak">-</div>
+                    <div class="stat-unit">days</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Total Days</div>
+                    <div class="stat-value" id="total-days">-</div>
+                    <div class="stat-unit">studied</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Total Cards</div>
+                    <div class="stat-value" id="total-cards">-</div>
+                    <div class="stat-unit">reviewed</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Avg Per Day</div>
+                    <div class="stat-value" id="avg-cards">-</div>
+                    <div class="stat-unit">cards</div>
+                </div>
+            </div>
+
+            <div class="recent-activity">
+                <h3>Last 7 Days</h3>
+                <div id="recent-days-list"></div>
+            </div>
+        </div>
+    </div>
 
     <button id="grind-btn">Back to Grinding</button>
 

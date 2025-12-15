@@ -23,17 +23,33 @@ def toggle_taskbar():
     else:
         mw.taskbar_widget.show()
         mw.taskbar_widget.activateWindow()
+        # Soft refresh via JS to preserve scroll position
+        mw.taskbar_widget.web_view.page().runJavaScript("if(window.refreshData) window.refreshData();")
+
+def save_daily_snapshot_on_close():
+    """Save daily snapshot when Anki profile is closing."""
+    try:
+        if mw.taskbar_widget and hasattr(mw.taskbar_widget, 'bridge'):
+            print("Saving daily snapshot on profile close...")
+            mw.taskbar_widget.bridge.save_daily_snapshot()
+    except Exception as e:
+        print(f"Error saving snapshot on close: {e}")
 
 def init_taskbar_menu():
     # Tools Menu
     mw.form.menuTools.addSeparator()
     action = QAction("Open Taskbar Widget", mw)
-    action.setShortcut(QKeySequence("Ctrl+1")) # Shortcut
-    action.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
     qconnect(action.triggered, toggle_taskbar)
     mw.form.menuTools.addAction(action)
     
-    # Register action with main window to ensure it catches events
-    mw.addAction(action)
+    # Global Shortcut for Reviewer support
+    # Using a global shortcut on main window often bypasses context issues
+    shortcut = QShortcut(QKeySequence("Alt+Q"), mw)
+    shortcut.setContext(Qt.ShortcutContext.WindowShortcut) # Or ApplicationShortcut
+    qconnect(shortcut.activated, toggle_taskbar)
+    
+    # Keep reference to avoid GC
+    mw.taskbar_shortcut = shortcut
 
 gui_hooks.main_window_did_init.append(init_taskbar_menu)
+gui_hooks.profile_will_close.append(save_daily_snapshot_on_close)

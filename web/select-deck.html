@@ -20,10 +20,39 @@
         <button id="save-selection-btn" class="btn">Save</button>
     </div>
 
-    <div class="toolbar" style="margin-bottom: 10px; display: flex; gap: 8px;">
-        <button id="btn-all" class="btn small">Select All</button>
-        <button id="btn-none" class="btn small">Deselect All</button>
-        <button id="btn-invert" class="btn small">Invert</button>
+    <div class="search-container">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Search decks..." autocomplete="off"
+            autocorrect="off" spellcheck="false">
+        <button id="search-clear" class="search-clear-btn" style="display: none;">&times;</button>
+        <span class="search-hint">/</span>
+    </div>
+
+    </div>
+
+    <div class="selection-info" id="selection-counter" style="display: none;">
+        <span id="selection-count">0 decks selected</span>
+    </div>
+
+    <div class="toolbar"
+        style="margin-bottom: 10px; display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+            <button id="btn-all" class="btn small">Select All</button>
+            <button id="btn-none" class="btn small">Deselect All</button>
+            <button id="btn-invert" class="btn small">Invert</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button id="btn-expand-all" class="btn small secondary">Expand All</button>
+            <button id="btn-collapse-all" class="btn small secondary">Collapse All</button>
+        </div>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display: none;">
+        <p>No decks found matching your search.</p>
     </div>
     <div id="deck-tree-container"></div>
     <script src="select-deck.js"></script>
