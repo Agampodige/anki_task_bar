@@ -291,29 +291,56 @@ document.addEventListener("DOMContentLoaded", () => {
     if (statsBtn && modal) {
         const modalContent = modal.querySelector('.modal-content');
         const countDisplay = document.getElementById('total-done-count');
+        const titleEl = document.getElementById('stats-title');
+
+        let statsMode = 0; // 0 = cards, 1 = reviews
+
+        const renderStats = () => {
+            const totals = window._todayTotals || { total_cards: 0, total_reviews: 0 };
+            if (statsMode === 0) {
+                if (titleEl) titleEl.textContent = 'Total Cards Today';
+                if (countDisplay) countDisplay.textContent = String(totals.total_cards ?? 0);
+            } else {
+                if (titleEl) titleEl.textContent = 'Total Reviews Today';
+                if (countDisplay) countDisplay.textContent = String(totals.total_reviews ?? 0);
+            }
+        };
+
+        const fetchTotals = (cb) => {
+            if (window.py && typeof window.py.get_today_review_totals === 'function') {
+                window.py.get_today_review_totals((jsonData) => {
+                    try {
+                        window._todayTotals = JSON.parse(jsonData);
+                    } catch (e) {
+                        window._todayTotals = { total_cards: 0, total_reviews: 0 };
+                    }
+                    if (cb) cb();
+                });
+            } else {
+                window._todayTotals = { total_cards: 0, total_reviews: 0 };
+                if (cb) cb();
+            }
+        };
 
         statsBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // prevent drag
 
-            // Calculate total done from current DOM or Data?
-            // Easier to rely on the data if we have it scope-accessible,
-            // but since 'data' var is local to the callback, let's grab it from DOM or recalculate.
-            // Actually, we can just sum up the counters in the DOM if we don't want to expose 'data' globally.
-            // Or better, make 'taskData' a global variable or attached to window.
-
-            // Let's scrape the DOM for simplicity and robustness (what you see is what you get)
-            // Wait, accuracy matters. Let's look for the progress bars...
-            // Actually, we calculated 'totalDone' in the main callback.
-            // Let's create a global for it.
-
-            if (typeof window.totalDoneToday !== 'undefined') {
-                countDisplay.textContent = window.totalDoneToday;
-            } else {
-                countDisplay.textContent = "0";
-            }
-
-            modal.classList.add('visible');
+            statsMode = 0;
+            fetchTotals(() => {
+                renderStats();
+                modal.classList.add('visible');
+            });
         });
+
+        if (!window._statsClickBound && modalContent) {
+            window._statsClickBound = true;
+
+            modalContent.addEventListener('click', (e) => {
+                e.stopPropagation();
+                statsMode = statsMode === 0 ? 1 : 0;
+                renderStats();
+            });
+        }
 
         // Close on outside click
         modal.addEventListener('click', (e) => {

@@ -45,9 +45,33 @@ def _get_deck_counts_map() -> Dict[int, int]:
     traverse(root)
     return counts
 
+def _anki_day_start_end_ms() -> tuple[int, int]:
+    cutoff = getattr(mw.col.sched, "day_cutoff", None)
+    if cutoff is None:
+        cutoff = getattr(mw.col.sched, "dayCutoff", None)
+    cutoff = int(cutoff)
+    end_ms = cutoff * 1000
+    start_ms = (cutoff - 86400) * 1000
+    return start_ms, end_ms
+
 def _is_new_anki_day() -> bool:
     """Check if it's a new Anki day."""
     return mw.col.conf.get("anki_task_bar_day") != mw.col.sched.today
+
+def _reset_selected_decks_for_today(data_file: Path) -> None:
+    """Clear selected decks once per Anki day."""
+    try:
+        if mw.col.conf.get("anki_task_bar_selection_reset_day") == mw.col.sched.today:
+            return
+
+        data_file.write_text(json.dumps({"selected_decks": []}, indent=2), encoding="utf-8")
+
+        mw.col.conf["anki_task_bar_selection_reset_day"] = mw.col.sched.today
+        mw.col.conf["anki_task_bar_day"] = mw.col.sched.today
+        mw.col.conf["anki_task_bar_snapshot"] = {}
+        mw.col.setMod()
+    except Exception:
+        traceback.print_exc()
 
 def _ensure_today_snapshot(selected_dids: List[int], current_counts: Dict[int, int], stats_db=None) -> Dict[str, int]:
     """
@@ -96,6 +120,7 @@ def _ensure_today_snapshot(selected_dids: List[int], current_counts: Dict[int, i
     return mw.col.conf.get("anki_task_bar_snapshot", {})
 
 def _load_selected_decks(data_file: Path) -> List[int]:
+    _reset_selected_decks_for_today(data_file)
     if not data_file.exists():
         return []
 
@@ -168,6 +193,20 @@ class Bridge(QObject):
         self.data_file = data_file
         # Initialize database
         db_path = data_file.parent / "daily_stats.db"
+
+        # First-run initialization (new computer / fresh profile)
+        try:
+            marker_path = data_file.parent / ".anki_task_bar_initialized"
+            if not marker_path.exists():
+                data_file.write_text(json.dumps({"selected_decks": []}, indent=2), encoding="utf-8")
+
+                if db_path.exists():
+                    db_path.unlink()
+
+                marker_path.write_text("1", encoding="utf-8")
+        except Exception:
+            traceback.print_exc()
+
         self.stats_db = DailyStatsDB(db_path)
 
     @pyqtSlot(result=str)
@@ -179,6 +218,35 @@ class Bridge(QObject):
             print(f"Error in get_taskbar_tasks: {e}")
             traceback.print_exc()
             return "[]"
+
+    @pyqtSlot(result=str)
+    def get_today_review_totals(self):
+        try:
+            start_ms, end_ms = _anki_day_start_end_ms()
+            db = mw.col.db
+
+            def _scalar(query, *args):
+                if hasattr(db, "scalar"):
+                    return db.scalar(query, *args)
+                row = db.first(query, *args)
+                return row[0] if row else 0
+
+            total_reviews = int(_scalar(
+                "SELECT COUNT(*) FROM revlog WHERE id >= ? AND id < ?",
+                start_ms,
+                end_ms,
+            ))
+            total_cards = int(_scalar(
+                "SELECT COUNT(DISTINCT cid) FROM revlog WHERE id >= ? AND id < ?",
+                start_ms,
+                end_ms,
+            ))
+
+            return json.dumps({"total_cards": total_cards, "total_reviews": total_reviews})
+        except Exception as e:
+            print(f"Error in get_today_review_totals: {e}")
+            traceback.print_exc()
+            return json.dumps({"total_cards": 0, "total_reviews": 0})
 
     @pyqtSlot(result=str)
     def get_deck_tree(self):
