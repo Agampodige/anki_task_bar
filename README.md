@@ -20,13 +20,14 @@ A futuristic, floating task bar for Anki that keeps your spaced repetition goals
 
 ## 🚀 Usage
 
-1. **Open Anki**
-2. Press **Alt+Q** to toggle the widget (or use Tools → Open Taskbar Widget)
-3. **Drag** the widget anywhere on your screen by clicking and holding the background
-4. Click **"Manage Decks"** to select which decks to track
-5. Set deck priorities (High/Medium/Low) to organize your study workflow
-6. Click **"Analytics"** to view your study statistics and trends
-7. Press **Escape** or click **"Back to Grinding"** to hide the widget and focus on your work
+If you have lots of decks and need a quick way to filter and manage them, this addon is super useful! Here's how to get started:
+- Open Anki
+- Press Alt+Q (or go to Tools → Open Taskbar Widget) to toggle the widget
+- Drag the widget anywhere on your screen by clicking and holding the background
+- Click "Manage Decks" to pick which decks you want to track
+- Set deck priorities (High/Medium/Low) to organize your study flow
+- Hit "Analytics" to check your study stats and trends
+- Press Escape or click "Back to Grinding" to hide the widget and get back to studying
 
 ## 🛠️ Configuration
 
