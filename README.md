@@ -29,6 +29,8 @@ If you have lots of decks and need a quick way to filter and manage them, this a
 - Hit "Analytics" to check your study stats and trends
 - Press Escape or click "Back to Grinding" to hide the widget and get back to studying
 
+
+> use a Gamming Controller with keybindings.
 ## 🛠️ Configuration
 
 The widget is designed to be zero-config for the most part. Customization options include:
