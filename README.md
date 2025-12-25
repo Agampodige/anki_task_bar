@@ -1,9 +1,8 @@
 # Anki Task by Sene🦎
 
 A futuristic, floating task bar for Anki that keeps your spaced repetition goals front and center without being intrusive.
-<img width="503" height="599" alt="image" src="https://github.com/user-attachments/assets/d35c0079-d0cd-43b7-80b2-3ee5b969c910" />
-<img width="408" height="347" alt="image" src="https://github.com/user-attachments/assets/8c1a9dc4-4d71-495f-b059-f4d7ee71b989" />
-<img width="479" height="577" alt="image" src="https://github.com/user-attachments/assets/2530a42b-082b-4a73-b335-582862eeff99" />
+<img width="1647" height="1624" alt="Showing" src="https://github.com/user-attachments/assets/b592cb19-7b58-4f88-8f8e-9abb7cf3f7b1" />
+
 
 ## ✨ Features
 
