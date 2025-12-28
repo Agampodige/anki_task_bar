@@ -1,6 +1,6 @@
 {
   "name": "Daily Task Bar",
-  "version": "0.1",
+  "version": "1.02",
   "author": "Sene",
   "description": "Shows selected decks as tasks with progress bars for today",
   "requirements": {
