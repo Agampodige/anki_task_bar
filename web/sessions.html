@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sessions</title>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="sessions.css">
+</head>
+
+<body>
+    <div class="page-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="index.html" class="btn secondary" style="padding: 6px 12px;">← Back</a>
+            <h1>Sessions</h1>
+        </div>
+    </div>
+
+    <div id="sessions-main" class="sessions-layout">
+        <div class="editor-panel">
+            <div class="panel-title">Actions</div>
+
+            <div class="editor-actions">
+                <button id="activate-session" class="btn">Activate</button>
+                <button id="edit-session" class="btn secondary">Edit</button>
+                <button id="delete-session" class="btn secondary">Delete</button>
+                <div id="sessions-status" class="settings-status" aria-live="polite"></div>
+            </div>
+        </div>
+
+        <div class="sessions-panel">
+            <div class="panel-title">Saved Sessions</div>
+            <div id="sessions-list" class="sessions-list"></div>
+        </div>
+    </div>
+
+    <script src="sessions.js"></script>
+</body>
+
+</html>

@@ -40,6 +40,35 @@
                         d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
                 </svg>
             </a>
+            <a id="btn-sessions" class="icon-btn" href="sessions.html" title="Sessions" style="display: none;">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor"
+                        d="M4 6c0-1.1.9-2 2-2h9c1.1 0 2 .9 2 2v1h1c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H9c-1.1 0-2-.9-2-2v-1H6c-1.1 0-2-.9-2-2V6zm3 10V6c0-.55.45-1 1-1h8v12c0 .55-.45 1-1 1H8c-.55 0-1-.45-1-1zm10 3V9c0-.55.45-1 1-1h1c.55 0 1 .45 1 1v10c0 .55-.45 1-1 1h-1c-.55 0-1-.45-1-1z" />
+                </svg>
+            </a>
+            <a class="icon-btn" href="setting.html" title="Settings">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor"
+                        d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.11-0.2-0.36-0.28-0.57-0.2l-2.39,0.96c-0.5-0.38-1.04-0.69-1.63-0.92L14.5,2.5c-0.02-0.22-0.21-0.4-0.44-0.4h-3.84c-0.23,0-0.42,0.18-0.44,0.4L9.42,5.39c-0.59,0.23-1.13,0.54-1.63,0.92L5.4,5.35c-0.21-0.08-0.46,0-0.57,0.2L2.91,8.87c-0.11,0.2-0.06,0.47,0.12,0.61l2.03,1.58C5.02,11.37,5,11.69,5,12s0.02,0.63,0.06,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.11-0.2,0.36-0.28,0.57-0.2l2.39-0.96c0.5,0.38,1.04,0.69,1.63,0.92l0.36,2.89c0.02,0.22,0.21,0.4,0.44,0.4h3.84c0.23,0,0.42-0.18,0.44-0.4l0.36-2.89c0.59-0.23,1.13-0.54,1.63-0.92l2.39,0.96c0.21,0.08,0.46,0,0.57-0.2l1.92-3.32c0.11-0.2,0.06-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5S10.07,8.5,12,8.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <div id="selected-decks-stats" class="selected-decks-stats" style="display: none;">
+        <div class="stats-summary">
+            <div class="stat-item">
+                <div class="stat-label">Selected Decks</div>
+                <div id="stats-deck-count" class="stat-value">0 </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Total/Completed</div>
+                <div id="stats-cards-format" class="stat-value">0/0 </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Est. Minutes</div>
+                <div id="stats-estimated-time" class="stat-value">~0 </div>
+            </div>
         </div>
     </div>
 
@@ -62,9 +91,7 @@
         <!-- Active Decks -->
         <div id="task-list-container"></div>
 
-        <!-- Completed Decks Section -->
-        <div id="completed-section" style="display: none;">
-            <div class="section-divider">
+            <div class="section-divider" id="completed-section">
                 <span class="section-title">✓ Completed</span>
             </div>
             <div id="completed-list-container"></div>

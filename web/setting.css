@@ -1,0 +1,142 @@
+@import url('style.css');
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.settings-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+#settings-main {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.setting-card {
+    background: var(--bg-card);
+    padding: 15px 20px;
+    margin-bottom: 5px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    text-decoration: none;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.setting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.setting-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.link-card:hover {
+    background-color: var(--bg-hover);
+}
+
+.setting-label {
+    font-weight: 500;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: var(--border-color);
+    margin: 14px 0;
+}
+
+/* Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px; width: 18px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--accent-color); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+.icon { font-size: 1.5rem; color: #999; }
+
+button.setting-card {
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.settings-status {
+    min-height: 18px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.settings-status[data-kind="ok"] {
+    color: var(--accent-color);
+}
+
+.settings-status[data-kind="error"] {
+    color: #F44336;
+}
+
+/* Style for the back link/button */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none; /* Removes the underline */
+    color: #555; /* Neutral dark grey */
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease; /* Makes the hover effect smooth */
+    background-color: transparent;
+    margin-bottom: 20px;
+}
+
+/* Hover effect */
+.back-link:hover {
+    background-color: #e0e0e0; /* Light grey background on hover */
+    color: #000; /* Darker text */
+    transform: translateX(-3px); /* Subtle nudge to the left */
+}
+
+/* Optional: Styling the arrow specifically */
+.back-link::before {
+    margin-right: 5px;
+}

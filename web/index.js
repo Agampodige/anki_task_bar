@@ -1,4 +1,90 @@
 document.addEventListener("DOMContentLoaded", () => {
+    function _applySettingsToHomeUI(settings) {
+        const cfg = settings || {};
+        const hideCompleted = !!cfg.hideCompleted;
+        const completedSection = document.getElementById('completed-section');
+        if (completedSection && hideCompleted) {
+            completedSection.style.display = 'none';
+        }
+
+        const sessionsBtn = document.getElementById('btn-sessions');
+        if (sessionsBtn) {
+            const sessionsEnabled = cfg.sessionsEnabled !== false;
+            sessionsBtn.style.display = sessionsEnabled ? 'flex' : 'none';
+        }
+
+        // Apply statistics bar visibility setting
+        const statsBar = document.getElementById('selected-decks-stats');
+        if (statsBar) {
+            const showStatsBar = cfg.showStatsBar !== false; // Default to true
+            statsBar.style.display = showStatsBar && window.selectedDecksStats && window.selectedDecksStats.totalDecks > 0 ? 'flex' : 'none';
+        }
+        
+        window.ankiTaskBarSettings = cfg;
+    }
+
+    function _loadSettings(cb) {
+        const fallback = () => {
+            try {
+                const local = localStorage.getItem('anki_task_bar_settings');
+                cb(local ? JSON.parse(local) : {});
+            } catch (e) {
+                cb({});
+            }
+        };
+
+        if (window.py && typeof window.py.load_settings_from_file === 'function') {
+            window.py.load_settings_from_file((data) => {
+                try {
+                    const cfg = data ? JSON.parse(data) : {};
+                    try { localStorage.setItem('anki_task_bar_settings', JSON.stringify(cfg)); } catch (e) {}
+                    cb(cfg);
+                } catch (e) {
+                    fallback();
+                }
+            });
+            return;
+        }
+
+        fallback();
+    }
+
+    // Function to update selected decks statistics bar
+    function updateSelectedDecksStats(data) {
+        const statsBar = document.getElementById('selected-decks-stats');
+        if (!statsBar) return;
+
+        const selectedDecks = data.filter(t => !t.completed);
+        const totalDecks = selectedDecks.length;
+        const totalCards = selectedDecks.reduce((sum, t) => sum + (t.dueStart || 0), 0);
+        const completedCards = selectedDecks.reduce((sum, t) => sum + (t.done || 0), 0);
+        
+        // Estimate time (assuming 1 minute per card for remaining cards)
+        const remainingCards = Math.max(totalCards - completedCards, 0);
+        const estimatedMinutes = remainingCards;
+        const estimatedTime = estimatedMinutes < 60 
+            ? `${estimatedMinutes} ` 
+            : `${Math.round(estimatedMinutes / 60)}h ${estimatedMinutes % 60}`;
+
+        // Update global stats object
+        window.selectedDecksStats = {
+            totalDecks,
+            totalCards,
+            completedCards,
+            estimatedTime
+        };
+
+        // Update DOM elements
+        document.getElementById('stats-deck-count').textContent = `${totalDecks} ${totalDecks !== 1 ? '' : ''}`;
+        document.getElementById('stats-cards-format').textContent = `${totalCards}/${completedCards} `;
+        document.getElementById('stats-estimated-time').textContent = estimatedTime;
+
+        // Show/hide based on settings and data
+        const cfg = window.ankiTaskBarSettings || {};
+        const showStatsBar = cfg.showStatsBar !== false; // Default to true
+        statsBar.style.display = showStatsBar && totalDecks > 0 ? 'flex' : 'none';
+    }
+
     // Refactored Data Fetching Logic
     window.refreshData = function () {
         if (!window.py) return;
@@ -15,6 +101,11 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (e) {
                 console.error("Failed to parse tasks JSON:", e);
             }
+
+            const tasksById = new Map();
+            data.forEach(t => {
+                tasksById.set(Number(t.deckId), t);
+            });
 
             // Helper to load deck metadata
             function loadDeckMetadata() {
@@ -52,6 +143,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // Store globally for stats and selection restoration
             window.taskData = data;
 
+            // Update selected decks statistics bar
+            updateSelectedDecksStats(data);
+
             const completedContainer = document.getElementById('completed-list-container');
             const completedSection = document.getElementById('completed-section');
 
@@ -79,86 +173,154 @@ document.addEventListener("DOMContentLoaded", () => {
                 globalBar.style.width = `${Math.min(Math.max(globalPct, 0), 100)}%`;
             }
 
-            // Create a list to hold the active tasks
-            const ul = document.createElement('ul');
-            ul.className = 'task-list';
+            // Tree view rendering for active decks
+            const selectedActiveSet = new Set(activeDecks.map(t => Number(t.deckId)));
 
-            // State for keyboard navigation
-            let taskElements = [];
-            let newSelectedIndex = -1;
+            function displayName(fullName) {
+                if (!fullName) return '';
+                return fullName.includes('::') ? fullName.split('::').pop() : fullName;
+            }
 
-            const updateSelection = (index) => {
-                taskElements.forEach((el, idx) => {
-                    if (idx === index) {
-                        el.classList.add('selected');
-                    } else {
-                        el.classList.remove('selected');
-                    }
-                });
-                window.currentSelectedIndex = index;
-            };
+            function buildPrunedTree(root) {
+                if (!root) return null;
+                const id = Number(root.id);
+                const children = Array.isArray(root.children) ? root.children : [];
 
-            activeDecks.forEach((task, index) => {
-                const li = document.createElement('li');
-                li.className = 'task-item';
-                li.dataset.index = index;
-
-                // Add priority class
-                const priority = getDeckPriority(task.deckId);
-                li.classList.add(`priority-${priority}`);
-
-                // Progress Bar Background
-                const progressBar = document.createElement('div');
-                progressBar.className = 'task-progress-bar';
-                const pct = Math.min(Math.max(task.progress * 100, 0), 100);
-                progressBar.style.width = `${pct}%`;
-
-                // Content Container
-                const content = document.createElement('div');
-                content.className = 'task-content';
-
-                const deckName = document.createElement('span');
-                deckName.className = 'task-name';
-                deckName.textContent = task.name;
-
-                const counts = document.createElement('span');
-                counts.className = 'task-counts';
-                const total = task.dueStart;
-                const done = task.done;
-
-                if (task.completed) {
-                    counts.textContent = "Completed";
-                    counts.classList.add('status-completed');
-                } else {
-                    counts.innerHTML = `<span class="highlight">${done}</span><span class="separator"> / </span>${total}`;
+                const prunedChildren = [];
+                for (const c of children) {
+                    const pruned = buildPrunedTree(c);
+                    if (pruned) prunedChildren.push(pruned);
                 }
 
-                content.appendChild(deckName);
-                content.appendChild(counts);
+                const keep = selectedActiveSet.has(id) || prunedChildren.length > 0;
+                if (!keep) return null;
 
-                li.appendChild(progressBar);
-                li.appendChild(content);
+                return {
+                    id,
+                    name: root.name,
+                    children: prunedChildren,
+                };
+            }
 
-                // Click to review
-                li.addEventListener('click', () => {
-                    if (window.py && typeof window.py.start_review === 'function') {
-                        window.py.start_review(String(task.deckId));
+            function renderActiveTree(deckTreeRoot) {
+                // State for keyboard navigation
+                let taskElements = [];
+
+                const updateSelection = (index) => {
+                    taskElements.forEach((el, idx) => {
+                        if (idx === index) {
+                            el.classList.add('selected');
+                        } else {
+                            el.classList.remove('selected');
+                        }
+                    });
+                    window.currentSelectedIndex = index;
+                };
+
+                const ul = document.createElement('ul');
+                ul.className = 'task-tree';
+
+                function renderNode(node, parentUl) {
+                    const li = document.createElement('li');
+                    const row = document.createElement('div');
+                    row.className = 'deck-item task-node';
+
+                    const isSelected = selectedActiveSet.has(node.id);
+                    const task = isSelected ? tasksById.get(node.id) : null;
+
+                    if (task) {
+                        const priority = getDeckPriority(task.deckId);
+                        row.classList.add(`priority-${priority}`);
                     }
-                });
 
-                // Mouse hover sets selection
-                li.addEventListener('mouseenter', () => {
-                    updateSelection(index);
-                });
+                    if (node.children && node.children.length > 0) {
+                        li.classList.add('has-children');
+                        const toggle = document.createElement('span');
+                        toggle.className = 'toggle';
+                        toggle.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            li.classList.toggle('expanded');
+                        });
+                        row.appendChild(toggle);
+                        li.classList.add('expanded');
+                    } else {
+                        const spacer = document.createElement('span');
+                        spacer.style.width = '24px';
+                        spacer.style.display = 'inline-block';
+                        row.appendChild(spacer);
+                    }
 
-                ul.appendChild(li);
-                taskElements.push(li);
-            });
+                    if (task) {
+                        const progressBar = document.createElement('div');
+                        progressBar.className = 'task-progress-bar';
+                        const pct = Math.min(Math.max(task.progress * 100, 0), 100);
+                        progressBar.style.width = `${pct}%`;
+                        row.appendChild(progressBar);
+                    }
 
-            if (activeDecks.length > 0) {
+                    const content = document.createElement('div');
+                    content.className = 'task-content';
+
+                    const deckName = document.createElement('span');
+                    deckName.className = 'task-name';
+                    deckName.textContent = displayName(node.name);
+
+                    const counts = document.createElement('span');
+                    counts.className = 'task-counts';
+                    if (task) {
+                        const total = task.dueStart;
+                        const done = task.done;
+                        counts.innerHTML = `<span class="highlight">${done}</span><span class="separator"> / </span>${total}`;
+                    } else {
+                        counts.textContent = '';
+                    }
+
+                    content.appendChild(deckName);
+                    content.appendChild(counts);
+                    row.appendChild(content);
+
+                    if (task) {
+                        row.addEventListener('click', (e) => {
+                            if (e.target && e.target.classList && e.target.classList.contains('toggle')) return;
+                            if (window.py && typeof window.py.start_review === 'function') {
+                                window.py.start_review(String(task.deckId));
+                            }
+                        });
+
+                        row.addEventListener('mouseenter', () => {
+                            const idx = taskElements.indexOf(row);
+                            if (idx >= 0) updateSelection(idx);
+                        });
+
+                        taskElements.push(row);
+                    }
+
+                    li.appendChild(row);
+
+                    if (node.children && node.children.length > 0) {
+                        const nestedUl = document.createElement('ul');
+                        nestedUl.className = 'nested-list';
+                        li.appendChild(nestedUl);
+                        node.children.forEach(child => renderNode(child, nestedUl));
+                    }
+
+                    parentUl.appendChild(li);
+                }
+
+                if (deckTreeRoot && Array.isArray(deckTreeRoot.children)) {
+                    deckTreeRoot.children.forEach(child => {
+                        const pruned = buildPrunedTree(child);
+                        if (pruned) renderNode(pruned, ul);
+                    });
+                }
+
                 container.appendChild(ul);
-            } else {
-                container.innerHTML = '<p class="placeholder">All decks completed! 🎉</p>';
+
+                if (taskElements.length > 0) {
+                    updateSelection(0);
+                }
+
+                return taskElements;
             }
 
             // Render completed decks section
@@ -210,66 +372,84 @@ document.addEventListener("DOMContentLoaded", () => {
                 completedSection.style.display = 'none';
             }
 
-            // Restore Selection
-            if (newSelectedIndex !== -1) {
-                updateSelection(newSelectedIndex);
-            } else if (taskElements.length > 0) {
-                // Default to first if nothing selected previously
-                updateSelection(0);
-            }
+            // Apply settings-based visibility overrides after render
+            _applySettingsToHomeUI(window.ankiTaskBarSettings);
 
-            // Restore Scroll Position
-            if (mainContainer) {
-                mainContainer.scrollTop = savedScrollTop;
-            }
-
-            // Keyboard Event Listener
-            // Remove any existing listener to prevent duplicates
-            if (window._taskListKeyHandler) {
-                document.removeEventListener('keydown', window._taskListKeyHandler);
-            }
-
-            window._taskListKeyHandler = (e) => {
-                // Ignore if composing (IME) or if typing in an input field
-                if (e.isComposing || e.keyCode === 229) return;
-
-                const tag = e.target.tagName;
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
-
-                if (taskElements.length === 0) return;
-
-                let idx = typeof window.currentSelectedIndex !== 'undefined' ? window.currentSelectedIndex : 0;
-
-                if (e.key === 'ArrowDown') {
-                    idx = (idx + 1) % taskElements.length;
-                    updateSelection(idx);
-                    // Ensure visible
-                    taskElements[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    e.preventDefault();
-                } else if (e.key === 'ArrowUp') {
-                    idx = (idx - 1 + taskElements.length) % taskElements.length;
-                    updateSelection(idx);
-                    taskElements[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    e.preventDefault();
-                } else if (e.key === 'Enter') {
-                    if (idx >= 0 && idx < taskElements.length) {
-                        const task = data[idx];
-                        if (window.py && typeof window.py.start_review === 'function') {
-                            window.py.start_review(String(task.deckId));
-                        }
+            // Render active decks as tree (needs deck tree)
+            if (activeDecks.length === 0) {
+                container.innerHTML = '<p class="placeholder">All decks completed! 🎉</p>';
+            } else if (typeof window.py.get_deck_tree === 'function') {
+                window.py.get_deck_tree((jsonTree) => {
+                    let tree = null;
+                    try {
+                        tree = JSON.parse(jsonTree);
+                    } catch (e) {
+                        tree = null;
                     }
-                }
-            };
 
-            document.addEventListener('keydown', window._taskListKeyHandler);
+                    // Clear container again (we had completed rendering already)
+                    container.innerHTML = '';
+                    const taskElements = renderActiveTree(tree);
 
+                    // Keyboard Event Listener
+                    if (window._taskListKeyHandler) {
+                        document.removeEventListener('keydown', window._taskListKeyHandler);
+                    }
+
+                    window._taskListKeyHandler = (e) => {
+                        if (e.isComposing || e.keyCode === 229) return;
+                        const tag = e.target.tagName;
+                        if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+                        if (!taskElements || taskElements.length === 0) return;
+
+                        const visibleTaskElements = taskElements.filter((row) => {
+                            const li = row.closest('li');
+                            return li && li.style.display !== 'none' && row.style.display !== 'none';
+                        });
+
+                        if (visibleTaskElements.length === 0) return;
+
+                        let idx = typeof window.currentSelectedIndex !== 'undefined' ? window.currentSelectedIndex : 0;
+                        if (idx < 0 || idx >= visibleTaskElements.length) idx = 0;
+
+                        if (e.key === 'ArrowDown') {
+                            idx = (idx + 1) % visibleTaskElements.length;
+                            visibleTaskElements[idx].classList.add('selected');
+                            visibleTaskElements.forEach((el, i) => { if (i !== idx) el.classList.remove('selected'); });
+                            window.currentSelectedIndex = idx;
+                            visibleTaskElements[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            e.preventDefault();
+                        } else if (e.key === 'ArrowUp') {
+                            idx = (idx - 1 + visibleTaskElements.length) % visibleTaskElements.length;
+                            visibleTaskElements[idx].classList.add('selected');
+                            visibleTaskElements.forEach((el, i) => { if (i !== idx) el.classList.remove('selected'); });
+                            window.currentSelectedIndex = idx;
+                            visibleTaskElements[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            e.preventDefault();
+                        } else if (e.key === 'Enter') {
+                            const el = visibleTaskElements[idx];
+                            if (el) el.click();
+                        }
+                    };
+
+                    document.addEventListener('keydown', window._taskListKeyHandler);
+
+                    // Restore Scroll Position
+                    if (mainContainer) {
+                        mainContainer.scrollTop = savedScrollTop;
+                    }
+                });
+            }
         });
     };
 
     new QWebChannel(qt.webChannelTransport, function (channel) {
         window.py = channel.objects.py;
-        // Initial Load
-        window.refreshData();
+        _loadSettings((cfg) => {
+            _applySettingsToHomeUI(cfg);
+            // Initial Load
+            window.refreshData();
+        });
     });
 
     // Grind Button
@@ -466,22 +646,43 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!container) return;
 
             // Filter active tasks
-            const tasks = container.querySelectorAll('.task-item');
-            let visibleCount = 0;
-            let firstVisibleIndex = -1;
+            const treeRoot = container.querySelector('ul.task-tree');
+            if (treeRoot) {
+                const filterLi = (li) => {
+                    const row = li.querySelector(':scope > .task-node');
+                    const nameEl = row ? row.querySelector('.task-name') : null;
+                    const name = nameEl ? nameEl.textContent.toLowerCase() : '';
+                    const selfMatch = term === '' ? true : name.includes(term);
 
-            tasks.forEach((task, idx) => {
-                const nameEl = task.querySelector('.task-name');
-                const name = nameEl ? nameEl.textContent.toLowerCase() : '';
+                    const childLis = Array.from(li.querySelectorAll(':scope > ul.nested-list > li'));
+                    let childMatch = false;
+                    childLis.forEach(child => {
+                        if (filterLi(child)) childMatch = true;
+                    });
 
-                if (name.includes(term)) {
-                    task.style.display = 'flex';
-                    visibleCount++;
-                    if (firstVisibleIndex === -1) firstVisibleIndex = idx;
-                } else {
-                    task.style.display = 'none';
+                    const visible = term === '' ? true : (selfMatch || childMatch);
+                    li.style.display = visible ? '' : 'none';
+
+                    if (term !== '' && childMatch && li.classList.contains('has-children')) {
+                        li.classList.add('expanded');
+                    }
+
+                    return visible;
+                };
+
+                Array.from(treeRoot.querySelectorAll(':scope > li')).forEach(li => filterLi(li));
+
+                const visibleRows = Array.from(container.querySelectorAll('.task-node')).filter((row) => {
+                    const li = row.closest('li');
+                    return li && li.style.display !== 'none';
+                });
+
+                if (visibleRows.length > 0) {
+                    visibleRows.forEach(r => r.classList.remove('selected'));
+                    visibleRows[0].classList.add('selected');
+                    window.currentSelectedIndex = 0;
                 }
-            });
+            }
 
             // Filter completed tasks
             let completedVisibleCount = 0;
@@ -510,17 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Update selection if current selection is hidden
-            if (visibleCount > 0 && firstVisibleIndex !== -1) {
-                const currentSelected = container.querySelector('.task-item.selected');
-                if (currentSelected && currentSelected.style.display === 'none') {
-                    tasks.forEach(t => t.classList.remove('selected'));
-                    tasks[firstVisibleIndex].classList.add('selected');
-                    // Update global index if we rely on it
-                    if (typeof window.currentSelectedIndex !== 'undefined') {
-                        window.currentSelectedIndex = firstVisibleIndex;
-                    }
-                }
-            }
+            // Selection syncing is handled by the tree filter above.
         });
     }
 

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="setting.css">
+</head>
+<body>
+    <div class="page-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="index.html" class="btn secondary" style="padding: 6px 12px;">← Back</a>
+            <h1>Settings</h1>
+        </div>
+        <div id="settings-status" class="settings-status" aria-live="polite"></div>
+    </div>
+
+    <main id="settings-main" class="settings-container">
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Hide Completed Decks</span>
+                <span class="setting-desc">Hide the completed section on the home page.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="hideDecksToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Auto Hide on Review</span>
+                <span class="setting-desc">Automatically hide the widget when you start reviewing a deck.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="sessionToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Enable Sessions</span>
+                <span class="setting-desc">Create and activate saved groups of decks.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="sessionsEnabledToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Show Statistics Bar</span>
+                <span class="setting-desc">Display selected decks statistics at the top of the home page.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="showStatsBarToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <hr class="divider">
+
+        <button type="button" id="open-addon-folder" class="setting-card link-card">
+            <div class="setting-label">Open Add-on Folder</div>
+            <span class="icon">›</span>
+        </button>
+
+        <button type="button" id="open-project-page" class="setting-card link-card">
+            <div class="setting-label">Project Page</div>
+            <span class="icon">›</span>
+        </button>
+
+        <button type="button" id="open-sessions-page" class="setting-card link-card" style="display: none;">
+            <div class="setting-label">Manage Sessions</div>
+            <span class="icon">›</span>
+        </button>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const hideToggle = document.getElementById("hideDecksToggle");
+            const sessionToggle = document.getElementById("sessionToggle");
+            const sessionsEnabledToggle = document.getElementById("sessionsEnabledToggle");
+            const showStatsBarToggle = document.getElementById("showStatsBarToggle");
+            const statusEl = document.getElementById("settings-status");
+            const openAddonFolderBtn = document.getElementById("open-addon-folder");
+            const openProjectBtn = document.getElementById("open-project-page");
+            const openSessionsBtn = document.getElementById("open-sessions-page");
+
+            function setStatus(text, kind) {
+                if (!statusEl) return;
+                statusEl.textContent = text || '';
+                statusEl.dataset.kind = kind || '';
+                if (!text) return;
+                window.clearTimeout(window._settingsStatusTimer);
+                window._settingsStatusTimer = window.setTimeout(() => {
+                    statusEl.textContent = '';
+                    statusEl.dataset.kind = '';
+                }, 1500);
+            }
+
+            const defaultSettings = {
+                hideCompleted: false,
+                enableSessions: true,
+                sessionsEnabled: true,
+                showStatsBar: true
+            };
+
+            function getSettingsFromUI() {
+                return {
+                    hideCompleted: !!hideToggle?.checked,
+                    enableSessions: !!sessionToggle?.checked,
+                    sessionsEnabled: !!sessionsEnabledToggle?.checked,
+                    showStatsBar: !!showStatsBarToggle?.checked
+                };
+            }
+
+            function saveAllSettings() {
+                const settings = getSettingsFromUI();
+                const jsonString = JSON.stringify(settings);
+
+                try {
+                    localStorage.setItem('anki_task_bar_settings', jsonString);
+                } catch (e) {
+                }
+
+                if (window.py && typeof window.py.save_settings_to_file === 'function') {
+                    try {
+                        window.py.save_settings_to_file(jsonString);
+                        setStatus('Saved', 'ok');
+                    } catch (e) {
+                        setStatus('Error', 'error');
+                        console.error('Error saving settings:', e);
+                    }
+                } else {
+                    setStatus('Saved (local)', 'ok');
+                }
+            }
+
+            function applySettingsToUI(settings) {
+                const merged = { ...defaultSettings, ...(settings || {}) };
+                if (hideToggle) hideToggle.checked = !!merged.hideCompleted;
+                if (sessionToggle) sessionToggle.checked = !!merged.enableSessions;
+                if (sessionsEnabledToggle) sessionsEnabledToggle.checked = !!merged.sessionsEnabled;
+                if (showStatsBarToggle) showStatsBarToggle.checked = !!merged.showStatsBar;
+
+                if (openSessionsBtn) {
+                    openSessionsBtn.style.display = merged.sessionsEnabled ? 'flex' : 'none';
+                }
+            }
+
+            function loadInitialSettings() {
+                if (window.py && typeof window.py.load_settings_from_file === 'function') {
+                    window.py.load_settings_from_file((data) => {
+                        try {
+                            const cfg = data ? JSON.parse(data) : {};
+                            applySettingsToUI(cfg);
+                        } catch (e) {
+                            applySettingsToUI(defaultSettings);
+                        }
+                    });
+                    return;
+                }
+
+                try {
+                    const local = localStorage.getItem('anki_task_bar_settings');
+                    applySettingsToUI(local ? JSON.parse(local) : defaultSettings);
+                } catch (e) {
+                    applySettingsToUI(defaultSettings);
+                }
+            }
+
+            function bindUI() {
+                hideToggle?.addEventListener("change", saveAllSettings);
+                sessionToggle?.addEventListener("change", saveAllSettings);
+                sessionsEnabledToggle?.addEventListener("change", saveAllSettings);
+                showStatsBarToggle?.addEventListener("change", saveAllSettings);
+
+                openAddonFolderBtn?.addEventListener('click', () => {
+                    if (window.py && typeof window.py.open_addon_folder === 'function') {
+                        window.py.open_addon_folder();
+                    }
+                });
+
+                openProjectBtn?.addEventListener('click', () => {
+                    const url = 'https://github.com/';
+                    if (window.py && typeof window.py.open_link === 'function') {
+                        window.py.open_link(url);
+                    } else {
+                        try { window.open(url, '_blank'); } catch (e) {}
+                    }
+                });
+
+                openSessionsBtn?.addEventListener('click', () => {
+                    window.location.href = 'sessions.html';
+                });
+            }
+
+            bindUI();
+
+            if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
+                new QWebChannel(qt.webChannelTransport, function (channel) {
+                    window.py = channel.objects.py;
+                    loadInitialSettings();
+                });
+            } else {
+                loadInitialSettings();
+            }
+        });
+    </script>
+</body>
+</html>

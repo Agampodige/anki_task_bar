@@ -1,0 +1,130 @@
+#sessions-main {
+    flex: 1;
+    overflow: hidden;
+}
+
+.sessions-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+}
+
+.sessions-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-panel {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.sessions-panel,
+.editor-panel {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.panel-title {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sessions-list {
+    overflow-y: auto;
+    padding-right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.session-item {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.session-item:hover {
+    background-color: var(--bg-hover);
+    transform: translateX(2px);
+}
+
+.session-item.selected {
+    border-color: rgba(76, 175, 80, 0.35);
+    background-color: rgba(76, 175, 80, 0.08);
+}
+
+.session-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.editor-row {
+    margin-bottom: 14px;
+}
+
+.editor-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.editor-actions .btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+#deck-tree-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 6px;
+    margin-top: 8px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-secondary);
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius);
+}
+
+.settings-status {
+    margin-left: auto;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    min-width: 80px;
+    text-align: center;
+}
+
+.settings-status[data-kind="ok"] {
+    background: rgba(76, 175, 80, 0.2);
+    color: var(--accent-color);
+}
+
+.settings-status[data-kind="error"] {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}

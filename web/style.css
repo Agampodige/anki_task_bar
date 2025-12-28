@@ -63,6 +63,122 @@ body {
     box-shadow: 0 0 10px var(--accent-color);
 }
 
+/* --- Selected Decks Statistics Bar --- */
+.selected-decks-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    
+    padding: 4px 12px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    animation: slideDown 0.3s ease-out;
+    border: none;
+    
+}
+
+.stats-summary {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-weight: 600;
+    color: var(--text-primary) !important;
+    padding: 2px 6px;
+    /* background: rgba(255, 255, 255, 0.03); */
+    border-radius: 4px;
+    border: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 0 !important;
+}
+
+.stat-value {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: var(--text-secondary) !important;
+    margin: 0 !important;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.stat-item:hover {
+    /* background: rgba(255, 255, 255, 0.06); */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item:hover::before {
+    opacity: 0.5;
+}
+
+.stat-item:nth-child(1) {
+    color: #2196F3; /* Blue for deck count */
+}
+
+.stat-item:nth-child(2) {
+    color: #FFC107; /* Amber for cards format */
+}
+
+.stat-item:nth-child(3) {
+    color: #FF9800; /* Orange for estimated time */
+}
+
+.stat-item:nth-child(4) {
+    color: #9C27B0; /* Purple for due today */
+}
+
+.hide-stats-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hide-stats-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
 /* --- Keyboard Selection --- */
 .task-item.selected {
     border-color: var(--accent-color);
@@ -84,7 +200,6 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;

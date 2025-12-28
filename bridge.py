@@ -1,6 +1,7 @@
 from aqt.qt import QObject, pyqtSlot
 from aqt import mw
 import json
+import os
 import traceback
 from pathlib import Path
 from typing import Dict, Any, List
@@ -46,12 +47,22 @@ def _get_deck_counts_map() -> Dict[int, int]:
     return counts
 
 def _anki_day_start_end_ms() -> tuple[int, int]:
+    # Try multiple ways to get the cutoff, defaulting to current time if all fail
     cutoff = getattr(mw.col.sched, "day_cutoff", None)
     if cutoff is None:
         cutoff = getattr(mw.col.sched, "dayCutoff", None)
-    cutoff = int(cutoff)
-    end_ms = cutoff * 1000
-    start_ms = (cutoff - 86400) * 1000
+    
+    # If still None (modern Anki versions), use the timing API
+    if cutoff is None:
+        try:
+            # Modern Anki (2.1.50+) method
+            cutoff = mw.col.db.scalar("select nextDay from col") 
+        except:
+            import time
+            cutoff = int(time.time())
+
+    end_ms = int(cutoff) * 1000
+    start_ms = end_ms - (86400 * 1000)
     return start_ms, end_ms
 
 def _is_new_anki_day() -> bool:
@@ -59,7 +70,7 @@ def _is_new_anki_day() -> bool:
     return mw.col.conf.get("anki_task_bar_day") != mw.col.sched.today
 
 def _reset_selected_decks_for_today(data_file: Path) -> None:
-    """Clear selected decks once per Anki day."""
+    """Reset daily progress snapshot once per Anki day."""
     try:
         if mw.col.conf.get("anki_task_bar_selection_reset_day") == mw.col.sched.today:
             return
@@ -126,57 +137,80 @@ def _load_selected_decks(data_file: Path) -> List[int]:
 
     try:
         data = json.loads(data_file.read_text(encoding="utf-8"))
-        return [int(d) for d in data.get("selected_decks", [])]
+        dids = [int(d) for d in data.get("selected_decks", [])]
+        dids = list(dict.fromkeys(dids))
+
+        try:
+            names = {}
+            for did in dids:
+                try:
+                    names[did] = mw.col.decks.name(did)
+                except Exception:
+                    names[did] = ""
+
+            selected_set = set(dids)
+            to_remove: set[int] = set()
+            for child in dids:
+                child_name = names.get(child) or ""
+                if not child_name:
+                    continue
+                for parent in selected_set:
+                    if parent == child:
+                        continue
+                    parent_name = names.get(parent) or ""
+                    if parent_name and child_name.startswith(parent_name + "::"):
+                        to_remove.add(child)
+                        break
+
+            if to_remove:
+                dids = [d for d in dids if d not in to_remove]
+        except Exception:
+            pass
+
+        return dids
     except Exception:
         traceback.print_exc()
         return []
 
 def _build_taskbar_tasks_helper(data_file: Path, stats_db=None) -> List[dict]:
     selected = _load_selected_decks(data_file)
-    
-    # improved efficiency: get all counts in one pass
     current_counts = _get_deck_counts_map()
-    
     snapshot = _ensure_today_snapshot(selected, current_counts, stats_db)
     
-    # Make a mutable copy if needed, or modify directly. 
-    # Since we might update it, let's track if we need to save.
     snapshot_updated = False
     tasks = []
 
     for did in selected:
-        name = mw.col.decks.name(did)
+        try:
+            name = mw.col.decks.name(did)
+        except:
+            continue # Skip if deck was deleted
+
         due_now = current_counts.get(did, 0)
-        
         stored_start = snapshot.get(str(did), 0)
         
-        # If user added cards (Custom Study) or modified limits, 
-        # actual due might exceed our morning snapshot.
-        # We track the "peak" due as the start point.
-        if due_now > stored_start:
-            due_start = due_now
-            snapshot[str(did)] = due_now
+        # If new cards were added, update the start point so progress 
+        # is calculated against the new total, but never let due_start be less than due_now
+        due_start = max(stored_start, due_now)
+        
+        if due_start > stored_start:
+            snapshot[str(did)] = due_start
             snapshot_updated = True
-        else:
-            due_start = stored_start
 
         done = max(due_start - due_now, 0)
-        
-        # Avoid division by zero
-        progress = 1.0 if due_start == 0 else round(done / due_start, 3)
+        # Avoid division by zero and cap progress at 1.0
+        progress = 1.0 if due_start == 0 else min(1.0, round(done / due_start, 3))
 
-        tasks.append(
-            {
-                "deckId": did,
-                "name": name,
-                "dueStart": due_start,
-                "dueNow": due_now,
-                "done": done,
-                "progress": progress,
-                "completed": due_now == 0,
-            }
-        )
-        
+        tasks.append({
+            "deckId": did,
+            "name": name,
+            "dueStart": due_start,
+            "dueNow": due_now,
+            "done": done,
+            "progress": progress,
+            "completed": due_now == 0,
+        })
+
     if snapshot_updated:
         mw.col.conf["anki_task_bar_snapshot"] = snapshot
         mw.col.setMod()
@@ -192,13 +226,24 @@ class Bridge(QObject):
         super().__init__(parent)
         self.data_file = data_file
         # Initialize database
+        self.settings_path = data_file.parent / "config.json"
+        self.sessions_path = data_file.parent / "sessions.json"
         db_path = data_file.parent / "daily_stats.db"
 
         # First-run initialization (new computer / fresh profile)
         try:
+            if not data_file.parent.exists():
+                data_file.parent.mkdir(parents=True, exist_ok=True)
+
             marker_path = data_file.parent / ".anki_task_bar_initialized"
             if not marker_path.exists():
                 data_file.write_text(json.dumps({"selected_decks": []}, indent=2), encoding="utf-8")
+
+                if not self.sessions_path.exists():
+                    self.sessions_path.write_text(
+                        json.dumps({"sessions": [], "active_session_id": None}, indent=2),
+                        encoding="utf-8",
+                    )
 
                 if db_path.exists():
                     db_path.unlink()
@@ -208,6 +253,99 @@ class Bridge(QObject):
             traceback.print_exc()
 
         self.stats_db = DailyStatsDB(db_path)
+
+        try:
+            if not self.sessions_path.exists():
+                self.sessions_path.write_text(
+                    json.dumps({"sessions": [], "active_session_id": None}, indent=2),
+                    encoding="utf-8",
+                )
+        except Exception:
+            traceback.print_exc()
+
+    def _read_settings(self) -> Dict[str, Any]:
+        try:
+            if not self.settings_path.exists():
+                return {}
+
+            raw = self.settings_path.read_text(encoding="utf-8")
+            if not raw or not raw.strip():
+                return {}
+
+            data = json.loads(raw)
+            return data if isinstance(data, dict) else {}
+        except Exception:
+            return {}
+
+    def _read_sessions(self) -> Dict[str, Any]:
+        try:
+            if not self.sessions_path.exists():
+                return {"sessions": [], "active_session_id": None}
+
+            raw = self.sessions_path.read_text(encoding="utf-8")
+            if not raw or not raw.strip():
+                return {"sessions": [], "active_session_id": None}
+
+            data = json.loads(raw)
+            if not isinstance(data, dict):
+                return {"sessions": [], "active_session_id": None}
+
+            if "sessions" not in data or not isinstance(data.get("sessions"), list):
+                data["sessions"] = []
+            if "active_session_id" not in data:
+                data["active_session_id"] = None
+            return data
+        except Exception:
+            return {"sessions": [], "active_session_id": None}
+
+    def _write_sessions(self, data: Dict[str, Any]) -> None:
+        try:
+            self.sessions_path.parent.mkdir(parents=True, exist_ok=True)
+            self.sessions_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        except Exception:
+            traceback.print_exc()
+
+    def _save_selected_decks_list(self, dids: List[int]) -> None:
+        dids = [int(d) for d in dids]
+        dids = list(dict.fromkeys(dids))
+
+        try:
+            names = {}
+            for did in dids:
+                try:
+                    names[did] = mw.col.decks.name(did)
+                except Exception:
+                    names[did] = ""
+
+            selected_set = set(dids)
+            to_remove: set[int] = set()
+            for child in dids:
+                child_name = names.get(child) or ""
+                if not child_name:
+                    continue
+                for parent in selected_set:
+                    if parent == child:
+                        continue
+                    parent_name = names.get(parent) or ""
+                    if parent_name and child_name.startswith(parent_name + "::"):
+                        to_remove.add(child)
+                        break
+
+            if to_remove:
+                dids = [d for d in dids if d not in to_remove]
+        except Exception:
+            pass
+
+        data = {"selected_decks": dids}
+
+        current_counts = _get_deck_counts_map()
+        snapshot = mw.col.conf.get("anki_task_bar_snapshot", {})
+        for did in dids:
+            if str(did) not in snapshot:
+                snapshot[str(did)] = current_counts.get(did, 0)
+        mw.col.conf["anki_task_bar_snapshot"] = snapshot
+
+        self.data_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
     @pyqtSlot(result=str)
     def get_taskbar_tasks(self):
@@ -272,35 +410,133 @@ class Bridge(QObject):
     def save_selected_decks(self, json_dids):
         try:
             dids = json.loads(json_dids)
-            data = {"selected_decks": dids}
-            # Update the snapshot immediately when saving new selection
-            # so progress starts from 'now' for newly added decks
-            current_counts = _get_deck_counts_map()
-            snapshot = mw.col.conf.get("anki_task_bar_snapshot", {})
-            for did in dids:
-                if str(did) not in snapshot:
-                    snapshot[str(did)] = current_counts.get(did, 0)
-            mw.col.conf["anki_task_bar_snapshot"] = snapshot
-            
-            self.data_file.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            self._save_selected_decks_list(dids)
             return json.dumps({"ok": True, "path": str(self.data_file)})
         except Exception as e:
             print(f"Error in save_selected_decks: {e}")
             traceback.print_exc()
             return json.dumps({"ok": False, "error": str(e)})
 
+    @pyqtSlot(result=str)
+    def get_sessions(self):
+        try:
+            return json.dumps(self._read_sessions())
+        except Exception:
+            traceback.print_exc()
+            return json.dumps({"sessions": [], "active_session_id": None})
+
+    @pyqtSlot(str, result=str)
+    def upsert_session(self, json_session):
+        try:
+            sess = json.loads(json_session) if json_session else {}
+            if not isinstance(sess, dict):
+                return json.dumps({"ok": False, "error": "invalid session"})
+
+            sid = str(sess.get("id") or "").strip()
+            name = str(sess.get("name") or "").strip()
+            deck_ids = sess.get("deck_ids") or sess.get("deckIds") or []
+            if not isinstance(deck_ids, list):
+                deck_ids = []
+            deck_ids = [int(d) for d in deck_ids]
+            deck_ids = list(dict.fromkeys(deck_ids))
+
+            if not name:
+                return json.dumps({"ok": False, "error": "name required"})
+
+            if not sid:
+                import time
+                sid = str(int(time.time() * 1000))
+
+            data = self._read_sessions()
+            sessions = data.get("sessions", [])
+
+            import time
+            now_ms = int(time.time() * 1000)
+            found = False
+            for s in sessions:
+                if isinstance(s, dict) and str(s.get("id")) == sid:
+                    s["name"] = name
+                    s["deck_ids"] = deck_ids
+                    s["updated_at_ms"] = now_ms
+                    found = True
+                    break
+
+            if not found:
+                sessions.append({
+                    "id": sid,
+                    "name": name,
+                    "deck_ids": deck_ids,
+                    "created_at_ms": now_ms,
+                    "updated_at_ms": now_ms,
+                })
+
+            data["sessions"] = sessions
+            self._write_sessions(data)
+            return json.dumps({"ok": True, "id": sid})
+        except Exception as e:
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(str, result=str)
+    def delete_session(self, session_id):
+        try:
+            sid = str(session_id or "").strip()
+            data = self._read_sessions()
+            sessions = data.get("sessions", [])
+            sessions = [s for s in sessions if not (isinstance(s, dict) and str(s.get("id")) == sid)]
+            data["sessions"] = sessions
+            if str(data.get("active_session_id")) == sid:
+                data["active_session_id"] = None
+            self._write_sessions(data)
+            return json.dumps({"ok": True})
+        except Exception as e:
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(str, result=str)
+    def activate_session(self, session_id):
+        try:
+            sid = str(session_id or "").strip()
+            data = self._read_sessions()
+            sessions = data.get("sessions", [])
+            session = None
+            for s in sessions:
+                if isinstance(s, dict) and str(s.get("id")) == sid:
+                    session = s
+                    break
+            if not session:
+                return json.dumps({"ok": False, "error": "not found"})
+
+            deck_ids = session.get("deck_ids") or []
+            if not isinstance(deck_ids, list):
+                deck_ids = []
+
+            self._save_selected_decks_list(deck_ids)
+            data["active_session_id"] = sid
+            self._write_sessions(data)
+            return json.dumps({"ok": True})
+        except Exception as e:
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
     @pyqtSlot(str)
     def start_review(self, did_str):
-        from aqt.utils import tooltip  # Lazy import to avoid circular dependency issues
+        from aqt.utils import tooltip, showWarning  # Lazy import to avoid circular dependency issues
         try:
             did = int(did_str)
+            if not mw.col.decks.get(did):
+                showWarning("This deck no longer exists.")
+                return
             mw.col.decks.select(did)
             mw.moveToState("overview")
             mw.activateWindow()
             tooltip(f"Opening {mw.col.decks.name(did)}...", period=1500)
             
-            # Auto-close the widget when review starts
-            if self.parent():
+            settings = self._read_settings()
+            auto_hide = settings.get("enableSessions", True)
+
+            # Auto-close the widget when review starts (if enabled)
+            if auto_hide and self.parent():
                 self.parent().hide()
 
         except Exception as e:
@@ -433,3 +669,38 @@ class Bridge(QObject):
             print(f"Error exporting CSV: {e}")
             traceback.print_exc()
             return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(str)
+    def save_settings_to_file(self, json_data):
+        try:
+            settings = json.loads(json_data)
+            # FIX: Use absolute path and ensure directory exists
+            self.settings_path.parent.mkdir(parents=True, exist_ok=True)
+            self.settings_path.write_text(json.dumps(settings, indent=4), encoding="utf-8")
+            print(f"Successfully saved to {self.settings_path}")
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+            traceback.print_exc()
+
+    @pyqtSlot(result=str)
+    def load_settings_from_file(self):
+        try:
+            if self.settings_path.exists():
+                raw = self.settings_path.read_text(encoding="utf-8")
+                if not raw or not raw.strip():
+                    return "{}"
+                return raw
+            return "{}" 
+        except Exception as e:
+            print(f"Error loading settings: {e}")
+            return "{}"
+
+    @pyqtSlot()
+    def open_addon_folder(self):
+        from aqt.utils import openFolder
+        openFolder(str(self.data_file.parent))
+
+    @pyqtSlot(str)
+    def open_link(self, url):
+        from aqt.qt import QDesktopServices, QUrl
+        QDesktopServices.openUrl(QUrl(url))

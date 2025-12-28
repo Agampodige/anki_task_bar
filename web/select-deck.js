@@ -1,8 +1,35 @@
-
 document.addEventListener("DOMContentLoaded", () => {
+    // Check if we're editing an existing session
+    const editingSessionId = sessionStorage.getItem('editingSessionId');
+    let isEditing = !!editingSessionId;
+
     // Establish connection with Python backend
     new QWebChannel(qt.webChannelTransport, function (channel) {
         window.py = channel.objects.py;
+
+        // Check if sessions are enabled
+        if (window.py && typeof window.py.load_settings_from_file === 'function') {
+            window.py.load_settings_from_file((data) => {
+                try {
+                    const cfg = data ? JSON.parse(data) : {};
+                    const sessionsEnabled = cfg.sessionsEnabled !== false; // Default to enabled
+                    
+                    // Hide session creation UI if disabled
+                    const sessionCreateRow = document.querySelector('.session-create-row');
+                    if (sessionCreateRow) {
+                        sessionCreateRow.style.display = sessionsEnabled ? 'flex' : 'none';
+                    }
+                    
+                    // If editing but sessions disabled, clear editing state
+                    if (isEditing && !sessionsEnabled) {
+                        sessionStorage.removeItem('editingSessionId');
+                        isEditing = false;
+                    }
+                } catch (e) {
+                    console.error('Failed to load settings:', e);
+                }
+            });
+        }
 
         // Fetch the deck tree and render it
         py.get_deck_tree(function (jsonTree) {
@@ -15,29 +42,72 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const container = document.getElementById('deck-tree-container');
-            if (deckTree && deckTree.children) {
+            if (container && deckTree && deckTree.children) {
+                container.innerHTML = '';
                 const ul = document.createElement('ul');
-                deckTree.children.forEach(childNode => {
-                    buildTree(childNode, ul);
-                });
+                deckTree.children.forEach(child => buildTree(child, ul));
                 container.appendChild(ul);
+            }
 
-                // restore previously saved selection
-                if (window.py && typeof window.py.get_selected_decks === 'function') {
-                    window.py.get_selected_decks(function (jsonResp) {
-                        try {
-                            const data = JSON.parse(jsonResp);
-                            if (data && data.selected_decks) {
-                                data.selected_decks.forEach(did => {
-                                    const cb = document.getElementById(`deck-${did}`);
-                                    if (cb) cb.checked = true;
+            // If editing, load the session and restore its state
+            if (isEditing && window.py && typeof window.py.get_sessions === 'function') {
+                window.py.get_sessions((json) => {
+                    try {
+                        const data = JSON.parse(json);
+                        const session = (data.sessions || []).find(s => String(s.id) === editingSessionId);
+                        if (session) {
+                            // Restore name
+                            const nameInput = document.getElementById('new-session-name');
+                            if (nameInput) nameInput.value = session.name || '';
+                            // Restore deck selection
+                            const wanted = new Set((session.deck_ids || []).map(d => parseInt(d, 10)).filter(n => !Number.isNaN(n)));
+                            setTimeout(() => {
+                                document.querySelectorAll('input.deck-checkbox').forEach(cb => {
+                                    const did = parseInt(cb.value, 10);
+                                    cb.checked = wanted.has(did);
+                                    cb.dispatchEvent(new Event('change'));
                                 });
-                            }
-                        } catch (e) {
-                            console.error("Failed to parse selected decks:", e);
+                                // Update parent states after all checkboxes are set
+                                document.querySelectorAll('#deck-tree-container li').forEach(li => {
+                                    // Update parent states bottom-up
+                                    const parentCb = li.querySelector(':scope > .deck-item input.deck-checkbox');
+                                    const childCbs = Array.from(li.querySelectorAll(':scope > ul.nested-list input.deck-checkbox'));
+                                    if (parentCb && childCbs.length > 0) {
+                                        let checkedCount = 0;
+                                        childCbs.forEach(cb => {
+                                            if (cb.checked) checkedCount++;
+                                        });
+                                        if (checkedCount === 0) {
+                                            parentCb.checked = false;
+                                            parentCb.indeterminate = false;
+                                        } else if (checkedCount === childCbs.length) {
+                                            parentCb.checked = true;
+                                            parentCb.indeterminate = false;
+                                        } else {
+                                            parentCb.checked = false;
+                                            parentCb.indeterminate = true;
+                                        }
+                                    }
+                                });
+                                const all = document.querySelectorAll('input.deck-checkbox');
+                                all.forEach(cb => {
+                                    const row = cb.closest('.deck-item');
+                                    if (!row) return;
+                                    if (cb.checked || cb.indeterminate) row.classList.add('selected');
+                                    else row.classList.remove('selected');
+                                });
+                            }, 100);
                         }
-                    });
-                }
+                    } catch (e) {
+                        console.error('Failed to load session for editing:', e);
+                    }
+                });
+            }
+
+            // Update button text if editing
+            if (isEditing) {
+                const createBtn = document.getElementById('create-session-btn');
+                if (createBtn) createBtn.textContent = 'Save Changes';
             }
         });
     });
@@ -103,6 +173,60 @@ function buildTree(node, parentElement) {
     checkbox.className = 'deck-checkbox';
     itemDiv.appendChild(checkbox);
 
+    function setChildrenChecked(checked) {
+        const childCbs = li.querySelectorAll('ul.nested-list input.deck-checkbox');
+        childCbs.forEach(cb => {
+            cb.checked = checked;
+            cb.indeterminate = false;
+        });
+    }
+
+    function updateParentState(targetLi) {
+        const parentCb = targetLi.querySelector(':scope > .deck-item input.deck-checkbox');
+        const childCbs = Array.from(targetLi.querySelectorAll(':scope > ul.nested-list input.deck-checkbox'));
+        if (!parentCb || childCbs.length === 0) return;
+
+        let checkedCount = 0;
+        let indeterminateCount = 0;
+        childCbs.forEach(cb => {
+            if (cb.indeterminate) indeterminateCount++;
+            else if (cb.checked) checkedCount++;
+        });
+
+        if (checkedCount === 0 && indeterminateCount === 0) {
+            parentCb.checked = false;
+            parentCb.indeterminate = false;
+        } else if (checkedCount === childCbs.length) {
+            parentCb.checked = true;
+            parentCb.indeterminate = false;
+        } else {
+            parentCb.checked = false;
+            parentCb.indeterminate = true;
+        }
+    }
+
+    function updateAncestors() {
+        let current = li;
+        while (current) {
+            const parentUl = current.parentElement;
+            if (!parentUl || !parentUl.classList.contains('nested-list')) break;
+            const parentLi = parentUl.closest('li');
+            if (!parentLi) break;
+            updateParentState(parentLi);
+            current = parentLi;
+        }
+    }
+
+    function refreshItemVisuals() {
+        const all = document.querySelectorAll('input.deck-checkbox');
+        all.forEach(cb => {
+            const row = cb.closest('.deck-item');
+            if (!row) return;
+            if (cb.checked || cb.indeterminate) row.classList.add('selected');
+            else row.classList.remove('selected');
+        });
+    }
+
     // Create and append label
     const label = document.createElement('label');
     label.htmlFor = `deck-${node.id}`;
@@ -118,9 +242,9 @@ function buildTree(node, parentElement) {
     const prioritySelect = document.createElement('select');
     prioritySelect.className = 'priority-select';
     prioritySelect.innerHTML = `
-        <option value="low">⚪ Low</option>
-        <option value="medium">🟡 Medium</option>
-        <option value="high">🔴 High</option>
+        <option value="low"> Low</option>
+        <option value="medium"> Medium</option>
+        <option value="high"> High</option>
     `;
     prioritySelect.value = getDeckPriority(node.id);
     prioritySelect.onclick = (e) => {
@@ -189,12 +313,13 @@ function buildTree(node, parentElement) {
 
     // Update visual state when checkbox changes
     checkbox.addEventListener('change', () => {
-        if (checkbox.checked) {
-            itemDiv.classList.add('selected');
-        } else {
-            itemDiv.classList.remove('selected');
+        setChildrenChecked(checkbox.checked);
+        checkbox.indeterminate = false;
+        updateAncestors();
+        refreshItemVisuals();
+        if (typeof window.updateSelectionCounter === 'function') {
+            window.updateSelectionCounter();
         }
-        updateSelectionCounter();
     });
 
     li.appendChild(itemDiv);
@@ -224,10 +349,31 @@ function buildTree(node, parentElement) {
 // Save selection button handler - collect checked deck ids and persist
 document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('save-selection-btn');
+    const createSessionBtn = document.getElementById('create-session-btn');
+    const newSessionNameInput = document.getElementById('new-session-name');
+    const sessionCreateStatus = document.getElementById('session-create-status');
+
+    // Check if we're editing an existing session
+    const editingSessionId = sessionStorage.getItem('editingSessionId');
+    let isEditing = !!editingSessionId;
+
+    function setSessionCreateStatus(text, kind) {
+        if (!sessionCreateStatus) return;
+        sessionCreateStatus.textContent = text || '';
+        sessionCreateStatus.dataset.kind = kind || '';
+        sessionCreateStatus.style.display = text ? 'block' : 'none';
+        if (!text) return;
+        window.clearTimeout(window._sessionCreateStatusTimer);
+        window._sessionCreateStatusTimer = window.setTimeout(() => {
+            sessionCreateStatus.style.display = 'none';
+            sessionCreateStatus.textContent = '';
+            sessionCreateStatus.dataset.kind = '';
+        }, 2000);
+    }
     if (!saveBtn) return;
 
     saveBtn.addEventListener('click', () => {
-        const checked = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+        const checked = Array.from(document.querySelectorAll('input.deck-checkbox:checked'))
             .map(cb => parseInt(cb.value, 10));
 
         // call python bridge to save
@@ -259,23 +405,98 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Create Session button
+    createSessionBtn?.addEventListener('click', () => {
+        const name = (newSessionNameInput?.value || '').trim();
+        if (!name) {
+            setSessionCreateStatus('Name required', 'error');
+            return;
+        }
+
+        // Get all selected deck IDs and expand parents to children
+        const checked = Array.from(document.querySelectorAll('input.deck-checkbox:checked'))
+            .map(cb => parseInt(cb.value, 10))
+            .filter(n => !Number.isNaN(n));
+
+        // If any parent deck is selected, replace it with all its descendants
+        const expandedDeckIds = new Set();
+        checked.forEach(deckId => {
+            const checkbox = document.querySelector(`input.deck-checkbox[value="${deckId}"]`);
+            if (checkbox) {
+                const li = checkbox.closest('li');
+                if (li && li.classList.contains('has-children')) {
+                    // This is a parent deck, add all descendants instead
+                    const descendantCbs = li.querySelectorAll('input.deck-checkbox');
+                    descendantCbs.forEach(cb => {
+                        const did = parseInt(cb.value, 10);
+                        if (!Number.isNaN(did)) {
+                            expandedDeckIds.add(did);
+                        }
+                    });
+                } else {
+                    // This is not a parent deck, add as-is
+                    expandedDeckIds.add(deckId);
+                }
+            }
+        });
+
+        const finalDeckIds = Array.from(expandedDeckIds);
+
+        if (finalDeckIds.length === 0) {
+            setSessionCreateStatus('Select decks', 'error');
+            return;
+        }
+
+        if (window.py && typeof window.py.upsert_session === 'function') {
+            createSessionBtn.disabled = true;
+            createSessionBtn.textContent = isEditing ? 'Saving...' : 'Creating...';
+
+            const payload = isEditing ? { id: editingSessionId, name, deck_ids: finalDeckIds } : { name, deck_ids: finalDeckIds };
+            window.py.upsert_session(JSON.stringify(payload), (resp) => {
+                try {
+                    const r = JSON.parse(resp);
+                    if (!r.ok) {
+                        setSessionCreateStatus('Error', 'error');
+                        return;
+                    }
+                    setSessionCreateStatus(isEditing ? 'Saved' : 'Created', 'ok');
+                    newSessionNameInput.value = '';
+                    if (isEditing) {
+                        // Clear editing state after successful save
+                        sessionStorage.removeItem('editingSessionId');
+                        setTimeout(() => {
+                            window.location.href = 'sessions.html';
+                        }, 1000);
+                    }
+                } catch (e) {
+                    setSessionCreateStatus('Error', 'error');
+                } finally {
+                    createSessionBtn.disabled = false;
+                    createSessionBtn.textContent = isEditing ? 'Save Changes' : 'Create Session';
+                }
+            });
+        } else {
+            setSessionCreateStatus('No backend', 'error');
+        }
+    });
+
     // Helper Action Listeners
     document.getElementById('btn-all')?.addEventListener('click', () => {
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        document.querySelectorAll('input.deck-checkbox').forEach(cb => {
             cb.checked = true;
             cb.dispatchEvent(new Event('change'));
         });
     });
 
     document.getElementById('btn-none')?.addEventListener('click', () => {
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        document.querySelectorAll('input.deck-checkbox').forEach(cb => {
             cb.checked = false;
             cb.dispatchEvent(new Event('change'));
         });
     });
 
     document.getElementById('btn-invert')?.addEventListener('click', () => {
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        document.querySelectorAll('input.deck-checkbox').forEach(cb => {
             cb.checked = !cb.checked;
             cb.dispatchEvent(new Event('change'));
         });
@@ -298,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSelectionCounter() {
         const counter = document.getElementById('selection-counter');
         const countText = document.getElementById('selection-count');
-        const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+        const checked = document.querySelectorAll('input.deck-checkbox:checked').length;
 
         if (checked > 0) {
             counter.style.display = 'block';

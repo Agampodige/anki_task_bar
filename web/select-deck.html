@@ -32,10 +32,14 @@
         <span class="search-hint">/</span>
     </div>
 
-    </div>
-
     <div class="selection-info" id="selection-counter" style="display: none;">
         <span id="selection-count">0 decks selected</span>
+    </div>
+
+    <div class="session-create-row" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+        <input type="text" id="new-session-name" class="search-input" placeholder="New session name" autocomplete="off" style="flex: 1;" />
+        <button id="create-session-btn" class="btn">Create Session</button>
+        <div id="session-create-status" class="settings-status" aria-live="polite" style="display: none;"></div>
     </div>
 
     <div class="toolbar"
