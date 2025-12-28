@@ -1,12 +1,15 @@
+
 from aqt.qt import QObject, pyqtSlot
 from aqt import mw
 import json
-import os
 import traceback
 from pathlib import Path
 from typing import Dict, Any, List
 from datetime import date
 from .daily_stats import DailyStatsDB
+
+from aqt.utils import tooltip, showWarning
+import time
 
 # -----------------------------
 # Logic Helpers (Private)
@@ -58,7 +61,6 @@ def _anki_day_start_end_ms() -> tuple[int, int]:
             # Modern Anki (2.1.50+) method
             cutoff = mw.col.db.scalar("select nextDay from col") 
         except:
-            import time
             cutoff = int(time.time())
 
     end_ms = int(cutoff) * 1000
@@ -228,6 +230,11 @@ class Bridge(QObject):
         # Initialize database
         self.settings_path = data_file.parent / "config.json"
         self.sessions_path = data_file.parent / "sessions.json"
+        
+        # Cache for sessions to improve performance
+        self._sessions_cache = None
+        self._sessions_mtime = 0
+        
         db_path = data_file.parent / "daily_stats.db"
 
         # First-run initialization (new computer / fresh profile)
@@ -241,7 +248,7 @@ class Bridge(QObject):
 
                 if not self.sessions_path.exists():
                     self.sessions_path.write_text(
-                        json.dumps({"sessions": [], "active_session_id": None}, indent=2),
+                        json.dumps({"sessions": [], "active_session_id": None, "folders": []}, indent=2),
                         encoding="utf-8",
                     )
 
@@ -257,7 +264,7 @@ class Bridge(QObject):
         try:
             if not self.sessions_path.exists():
                 self.sessions_path.write_text(
-                    json.dumps({"sessions": [], "active_session_id": None}, indent=2),
+                    json.dumps({"sessions": [], "active_session_id": None, "folders": []}, indent=2),
                     encoding="utf-8",
                 )
         except Exception:
@@ -280,28 +287,57 @@ class Bridge(QObject):
     def _read_sessions(self) -> Dict[str, Any]:
         try:
             if not self.sessions_path.exists():
-                return {"sessions": [], "active_session_id": None}
+                return {"sessions": [], "active_session_id": None, "folders": []}
+
+            # Check if file has changed
+            try:
+                current_mtime = self.sessions_path.stat().st_mtime
+            except Exception:
+                current_mtime = 0
+
+            if self._sessions_cache is not None and current_mtime == self._sessions_mtime:
+                return self._sessions_cache
 
             raw = self.sessions_path.read_text(encoding="utf-8")
             if not raw or not raw.strip():
-                return {"sessions": [], "active_session_id": None}
+                data = {"sessions": [], "active_session_id": None, "folders": []}
+            else:
+                data = json.loads(raw)
+                if not isinstance(data, dict):
+                    data = {"sessions": [], "active_session_id": None, "folders": []}
 
-            data = json.loads(raw)
-            if not isinstance(data, dict):
-                return {"sessions": [], "active_session_id": None}
-
+            # Ensure required fields exist
             if "sessions" not in data or not isinstance(data.get("sessions"), list):
                 data["sessions"] = []
             if "active_session_id" not in data:
                 data["active_session_id"] = None
+            if "folders" not in data or not isinstance(data.get("folders"), list):
+                data["folders"] = []
+            
+            # Ensure each session has a folder field
+            for session in data["sessions"]:
+                if isinstance(session, dict) and "folder" not in session:
+                    session["folder"] = ""
+            
+            self._update_cache(data)
             return data
-        except Exception:
-            return {"sessions": [], "active_session_id": None}
+        except Exception as e:
+            print(f"Error reading sessions: {e}")
+            return {"sessions": [], "active_session_id": None, "folders": []}
+
+    def _update_cache(self, data):
+        """Update internal cache and mtime."""
+        self._sessions_cache = data
+        try:
+            self._sessions_mtime = self.sessions_path.stat().st_mtime
+        except:
+            self._sessions_mtime = 0
 
     def _write_sessions(self, data: Dict[str, Any]) -> None:
         try:
             self.sessions_path.parent.mkdir(parents=True, exist_ok=True)
             self.sessions_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+            self._update_cache(data)
         except Exception:
             traceback.print_exc()
 
@@ -420,10 +456,76 @@ class Bridge(QObject):
     @pyqtSlot(result=str)
     def get_sessions(self):
         try:
-            return json.dumps(self._read_sessions())
+            data = self._read_sessions()
+            # Calculate progress for each session
+            sessions = data.get("sessions", [])
+            for session in sessions:
+                if isinstance(session, dict):
+                    stats = self._calculate_session_progress_stats(session.get("deck_ids", []))
+                    session.update(stats)
+            return json.dumps(data)
         except Exception:
             traceback.print_exc()
-            return json.dumps({"sessions": [], "active_session_id": None})
+            return json.dumps({"sessions": [], "active_session_id": None, "folders": []})
+
+    def _calculate_session_progress_stats(self, deck_ids: List[int]) -> Dict[str, Any]:
+        """Calculate detailed progress stats for a list of decks."""
+        if not deck_ids:
+            return {"progress": 0.0, "total_cards": 0, "done_cards": 0}
+        
+        try:
+            current_counts = _get_deck_counts_map()
+            snapshot = mw.col.conf.get("anki_task_bar_snapshot", {})
+            
+            total_due_start = 0
+            total_done = 0
+            
+            # Debug
+            # print(f"Calc stats for {deck_ids}, Snapshot keys: {list(snapshot.keys())}")
+
+            for did in deck_ids:
+                try:
+                    if not mw.col.decks.name(did): continue
+                except:
+                    continue
+
+                due_now = current_counts.get(did, 0)
+                stored_start_raw = snapshot.get(str(did))
+                
+                # If we have no snapshot for this deck, assume we start NOW.
+                # If due_now > 0, then start = due_now (0% done).
+                # If due_now == 0, then start = 0 (100% done or nothing to do? Let's say nothing).
+                if stored_start_raw is None:
+                     stored_start = due_now
+                else:
+                     stored_start = int(stored_start_raw)
+
+                # Logic:
+                # Total Goal = Max(SnapshotDue, CurrentDue) 
+                # Why Max? If I add cards today, due increases. Goal should increase.
+                # If I review cards, due decreases. Goal stays high.
+                
+                due_start = max(stored_start, due_now)
+                done = max(due_start - due_now, 0)
+                
+                total_due_start += due_start
+                total_done += done
+            
+            progress = 0.0
+            if total_due_start > 0:
+                progress = min(1.0, round(total_done / total_due_start, 3))
+            elif total_due_start == 0 and total_done == 0:
+                # Nothing to do
+                progress = 0.0 # Or 1.0? 0.0 feels safer for "empty" state.
+                
+            return {
+                "progress": progress,
+                "total_cards": total_due_start,
+                "done_cards": total_done
+            }
+        except Exception as e:
+            print(f"Error calculating session stats: {e}")
+            return {"progress": 0.0, "total_cards": 0, "done_cards": 0}
 
     @pyqtSlot(str, result=str)
     def upsert_session(self, json_session):
@@ -435,6 +537,7 @@ class Bridge(QObject):
             sid = str(sess.get("id") or "").strip()
             name = str(sess.get("name") or "").strip()
             deck_ids = sess.get("deck_ids") or sess.get("deckIds") or []
+            folder = str(sess.get("folder") or "").strip()
             if not isinstance(deck_ids, list):
                 deck_ids = []
             deck_ids = [int(d) for d in deck_ids]
@@ -444,19 +547,18 @@ class Bridge(QObject):
                 return json.dumps({"ok": False, "error": "name required"})
 
             if not sid:
-                import time
                 sid = str(int(time.time() * 1000))
 
             data = self._read_sessions()
             sessions = data.get("sessions", [])
 
-            import time
             now_ms = int(time.time() * 1000)
             found = False
             for s in sessions:
                 if isinstance(s, dict) and str(s.get("id")) == sid:
                     s["name"] = name
                     s["deck_ids"] = deck_ids
+                    s["folder"] = folder
                     s["updated_at_ms"] = now_ms
                     found = True
                     break
@@ -466,9 +568,14 @@ class Bridge(QObject):
                     "id": sid,
                     "name": name,
                     "deck_ids": deck_ids,
+                    "folder": folder,
                     "created_at_ms": now_ms,
                     "updated_at_ms": now_ms,
                 })
+
+            # Ensure folder exists in folders list if it's not empty
+            if folder and folder not in data.get("folders", []):
+                data["folders"].append(folder)
 
             data["sessions"] = sessions
             self._write_sessions(data)
@@ -521,7 +628,6 @@ class Bridge(QObject):
 
     @pyqtSlot(str)
     def start_review(self, did_str):
-        from aqt.utils import tooltip, showWarning  # Lazy import to avoid circular dependency issues
         try:
             did = int(did_str)
             if not mw.col.decks.get(did):
@@ -551,7 +657,6 @@ class Bridge(QObject):
     @pyqtSlot()
     def drag_window(self):
         # Trigger native window drag
-        # This requires the mouse button to be held down, which it is during the JS mousedown event.
         if self.parent() and self.parent().windowHandle():
             self.parent().windowHandle().startSystemMove()
     
@@ -674,7 +779,6 @@ class Bridge(QObject):
     def save_settings_to_file(self, json_data):
         try:
             settings = json.loads(json_data)
-            # FIX: Use absolute path and ensure directory exists
             self.settings_path.parent.mkdir(parents=True, exist_ok=True)
             self.settings_path.write_text(json.dumps(settings, indent=4), encoding="utf-8")
             print(f"Successfully saved to {self.settings_path}")
@@ -704,3 +808,140 @@ class Bridge(QObject):
     def open_link(self, url):
         from aqt.qt import QDesktopServices, QUrl
         QDesktopServices.openUrl(QUrl(url))
+
+    # Folder management methods
+    @pyqtSlot(str, result=str)
+    def create_folder(self, folder_name):
+        """Create a new folder."""
+        try:
+            print(f"create_folder called with: '{folder_name}'")
+            folder_name = str(folder_name or "").strip()
+            if not folder_name:
+                return json.dumps({"ok": False, "error": "Folder name required"})
+            
+            data = self._read_sessions()
+            folders = data.get("folders", [])
+            
+            if folder_name in folders:
+                print(f"Folder '{folder_name}' already exists in {folders}")
+                return json.dumps({"ok": False, "error": "Folder already exists"})
+            
+            folders.append(folder_name)
+            data["folders"] = folders
+            self._write_sessions(data)
+            
+            print(f"Folder '{folder_name}' created successfully")
+            return json.dumps({"ok": True})
+        except Exception as e:
+            print(f"Error in create_folder: {e}")
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+    @pyqtSlot(str, str, result=str)
+    def rename_folder(self, old_name, new_name):
+        """Rename a folder."""
+        try:
+            old_name = str(old_name or "").strip()
+            new_name = str(new_name or "").strip()
+            
+            if not old_name or not new_name:
+                return json.dumps({"ok": False, "error": "Folder names required"})
+            
+            if old_name == new_name:
+                return json.dumps({"ok": True})
+            
+            data = self._read_sessions()
+            folders = data.get("folders", [])
+            
+            # Check if old name exists
+            if old_name not in folders:
+                return json.dumps({"ok": False, "error": "Folder not found"})
+            
+            # Check if new name already exists
+            if new_name in folders:
+                return json.dumps({"ok": False, "error": "New folder name already exists"})
+            
+            # Update in folders list
+            folders[folders.index(old_name)] = new_name
+            
+            # Update folder name in sessions
+            sessions = data.get("sessions", [])
+            for session in sessions:
+                if isinstance(session, dict) and session.get("folder") == old_name:
+                    session["folder"] = new_name
+            
+            data["folders"] = folders
+            data["sessions"] = sessions
+            self._write_sessions(data)
+            
+            return json.dumps({"ok": True})
+        except Exception as e:
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(str, result=str)
+    def delete_folder(self, folder_name):
+        """Delete a folder and move its sessions to uncategorized."""
+        try:
+            folder_name = str(folder_name or "").strip()
+            
+            data = self._read_sessions()
+            folders = data.get("folders", [])
+            sessions = data.get("sessions", [])
+            
+            # Move sessions to uncategorized (empty string)
+            moved_count = 0
+            for session in sessions:
+                if isinstance(session, dict) and session.get("folder") == folder_name:
+                    session["folder"] = ""
+                    moved_count += 1
+            
+            # Remove from folders list
+            if folder_name in folders:
+                folders.remove(folder_name)
+            
+            data["folders"] = folders
+            data["sessions"] = sessions
+            self._write_sessions(data)
+            
+            return json.dumps({"ok": True, "moved_sessions": moved_count})
+        except Exception as e:
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(str, str, result=str)
+    def move_session_to_folder(self, session_id, folder_name):
+        """Move a session to a different folder."""
+        try:
+            print(f"move_session_to_folder called with session_id='{session_id}', folder_name='{folder_name}'")
+            session_id = str(session_id or "").strip()
+            folder_name = str(folder_name or "").strip()
+            
+            data = self._read_sessions()
+            sessions = data.get("sessions", [])
+            folders = data.get("folders", [])
+            
+            session_found = False
+            for session in sessions:
+                if isinstance(session, dict) and str(session.get("id")) == session_id:
+                    session["folder"] = folder_name
+                    session_found = True
+                    break
+            
+            if not session_found:
+                print(f"Session {session_id} not found")
+                return json.dumps({"ok": False, "error": "Session not found"})
+            
+            # If folder doesn't exist in folders list and it's not empty, add it
+            if folder_name and folder_name not in folders:
+                folders.append(folder_name)
+                data["folders"] = folders
+            
+            data["sessions"] = sessions
+            self._write_sessions(data)
+            
+            print(f"Session {session_id} moved to folder '{folder_name}'")
+            return json.dumps({"ok": True})
+        except Exception as e:
+            print(f"Error in move_session_to_folder: {e}")
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})

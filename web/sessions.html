@@ -11,30 +11,94 @@
 </head>
 
 <body>
-    <div class="page-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="index.html" class="btn secondary" style="padding: 6px 12px;">← Back</a>
-            <h1>Sessions</h1>
-        </div>
-    </div>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="back-link">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                    </svg>
+                    <span>Back</span>
+                </a>
+                <h2>Library</h2>
+            </div>
 
-    <div id="sessions-main" class="sessions-layout">
-        <div class="editor-panel">
-            <div class="panel-title">Actions</div>
+            <div class="sidebar-actions">
+                <button id="new-session-btn" class="primary-btn full-width">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                    New Session
+                </button>
+            </div>
 
-            <div class="editor-actions">
-                <button id="activate-session" class="btn">Activate</button>
-                <button id="edit-session" class="btn secondary">Edit</button>
-                <button id="delete-session" class="btn secondary">Delete</button>
-                <div id="sessions-status" class="settings-status" aria-live="polite"></div>
+            <div class="nav-section">
+                <div class="nav-label">FOLDERS <button id="add-folder-btn" class="icon-btn-tiny"
+                        title="Add Folder">+</button></div>
+                <div id="folders-list" class="nav-list">
+                    <!-- Folders populated here -->
+                </div>
             </div>
         </div>
 
-        <div class="sessions-panel">
-            <div class="panel-title">Saved Sessions</div>
-            <div id="sessions-list" class="sessions-list"></div>
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="content-header">
+                <div class="header-left">
+                    <h1 id="current-view-title">All Sessions</h1>
+                    <span id="session-count-badge" class="count-badge">0</span>
+                </div>
+                <!-- <div class="header-actions">
+                    <input type="text" id="search-sessions" placeholder="Search sessions..." class="search-input-small">
+                </div> -->
+            </div>
+
+            <div id="sessions-grid" class="sessions-grid">
+                <!-- Session Cards populated here -->
+            </div>
         </div>
     </div>
+
+    <!-- Modals -->
+
+    <!-- Create Folder Modal -->
+    <div id="create-folder-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3>Create Folder</h3>
+            <input type="text" id="new-folder-input" placeholder="Folder Name" class="modal-input" autofocus>
+            <div class="modal-footer">
+                <button class="btn secondary" data-action="cancel">Cancel</button>
+                <button class="btn primary" id="confirm-create-folder">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Session Modal -->
+    <div id="move-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3>Move Session</h3>
+            <p class="modal-subtitle">Select a destination folder</p>
+            <div id="folder-selection-list" class="folder-selection-list">
+                <!-- List of folders to pick from -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn secondary" id="cancel-move">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu (Custom) -->
+    <div id="context-menu" class="context-menu hidden">
+        <div class="menu-item" id="ctx-activate">Activate</div>
+        <div class="menu-item" id="ctx-edit">Edit</div>
+        <div class="menu-item" id="ctx-move">Move to Folder...</div>
+        <div class="menu-divider"></div>
+        <div class="menu-item destructive" id="ctx-delete">Delete</div>
+    </div>
+
+    <!-- Status Toast -->
+    <div id="status-toast" class="toast hidden"></div>
 
     <script src="sessions.js"></script>
 </body>

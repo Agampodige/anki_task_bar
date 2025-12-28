@@ -2,6 +2,25 @@ document.addEventListener("DOMContentLoaded", () => {
     function _applySettingsToHomeUI(settings) {
         const cfg = settings || {};
         const hideCompleted = !!cfg.hideCompleted;
+        const compactMode = !!cfg.compactMode;
+        const hideSearchBar = !!cfg.hideSearchBar;
+        const theme = cfg.theme || 'green';
+        const zoomLevel = cfg.zoomLevel !== undefined ? cfg.zoomLevel : 1.0;
+
+        document.documentElement.setAttribute('data-theme', theme);
+        document.body.style.zoom = zoomLevel;
+
+        if (compactMode) {
+            document.body.classList.add('compact');
+        } else {
+            document.body.classList.remove('compact');
+        }
+
+        const searchContainer = document.querySelector('.search-container');
+        if (searchContainer) {
+            searchContainer.parentNode.style.display = hideSearchBar ? 'none' : 'block';
+        }
+
         const completedSection = document.getElementById('completed-section');
         if (completedSection && hideCompleted) {
             completedSection.style.display = 'none';
@@ -19,9 +38,16 @@ document.addEventListener("DOMContentLoaded", () => {
             const showStatsBar = cfg.showStatsBar !== false; // Default to true
             statsBar.style.display = showStatsBar && window.selectedDecksStats && window.selectedDecksStats.totalDecks > 0 ? 'flex' : 'none';
         }
-        
+
         window.ankiTaskBarSettings = cfg;
     }
+
+    // Disable Ctrl+Scroll Zoom
+    window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) {
+            e.preventDefault();
+        }
+    }, { passive: false });
 
     function _loadSettings(cb) {
         const fallback = () => {
@@ -37,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.py.load_settings_from_file((data) => {
                 try {
                     const cfg = data ? JSON.parse(data) : {};
-                    try { localStorage.setItem('anki_task_bar_settings', JSON.stringify(cfg)); } catch (e) {}
+                    try { localStorage.setItem('anki_task_bar_settings', JSON.stringify(cfg)); } catch (e) { }
                     cb(cfg);
                 } catch (e) {
                     fallback();
@@ -54,17 +80,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const statsBar = document.getElementById('selected-decks-stats');
         if (!statsBar) return;
 
-        const selectedDecks = data.filter(t => !t.completed);
-        const totalDecks = selectedDecks.length;
-        const totalCards = selectedDecks.reduce((sum, t) => sum + (t.dueStart || 0), 0);
-        const completedCards = selectedDecks.reduce((sum, t) => sum + (t.done || 0), 0);
-        
+        // Use ALL decks (active + completed) for persistence
+        const allDecks = data;
+        const totalDecks = allDecks.length;
+        const totalCards = allDecks.reduce((sum, t) => sum + (t.dueStart || 0), 0);
+
+        // Active decks calculate pending work
+        const pendingCards = allDecks.reduce((sum, t) => sum + (t.dueNow || 0), 0);
+        // Completed cards is Total - Pending (or use t.done, but dueStart might include learned today)
+        const completedCards = allDecks.reduce((sum, t) => sum + (t.done || 0), 0);
+
         // Estimate time (assuming 1 minute per card for remaining cards)
-        const remainingCards = Math.max(totalCards - completedCards, 0);
-        const estimatedMinutes = remainingCards;
-        const estimatedTime = estimatedMinutes < 60 
-            ? `${estimatedMinutes} ` 
-            : `${Math.round(estimatedMinutes / 60)}h ${estimatedMinutes % 60}`;
+        const estimatedMinutes = pendingCards;
+        const estimatedTime = estimatedMinutes < 60
+            ? `${estimatedMinutes}m`
+            : `${Math.floor(estimatedMinutes / 60)}h ${estimatedMinutes % 60}m`;
 
         // Update global stats object
         window.selectedDecksStats = {
@@ -75,9 +105,13 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         // Update DOM elements
-        document.getElementById('stats-deck-count').textContent = `${totalDecks} ${totalDecks !== 1 ? '' : ''}`;
-        document.getElementById('stats-cards-format').textContent = `${totalCards}/${completedCards} `;
-        document.getElementById('stats-estimated-time').textContent = estimatedTime;
+        const deckCountEl = document.getElementById('stats-deck-count');
+        const cardsFormatEl = document.getElementById('stats-cards-format');
+        const timeEl = document.getElementById('stats-estimated-time');
+
+        if (deckCountEl) deckCountEl.textContent = `${totalDecks}`;
+        if (cardsFormatEl) cardsFormatEl.textContent = `${completedCards} / ${totalCards}`;
+        if (timeEl) timeEl.textContent = estimatedTime;
 
         // Show/hide based on settings and data
         const cfg = window.ankiTaskBarSettings || {};
@@ -243,12 +277,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         });
                         row.appendChild(toggle);
                         li.classList.add('expanded');
-                    } else {
-                        const spacer = document.createElement('span');
-                        spacer.style.width = '24px';
-                        spacer.style.display = 'inline-block';
-                        row.appendChild(spacer);
                     }
+                    // REMOVED: Else block that added spacer/icon
 
                     if (task) {
                         const progressBar = document.createElement('div');
@@ -378,6 +408,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // Render active decks as tree (needs deck tree)
             if (activeDecks.length === 0) {
                 container.innerHTML = '<p class="placeholder">All decks completed! 🎉</p>';
+                if (window.confetti && window.ankiTaskBarSettings && window.ankiTaskBarSettings.confettiEnabled !== false) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
             } else if (typeof window.py.get_deck_tree === 'function') {
                 window.py.get_deck_tree((jsonTree) => {
                     let tree = null;
@@ -530,93 +567,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Analytics Logic
-    const analyticsBtn = document.getElementById('btn-analytics');
-    const analyticsModal = document.getElementById('analytics-modal');
 
-    if (analyticsBtn && analyticsModal) {
-        const analyticsContent = analyticsModal.querySelector('.modal-content');
-        const closeBtn = document.getElementById('analytics-close');
 
-        analyticsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            loadAnalyticsData();
-            analyticsModal.classList.add('visible');
-        });
 
-        // Close button
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                analyticsModal.classList.remove('visible');
-            });
-        }
-
-        // Close on outside click
-        analyticsModal.addEventListener('click', (e) => {
-            if (!analyticsContent.contains(e.target)) {
-                analyticsModal.classList.remove('visible');
-            }
-        });
-    }
-
-    function loadAnalyticsData() {
-        if (!window.py) return;
-
-        // Get total stats
-        if (typeof window.py.get_total_stats === 'function') {
-            window.py.get_total_stats((jsonData) => {
-                try {
-                    const stats = JSON.parse(jsonData);
-
-                    document.getElementById('current-streak').textContent = stats.current_streak || 0;
-                    document.getElementById('total-days').textContent = stats.total_days || 0;
-                    document.getElementById('total-cards').textContent = stats.total_cards || 0;
-                    document.getElementById('avg-cards').textContent = stats.avg_cards_per_day || 0;
-                } catch (e) {
-                    console.error('Error parsing total stats:', e);
-                }
-            });
-        }
-
-        // Get last 7 days
-        if (typeof window.py.get_daily_stats === 'function') {
-            window.py.get_daily_stats(7, (jsonData) => {
-                try {
-                    const days = JSON.parse(jsonData);
-                    const container = document.getElementById('recent-days-list');
-                    container.innerHTML = '';
-
-                    if (days.length === 0) {
-                        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No data yet. Start studying to see your progress!</p>';
-                        return;
-                    }
-
-                    days.forEach(day => {
-                        const dayItem = document.createElement('div');
-                        dayItem.className = 'day-item';
-
-                        const dateStr = new Date(day.date).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric'
-                        });
-
-                        dayItem.innerHTML = `
-                            <span class="day-date">${dateStr}</span>
-                            <span>
-                                <span class="day-cards">${day.total_cards_reviewed} cards</span>
-                                <span class="day-streak">🔥 ${day.streak_days} day streak</span>
-                            </span>
-                        `;
-
-                        container.appendChild(dayItem);
-                    });
-                } catch (e) {
-                    console.error('Error parsing daily stats:', e);
-                }
-            });
-        }
-    }
 
     // --- Search & Shortcut Logic ---
     const searchInput = document.getElementById('search-input');

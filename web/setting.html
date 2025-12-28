@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Settings</title>
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="setting.css">
 </head>
+
 <body>
     <div class="page-header">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -62,7 +64,76 @@
             </label>
         </div>
 
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Hide Search Bar</span>
+                <span class="setting-desc">Remove the search input from the home page.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="hideSearchBarToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Zoom Level</span>
+                <span class="setting-desc">Adjust interface size. (Ctrl+Scroll disabled)</span>
+            </div>
+            <div class="zoom-controls" style="display: flex; align-items: center; gap: 10px;">
+                <button id="zoom-out" class="icon-btn-tiny"
+                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">-</button>
+                <span id="zoom-value" style="font-weight: bold; min-width: 40px; text-align: center;">100%</span>
+                <button id="zoom-in" class="icon-btn-tiny"
+                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">+</button>
+            </div>
+        </div>
+
         <hr class="divider">
+        <h3 style="margin: 10px 0; font-size: 1rem; color: var(--text-secondary);">Appearance</h3>
+
+        <div class="setting-card" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+            <div class="setting-info">
+                <span class="setting-label">Accent Color</span>
+            </div>
+            <div class="color-options">
+                <button class="color-btn" data-color="green" style="background: #4CAF50;" title="Green"></button>
+                <button class="color-btn" data-color="blue" style="background: #2196F3;" title="Blue"></button>
+                <button class="color-btn" data-color="purple" style="background: #9C27B0;" title="Purple"></button>
+                <button class="color-btn" data-color="orange" style="background: #FF9800;" title="Orange"></button>
+                <button class="color-btn" data-color="pink" style="background: #E91E63;" title="Pink"></button>
+                <button class="color-btn" data-color="teal" style="background: #009688;" title="Teal"></button>
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Compact Mode</span>
+                <span class="setting-desc">Denser view with smaller padding.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="compactModeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Confetti Effects</span>
+                <span class="setting-desc">Celebrate when finding or completing tasks.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="confettiToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <hr class="divider">
+
+        <button type="button" id="open-help-page" class="setting-card link-card">
+            <div class="setting-label">How to Use</div>
+            <span class="icon">?</span>
+        </button>
 
         <button type="button" id="open-addon-folder" class="setting-card link-card">
             <div class="setting-label">Open Add-on Folder</div>
@@ -86,10 +157,24 @@
             const sessionToggle = document.getElementById("sessionToggle");
             const sessionsEnabledToggle = document.getElementById("sessionsEnabledToggle");
             const showStatsBarToggle = document.getElementById("showStatsBarToggle");
+            const hideSearchBarToggle = document.getElementById("hideSearchBarToggle");
+            const compactModeToggle = document.getElementById("compactModeToggle");
+            const confettiToggle = document.getElementById("confettiToggle");
+            const colorBtns = document.querySelectorAll('.color-btn');
+
+            // Zoom controls
+            const zoomInBtn = document.getElementById("zoom-in");
+            const zoomOutBtn = document.getElementById("zoom-out");
+            const zoomValueEl = document.getElementById("zoom-value");
+            let currentZoom = 1.0;
+
             const statusEl = document.getElementById("settings-status");
             const openAddonFolderBtn = document.getElementById("open-addon-folder");
             const openProjectBtn = document.getElementById("open-project-page");
+            const openHelpBtn = document.getElementById("open-help-page");
             const openSessionsBtn = document.getElementById("open-sessions-page");
+
+            let currentSettings = {};
 
             function setStatus(text, kind) {
                 if (!statusEl) return;
@@ -107,21 +192,43 @@
                 hideCompleted: false,
                 enableSessions: true,
                 sessionsEnabled: true,
-                showStatsBar: true
+                showStatsBar: true,
+                hideSearchBar: false,
+                compactMode: false,
+                confettiEnabled: true,
+                theme: 'green',
+                zoomLevel: 1.0
             };
 
+            function updateZoomDisplay() {
+                if (zoomValueEl) zoomValueEl.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+
             function getSettingsFromUI() {
+                // Find selected color
+                const selectedBtn = document.querySelector('.color-btn.selected');
+                const theme = selectedBtn ? selectedBtn.dataset.color : 'green';
+
                 return {
                     hideCompleted: !!hideToggle?.checked,
                     enableSessions: !!sessionToggle?.checked,
                     sessionsEnabled: !!sessionsEnabledToggle?.checked,
-                    showStatsBar: !!showStatsBarToggle?.checked
+                    showStatsBar: !!showStatsBarToggle?.checked,
+                    hideSearchBar: !!hideSearchBarToggle?.checked,
+                    compactMode: !!compactModeToggle?.checked,
+                    confettiEnabled: !!confettiToggle?.checked,
+                    theme: theme,
+                    zoomLevel: currentZoom
                 };
             }
 
             function saveAllSettings() {
                 const settings = getSettingsFromUI();
                 const jsonString = JSON.stringify(settings);
+
+                // Apply immediate previews
+                document.documentElement.setAttribute('data-theme', settings.theme);
+                document.body.style.zoom = settings.zoomLevel;
 
                 try {
                     localStorage.setItem('anki_task_bar_settings', jsonString);
@@ -143,10 +250,31 @@
 
             function applySettingsToUI(settings) {
                 const merged = { ...defaultSettings, ...(settings || {}) };
+                currentSettings = merged;
+
                 if (hideToggle) hideToggle.checked = !!merged.hideCompleted;
                 if (sessionToggle) sessionToggle.checked = !!merged.enableSessions;
                 if (sessionsEnabledToggle) sessionsEnabledToggle.checked = !!merged.sessionsEnabled;
                 if (showStatsBarToggle) showStatsBarToggle.checked = !!merged.showStatsBar;
+                if (hideSearchBarToggle) hideSearchBarToggle.checked = !!merged.hideSearchBar;
+                if (compactModeToggle) compactModeToggle.checked = !!merged.compactMode;
+                if (confettiToggle) confettiToggle.checked = !!merged.confettiEnabled;
+
+                currentZoom = merged.zoomLevel !== undefined ? merged.zoomLevel : 1.0;
+                updateZoomDisplay();
+
+                // Color selection
+                colorBtns.forEach(btn => {
+                    if (btn.dataset.color === merged.theme) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+
+                // Apply theme/zoom to body for preview
+                document.documentElement.setAttribute('data-theme', merged.theme);
+                document.body.style.zoom = currentZoom;
 
                 if (openSessionsBtn) {
                     openSessionsBtn.style.display = merged.sessionsEnabled ? 'flex' : 'none';
@@ -179,6 +307,30 @@
                 sessionToggle?.addEventListener("change", saveAllSettings);
                 sessionsEnabledToggle?.addEventListener("change", saveAllSettings);
                 showStatsBarToggle?.addEventListener("change", saveAllSettings);
+                hideSearchBarToggle?.addEventListener("change", saveAllSettings);
+                compactModeToggle?.addEventListener("change", saveAllSettings);
+                confettiToggle?.addEventListener("change", saveAllSettings);
+
+                // Zoom Handlers
+                zoomInBtn?.addEventListener('click', () => {
+                    currentZoom = Math.min(Math.round((currentZoom + 0.1) * 10) / 10, 2.0);
+                    updateZoomDisplay();
+                    saveAllSettings();
+                });
+
+                zoomOutBtn?.addEventListener('click', () => {
+                    currentZoom = Math.max(Math.round((currentZoom - 0.1) * 10) / 10, 0.5);
+                    updateZoomDisplay();
+                    saveAllSettings();
+                });
+
+                colorBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        colorBtns.forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        saveAllSettings();
+                    });
+                });
 
                 openAddonFolderBtn?.addEventListener('click', () => {
                     if (window.py && typeof window.py.open_addon_folder === 'function') {
@@ -186,12 +338,21 @@
                     }
                 });
 
-                openProjectBtn?.addEventListener('click', () => {
-                    const url = 'https://github.com/';
+                openHelpBtn?.addEventListener('click', () => {
+                    const url = 'https://github.com/Agampoci/anki-task-bar/blob/main/README.md'; // Fallback link
                     if (window.py && typeof window.py.open_link === 'function') {
                         window.py.open_link(url);
                     } else {
-                        try { window.open(url, '_blank'); } catch (e) {}
+                        try { window.open(url, '_blank'); } catch (e) { }
+                    }
+                });
+
+                openProjectBtn?.addEventListener('click', () => {
+                    const url = 'https://github.com/Agampodige/anki_task_bar';
+                    if (window.py && typeof window.py.open_link === 'function') {
+                        window.py.open_link(url);
+                    } else {
+                        try { window.open(url, '_blank'); } catch (e) { }
                     }
                 });
 
@@ -213,4 +374,5 @@
         });
     </script>
 </body>
+
 </html>

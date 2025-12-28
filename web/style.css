@@ -7,12 +7,82 @@
     --text-primary: #e0e0e0;
     --text-secondary: #aaaaaa;
 
+    /* Default Accent (Green) */
     --accent-color: #4CAF50;
     --accent-hover: #66bb6a;
 
     --font-family: 'Segoe UI', 'Nirmala UI', 'Iskoola Pota', Inter, -apple-system, system-ui, sans-serif;
     --radius: 12px;
     /* Restored for inner elements */
+}
+
+/* Themes */
+[data-theme='blue'] {
+    --accent-color: #2196F3;
+    --accent-hover: #42A5F5;
+}
+
+[data-theme='purple'] {
+    --accent-color: #9C27B0;
+    --accent-hover: #AB47BC;
+}
+
+[data-theme='orange'] {
+    --accent-color: #FF9800;
+    --accent-hover: #FFA726;
+}
+
+[data-theme='pink'] {
+    --accent-color: #E91E63;
+    --accent-hover: #EC407A;
+}
+
+[data-theme='teal'] {
+    --accent-color: #009688;
+    --accent-hover: #26A69A;
+}
+
+/* Compact Mode */
+body.compact .task-item {
+    min-height: 40px;
+}
+
+body.compact .task-content {
+    padding: 0 12px;
+}
+
+body.compact .task-name {
+    font-size: 0.9rem;
+}
+
+body.compact .task-counts {
+    font-size: 0.8rem;
+    padding: 2px 8px;
+}
+
+body.compact .selected-decks-stats {
+    padding: 4px 12px;
+    gap: 16px;
+    margin-bottom: 6px;
+}
+
+body.compact .stat-icon-wrapper {
+    width: 24px;
+    height: 24px;
+    font-size: 0.9rem;
+}
+
+body.compact .stat-value {
+    font-size: 0.95rem !important;
+}
+
+body.compact .search-container {
+    margin-bottom: 6px;
+}
+
+body.compact .search-input {
+    padding: 6px 12px 6px 32px;
+    font-size: 0.9rem;
 }
 
 html,
@@ -68,91 +138,124 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    
-    padding: 4px 12px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px 16px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin: 0 auto 10px auto;
+    width: fit-content;
+    gap: 24px;
     animation: slideDown 0.3s ease-out;
-    border: none;
-    
-}
-
-.stats-summary {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    
 }
 
 .stat-item {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    font-weight: 600;
-    color: var(--text-primary) !important;
-    padding: 2px 6px;
-    /* background: rgba(255, 255, 255, 0.03); */
-    border-radius: 4px;
-    border: none;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.stat-label {
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    opacity: 0.8;
-    margin-bottom: 0 !important;
-}
-
-.stat-value {
-    font-size: 2rem !important;
-    font-weight: 700 !important;
-    color: var(--text-secondary) !important;
-    margin: 0 !important;
-}
-
-.stat-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, currentColor, transparent);
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    gap: 10px;
+    padding: 4px 8px;
+    flex: 1;
+    border-radius: 8px;
+    /* Allow flex shrinking */
 }
 
 .stat-item:hover {
-    /* background: rgba(255, 255, 255, 0.06); */
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-1px);
 }
 
-.stat-item:hover::before {
-    opacity: 0.5;
+.stat-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.stat-item:nth-child(1) {
-    color: #2196F3; /* Blue for deck count */
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Important for truncation */
 }
 
-.stat-item:nth-child(2) {
-    color: #FFC107; /* Amber for cards format */
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
 }
 
-.stat-item:nth-child(3) {
-    color: #FF9800; /* Orange for estimated time */
+.stat-value {
+    font-size: 1rem !important;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Ellipsis if too long */
+    line-height: 1.1;
 }
 
-.stat-item:nth-child(4) {
-    color: #9C27B0; /* Purple for due today */
+/* Priority Dropdown Styling */
+.priority-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 4px 24px 4px 8px;
+    /* Right padding for arrow */
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    text-align: left;
+
+    /* Custom Arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 4px center;
+    background-size: 14px;
+}
+
+.priority-select:hover {
+    border-color: var(--accent-color);
+}
+
+.priority-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+/* Custom Arrow for Dropdown */
+.deck-item label {
+    position: relative;
+}
+
+/* Specific Colors */
+.stat-item.decks .stat-icon-wrapper {
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+}
+
+.stat-item.cards .stat-icon-wrapper {
+    background: linear-gradient(135deg, #FFC107, #FFA000);
+}
+
+.stat-item.time .stat-icon-wrapper {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+}
+
+.stat-item.due .stat-icon-wrapper {
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
 }
 
 .hide-stats-btn {

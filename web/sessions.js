@@ -1,419 +1,527 @@
+
 document.addEventListener('DOMContentLoaded', () => {
-    const sessionsListEl = document.getElementById('sessions-list');
-    const deleteBtn = document.getElementById('delete-session');
-    const activateBtn = document.getElementById('activate-session');
-    const editBtn = document.getElementById('edit-session');
-    const statusEl = document.getElementById('sessions-status');
+    // --- Elements ---
+    const sessionsGridEl = document.getElementById('sessions-grid');
+    const foldersListEl = document.getElementById('folders-list');
+    const currentViewTitleEl = document.getElementById('current-view-title');
+    const sessionCountBadgeEl = document.getElementById('session-count-badge');
 
-    let sessionsData = { sessions: [], active_session_id: null };
-    let currentSessionId = null;
+    // Buttons
+    const newSessionBtn = document.getElementById('new-session-btn');
+    const addFolderBtn = document.getElementById('add-folder-btn');
 
-    function setStatus(text, kind) {
-        if (!statusEl) return;
-        statusEl.textContent = text || '';
-        statusEl.dataset.kind = kind || '';
-        if (!text) return;
-        window.clearTimeout(window._sessionsStatusTimer);
-        window._sessionsStatusTimer = window.setTimeout(() => {
-            statusEl.textContent = '';
-            statusEl.dataset.kind = '';
-        }, 1500);
+    // Modals
+    const createFolderModal = document.getElementById('create-folder-modal');
+    const moveModal = document.getElementById('move-modal');
+    const newFolderInput = document.getElementById('new-folder-input');
+    const confirmCreateFolderBtn = document.getElementById('confirm-create-folder');
+    const folderSelectionList = document.getElementById('folder-selection-list');
+
+    // Context Menu
+    const contextMenu = document.getElementById('context-menu');
+    const ctxActivate = document.getElementById('ctx-activate');
+    const ctxEdit = document.getElementById('ctx-edit');
+    const ctxMove = document.getElementById('ctx-move');
+    const ctxDelete = document.getElementById('ctx-delete');
+
+    // Status
+    const statusToast = document.getElementById('status-toast');
+
+    // --- State ---
+    let appState = {
+        sessions: [],
+        folders: [],
+        activeSessionId: null,
+        currentView: 'all', // 'all', 'uncategorized', or specific folder name
+        contextMenuTargetId: null // ID of session right-clicked
+    };
+
+    // --- Timers ---
+    let toastTimer = null;
+
+    // --- Helpers ---
+    function showToast(message, type = 'normal') {
+        if (!statusToast) return;
+        statusToast.textContent = message;
+        statusToast.className = `toast ${type}`;
+        statusToast.classList.remove('hidden');
+
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            statusToast.classList.add('hidden');
+        }, 3000);
     }
 
-    function getSelectedDeckIds() {
-        const checked = Array.from(document.querySelectorAll('input.deck-checkbox:checked'))
-            .map(cb => parseInt(cb.value, 10))
-            .filter(n => !Number.isNaN(n));
-        // Deduplicate
-        return Array.from(new Set(checked));
-    }
-
-    function clearSelectionUI() {
-        document.querySelectorAll('input.deck-checkbox').forEach(cb => {
-            cb.checked = false;
-            cb.indeterminate = false;
-            cb.dispatchEvent(new Event('change'));
+    // --- Backend Communication ---
+    function callBackend(method, args = []) {
+        return new Promise((resolve, reject) => {
+            if (window.py && typeof window.py[method] === 'function') {
+                window.py[method](...args, (response) => {
+                    try {
+                        const res = JSON.parse(response);
+                        resolve(res);
+                    } catch (e) {
+                        console.error(`Error parsing response from ${method}:`, e);
+                        reject(e);
+                    }
+                });
+            } else {
+                console.warn(`Backend method ${method} not found (standalone mode)`);
+                // Mock responses for development
+                if (method === 'get_sessions') {
+                    resolve({
+                        sessions: appState.sessions, // Use current state as mock DB
+                        folders: appState.folders,
+                        active_session_id: appState.activeSessionId
+                    });
+                } else {
+                    resolve({ ok: true });
+                }
+            }
         });
     }
 
-    function applySelectedDeckIds(deckIds) {
-        const wanted = new Set((deckIds || []).map(d => parseInt(d, 10)).filter(n => !Number.isNaN(n)));
-        document.querySelectorAll('input.deck-checkbox').forEach(cb => {
-            const did = parseInt(cb.value, 10);
-            cb.checked = wanted.has(did);
-        });
-        // update states bottom-up
-        document.querySelectorAll('#deck-tree-container li').forEach(li => {
-            updateParentState(li);
-        });
-        refreshVisuals();
-    }
+    async function refreshData() {
+        try {
+            const data = await callBackend('get_sessions');
+            if (data) {
+                appState.sessions = data.sessions || [];
+                appState.folders = data.folders || [];
+                appState.activeSessionId = data.active_session_id;
 
-    function refreshVisuals() {
-        document.querySelectorAll('input.deck-checkbox').forEach(cb => {
-            const itemDiv = cb.closest('.deck-item');
-            if (!itemDiv) return;
-            if (cb.checked || cb.indeterminate) itemDiv.classList.add('selected');
-            else itemDiv.classList.remove('selected');
-        });
-    }
+                // Ensure all sessions have a folder property
+                appState.sessions.forEach(s => {
+                    if (!s.folder) s.folder = '';
+                });
 
-    function updateParentState(li) {
-        if (!li) return;
-        const checkbox = li.querySelector(':scope > .deck-item input.deck-checkbox');
-        const childCheckboxes = Array.from(li.querySelectorAll(':scope > ul.nested-list input.deck-checkbox'));
-        if (!checkbox || childCheckboxes.length === 0) {
-            return;
-        }
-
-        let checkedCount = 0;
-        let indeterminateCount = 0;
-        childCheckboxes.forEach(cb => {
-            if (cb.indeterminate) indeterminateCount++;
-            else if (cb.checked) checkedCount++;
-        });
-
-        if (checkedCount === 0 && indeterminateCount === 0) {
-            checkbox.checked = false;
-            checkbox.indeterminate = false;
-        } else if (checkedCount === childCheckboxes.length) {
-            checkbox.checked = true;
-            checkbox.indeterminate = false;
-        } else {
-            checkbox.checked = false;
-            checkbox.indeterminate = true;
+                renderApp();
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Failed to load data', 'error');
         }
     }
 
-    function updateAncestors(li) {
-        let current = li;
-        while (current) {
-            const parentUl = current.parentElement;
-            if (!parentUl || !parentUl.classList.contains('nested-list')) break;
-            const parentLi = parentUl.closest('li');
-            if (!parentLi) break;
-            updateParentState(parentLi);
-            current = parentLi;
-        }
+    // --- Rendering ---
+    function renderApp() {
+        renderSidebar();
+        renderMainContent();
     }
 
-    function setChildrenChecked(li, checked) {
-        const childCheckboxes = li.querySelectorAll('ul.nested-list input.deck-checkbox');
-        childCheckboxes.forEach(cb => {
-            cb.checked = checked;
-            cb.indeterminate = false;
-        });
-    }
+    function renderSidebar() {
+        if (!foldersListEl) return;
+        foldersListEl.innerHTML = '';
 
-    function bindTreeSelectionHandlers(li, checkbox) {
-        checkbox.addEventListener('change', (e) => {
-            // Cascade to children
-            setChildrenChecked(li, checkbox.checked);
-            checkbox.indeterminate = false;
+        // "All Sessions" Item
+        const allItem = document.createElement('div');
+        allItem.className = 'nav-item';
+        if (appState.currentView === 'all') allItem.classList.add('active');
+        allItem.innerHTML = `
+            <span>All Sessions</span>
+            <span class="nav-item-count">${appState.sessions.length}</span>
+        `;
+        allItem.onclick = () => {
+            appState.currentView = 'all';
+            renderApp();
+        };
+        foldersListEl.appendChild(allItem);
 
-            // Update ancestors
-            updateAncestors(li);
-            refreshVisuals();
-        });
-    }
-
-    function buildTree(node, parentElement) {
-        const li = document.createElement('li');
-
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'deck-item';
-
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `deck-${node.id}`;
-        checkbox.value = node.id;
-        checkbox.className = 'deck-checkbox';
-        itemDiv.appendChild(checkbox);
-
-        const label = document.createElement('label');
-        label.htmlFor = `deck-${node.id}`;
-
-        const displayName = node.name.includes('::') ? node.name.split('::').pop() : node.name;
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'deck-name';
-        nameSpan.textContent = displayName;
-        label.appendChild(nameSpan);
-
-        const countsContainer = document.createElement('span');
-        countsContainer.className = 'counts';
-
-        const totalCards = (node.review || 0) + (node.learn || 0) + (node.new || 0);
-        if (node.review > 0) {
-            const reviewBadge = document.createElement('span');
-            reviewBadge.className = 'count-badge has-cards';
-            reviewBadge.innerHTML = `<span class="count-review">${node.review}</span> R`;
-            countsContainer.appendChild(reviewBadge);
-        }
-        if (node.learn > 0) {
-            const learnBadge = document.createElement('span');
-            learnBadge.className = 'count-badge has-cards';
-            learnBadge.innerHTML = `<span class="count-learn">${node.learn}</span> L`;
-            countsContainer.appendChild(learnBadge);
-        }
-        if (node.new > 0) {
-            const newBadge = document.createElement('span');
-            newBadge.className = 'count-badge has-cards';
-            newBadge.innerHTML = `<span class="count-new">${node.new}</span> N`;
-            countsContainer.appendChild(newBadge);
-        }
-        if (totalCards === 0) {
-            const emptyBadge = document.createElement('span');
-            emptyBadge.className = 'count-badge';
-            emptyBadge.textContent = 'No cards';
-            countsContainer.appendChild(emptyBadge);
-        }
-
-        label.appendChild(countsContainer);
-        itemDiv.appendChild(label);
-
-        // Click row to toggle checkbox (except toggle)
-        itemDiv.addEventListener('click', (e) => {
-            if (e.target === checkbox || e.target.classList.contains('toggle')) return;
-            e.stopPropagation();
-            checkbox.checked = !checkbox.checked;
-            checkbox.dispatchEvent(new Event('change'));
-        });
-
-        li.appendChild(itemDiv);
-        parentElement.appendChild(li);
-
-        if (node.children && node.children.length > 0) {
-            li.classList.add('has-children');
-            const toggle = document.createElement('span');
-            toggle.className = 'toggle';
-            itemDiv.insertBefore(toggle, checkbox);
-
-            const nestedUl = document.createElement('ul');
-            nestedUl.className = 'nested-list';
-            li.appendChild(nestedUl);
-            node.children.forEach(child => buildTree(child, nestedUl));
-
-            toggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                li.classList.toggle('expanded');
-            });
-        }
-
-        bindTreeSelectionHandlers(li, checkbox);
-    }
-
-    function renderSessionsList() {
-        if (!sessionsListEl) return;
-        sessionsListEl.innerHTML = '';
-
-        const sessions = Array.isArray(sessionsData.sessions) ? sessionsData.sessions : [];
-        if (sessions.length === 0) {
-            const empty = document.createElement('div');
-            empty.className = 'empty-state';
-            empty.textContent = 'No sessions yet.';
-            sessionsListEl.appendChild(empty);
-            return;
-        }
-
-        sessions.forEach(sess => {
-            if (!sess || typeof sess !== 'object') return;
+        // "Uncategorized" Item
+        const uncategorizedCount = appState.sessions.filter(s => !s.folder).length;
+        if (uncategorizedCount > 0) {
             const item = document.createElement('div');
-            item.className = 'session-item';
-            if (String(sess.id) === String(currentSessionId)) item.classList.add('selected');
+            item.className = 'nav-item';
+            if (appState.currentView === 'uncategorized') item.classList.add('active');
+            item.innerHTML = `
+                <span>Uncategorized</span>
+                <span class="nav-item-count">${uncategorizedCount}</span>
+            `;
+            item.onclick = () => {
+                appState.currentView = 'uncategorized';
+                renderApp();
+            };
+            foldersListEl.appendChild(item);
+        }
 
-            const left = document.createElement('div');
-            left.style.display = 'flex';
-            left.style.flexDirection = 'column';
-            left.style.gap = '2px';
+        // Folders
+        appState.folders.forEach(folder => {
+            const count = appState.sessions.filter(s => s.folder === folder).length;
 
-            const title = document.createElement('div');
-            title.textContent = sess.name || 'Untitled';
-            title.style.fontWeight = '700';
+            const item = document.createElement('div');
+            item.className = 'nav-item';
+            if (appState.currentView === folder) item.classList.add('active');
+            item.innerHTML = `
+                <span>${folder}</span>
+                <span class="nav-item-count">${count}</span>
+            `;
 
-            const meta = document.createElement('div');
-            meta.className = 'session-meta';
-            const count = Array.isArray(sess.deck_ids) ? sess.deck_ids.length : 0;
-            meta.textContent = `${count} deck${count === 1 ? '' : 's'}`;
+            // Context menu for folders (delete/rename) - Simplified for now
+            item.oncontextmenu = (e) => {
+                e.preventDefault();
+                if (confirm(`Delete folder "${folder}"?`)) {
+                    deleteFolder(folder);
+                }
+            };
 
-            left.appendChild(title);
-            left.appendChild(meta);
-
-            const badge = document.createElement('div');
-            badge.className = 'session-meta';
-            badge.textContent = (String(sessionsData.active_session_id) === String(sess.id)) ? 'Active' : '';
-
-            item.appendChild(left);
-            item.appendChild(badge);
-
-            item.addEventListener('click', () => {
-                selectSession(sess.id);
-            });
-
-            sessionsListEl.appendChild(item);
+            item.onclick = () => {
+                appState.currentView = folder;
+                renderApp();
+            };
+            foldersListEl.appendChild(item);
         });
     }
 
-    function selectSession(sessionId) {
-        currentSessionId = String(sessionId);
-        renderSessionsList();
-    }
+    function renderMainContent() {
+        if (!sessionsGridEl) return;
 
-    function setNewSessionDraft() {
-        currentSessionId = null;
-        renderSessionsList();
-    }
+        // Filter Sessions
+        let filtered = [];
+        if (appState.currentView === 'all') {
+            filtered = appState.sessions;
+            if (currentViewTitleEl) currentViewTitleEl.textContent = 'All Sessions';
+        } else if (appState.currentView === 'uncategorized') {
+            filtered = appState.sessions.filter(s => !s.folder);
+            if (currentViewTitleEl) currentViewTitleEl.textContent = 'Uncategorized';
+        } else {
+            filtered = appState.sessions.filter(s => s.folder === appState.currentView);
+            if (currentViewTitleEl) currentViewTitleEl.textContent = appState.currentView;
+        }
 
-    function loadDeckTree() {
-        return new Promise((resolve) => {
-            if (!window.py || typeof window.py.get_deck_tree !== 'function') {
-                resolve(null);
-                return;
+        if (sessionCountBadgeEl) sessionCountBadgeEl.textContent = filtered.length;
+        sessionsGridEl.innerHTML = '';
+
+        if (filtered.length === 0) {
+            sessionsGridEl.innerHTML = `
+                <div class="empty-state" style="grid-column: 1/-1; text-align:center; padding: 40px; color: #888;">
+                    No sessions found here.
+                    <br><br>
+                    <button class="primary-btn" onclick="document.getElementById('new-session-btn').click()" style="margin:auto;">Create Session</button>
+                </div>
+            `;
+            return;
+        }
+
+        filtered.forEach((session, index) => {
+            const card = document.createElement('div');
+            card.className = 'session-card';
+            if (String(session.id) === String(appState.activeSessionId)) {
+                card.classList.add('active-session');
             }
-            window.py.get_deck_tree((jsonTree) => {
-                try {
-                    deckTree = JSON.parse(jsonTree);
-                } catch (e) {
-                    deckTree = null;
-                }
-                resolve(deckTree);
-            });
-        });
-    }
 
-    function renderDeckTree() {
-        const container = document.getElementById('deck-tree-container');
-        if (!container) return;
-        container.innerHTML = '';
+            // Animation
+            card.style.opacity = '0';
+            card.style.animation = `fadeIn 0.3s ease-out forwards`;
+            card.style.animationDelay = `${index * 0.05}s`;
 
-        if (!deckTree || !deckTree.children) {
-            container.innerHTML = '<p class="placeholder">Unable to load deck tree.</p>';
-            return;
-        }
+            const deckCount = session.deck_ids ? session.deck_ids.length : 0;
 
-        const ul = document.createElement('ul');
-        deckTree.children.forEach(child => buildTree(child, ul));
-        container.appendChild(ul);
-    }
-
-    function loadSessions() {
-        return new Promise((resolve) => {
-            if (!window.py || typeof window.py.get_sessions !== 'function') {
-                sessionsData = { sessions: [], active_session_id: null };
-                resolve(sessionsData);
-                return;
+            // Format folder label
+            let folderBadge = '';
+            if (session.folder) {
+                folderBadge = `<div class="folder-badge" title="In folder: ${session.folder}">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                    ${session.folder}
+                </div>`;
             }
-            window.py.get_sessions((json) => {
-                try {
-                    sessionsData = JSON.parse(json);
-                } catch (e) {
-                    sessionsData = { sessions: [], active_session_id: null };
-                }
-                resolve(sessionsData);
-            });
-        });
-    }
 
-    async function refreshAll() {
-        await loadSessions();
-        renderSessionsList();
-    }
+            // Progress Bar
+            const progress = session.progress || 0; // 0.0 to 1.0
+            const pct = Math.round(progress * 100);
+            const doneCards = session.done_cards || 0;
+            const totalCards = session.total_cards || 0;
 
-    function editCurrentSession() {
-        if (!currentSessionId) {
-            setStatus('Select a session', 'error');
-            return;
-        }
-        // Store the session ID in sessionStorage so select-deck.js knows we're editing
-        sessionStorage.setItem('editingSessionId', currentSessionId);
-        window.location.href = 'select-deck.html';
-    }
+            // Only show detailed counts if we have data
+            const progressText = totalCards > 0
+                ? `${doneCards}/${totalCards} cards`
+                : `${pct}%`;
 
-    function deleteCurrentSession() {
-        if (!currentSessionId) {
-            setStatus('Select a session', 'error');
-            return;
-        }
-        if (!window.py || typeof window.py.delete_session !== 'function') {
-            setStatus('No backend', 'error');
-            return;
-        }
-        window.py.delete_session(String(currentSessionId), (resp) => {
-            try {
-                const r = JSON.parse(resp);
-                if (!r.ok) {
-                    setStatus('Error', 'error');
-                    return;
-                }
-                setStatus('Deleted', 'ok');
-                currentSessionId = null;
-                refreshAll();
-            } catch (e) {
-                setStatus('Error', 'error');
+            const progressBar = `
+                <div class="session-progress-wrapper" title="${pct}% Completed">
+                    <div class="session-progress-text">${progressText}</div>
+                    <div class="session-progress-container">
+                        <div class="session-progress-bar" style="width: ${pct}%"></div>
+                    </div>
+                </div>
+            `;
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="card-icon">
+                        ${session.name ? session.name[0].toUpperCase() : 'S'}
+                    </div>
+                     <button class="card-menu-btn" data-id="${session.id}">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div>
+                    <div class="card-title" title="${session.name}">${session.name || 'Untitled Session'}</div>
+                    <div class="card-meta">${deckCount} deck${deckCount !== 1 ? 's' : ''}</div>
+                    ${folderBadge}
+                    ${progressBar}
+                </div>
+                <div class="card-footer">
+                    ${String(session.id) === String(appState.activeSessionId)
+                    ? '<div class="active-tag">Active</div>'
+                    : '<div></div>'}
+                    <button class="play-btn" data-id="${session.id}">
+                        ${String(session.id) === String(appState.activeSessionId) ? 'Current' : 'Activate'}
+                    </button>
+                </div>
+            `;
+
+            const menuBtn = card.querySelector('.card-menu-btn');
+            if (menuBtn) {
+                menuBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showContextMenu(e, session.id);
+                };
             }
+
+            const playBtn = card.querySelector('.play-btn');
+            if (playBtn) {
+                playBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    activateSession(session.id);
+                };
+            }
+
+            // Allow right click anywhere on card
+            card.oncontextmenu = (e) => {
+                e.preventDefault();
+                showContextMenu(e, session.id);
+            };
+
+            sessionsGridEl.appendChild(card);
         });
     }
 
-    function activateCurrentSession() {
-        if (!currentSessionId) {
-            setStatus('Select a session', 'error');
-            return;
-        }
-        if (!window.py || typeof window.py.activate_session !== 'function') {
-            setStatus('No backend', 'error');
-            return;
-        }
-        window.py.activate_session(String(currentSessionId), (resp) => {
-            try {
-                const r = JSON.parse(resp);
-                if (!r.ok) {
-                    setStatus('Error', 'error');
-                    return;
-                }
-                setStatus('Activated', 'ok');
+    // --- Actions ---
+
+    function activateSession(id) {
+        callBackend('activate_session', [String(id)]).then(res => {
+            if (res.ok) {
+                showToast('Session Activated', 'success');
                 window.location.href = 'index.html';
-            } catch (e) {
-                setStatus('Error', 'error');
+            } else {
+                showToast(res.error || 'Error', 'error');
             }
         });
     }
 
-    function bindActions() {
-        editBtn?.addEventListener('click', () => editCurrentSession());
-        deleteBtn?.addEventListener('click', () => deleteCurrentSession());
-        activateBtn?.addEventListener('click', () => activateCurrentSession());
+    function createFolder() {
+        if (!newFolderInput) return;
+        const name = newFolderInput.value.trim();
+        if (!name) return;
+
+        callBackend('create_folder', [name]).then(res => {
+            if (res.ok) {
+                showToast('Folder created', 'success');
+                if (createFolderModal) createFolderModal.classList.add('hidden');
+                refreshData();
+            } else {
+                showToast(res.error || 'Error', 'error');
+            }
+        });
     }
 
-    function ensureSessionsEnabled() {
-        return new Promise((resolve) => {
-            if (!window.py || typeof window.py.load_settings_from_file !== 'function') {
-                resolve(true);
-                return;
+    function deleteFolder(name) {
+        callBackend('delete_folder', [name]).then(res => {
+            if (res.ok) {
+                showToast('Folder deleted', 'success');
+                if (appState.currentView === name) appState.currentView = 'all';
+                refreshData();
+            } else {
+                showToast(res.error || 'Error', 'error');
             }
-            window.py.load_settings_from_file((data) => {
-                try {
-                    const cfg = data ? JSON.parse(data) : {};
-                    resolve(cfg.sessionsEnabled !== false);
-                } catch (e) {
-                    resolve(true);
+        });
+    }
+
+    function moveSession(sessionId, folderName) {
+        // Debug
+        // console.log(`Moving session ${sessionId} to folder "${folderName}"`);
+
+        callBackend('move_session_to_folder', [String(sessionId), folderName])
+            .then(res => {
+                if (res.ok) {
+                    showToast(`Moved to ${folderName || 'Uncategorized'}`, 'success');
+                    if (moveModal) moveModal.classList.add('hidden');
+                    refreshData();
+                } else {
+                    console.error('Move failed:', res);
+                    showToast(res.error || 'Move failed', 'error');
                 }
+            })
+            .catch(err => {
+                console.error('Backend call failed:', err);
+                showToast('Backend Error', 'error');
             });
+    }
+
+    function deleteSession(id) {
+        if (!confirm('Are you sure you want to delete this session?')) return;
+
+        callBackend('delete_session', [String(id)]).then(res => {
+            if (res.ok) {
+                showToast('Session deleted', 'success');
+                refreshData();
+            } else {
+                showToast(res.error || 'Error', 'error');
+            }
         });
     }
 
+    // --- UI Interactions ---
+
+    function showContextMenu(e, sessionId) {
+        if (!contextMenu) return;
+        appState.contextMenuTargetId = sessionId;
+
+        // Position menu
+        const x = e.clientX;
+        const y = e.clientY;
+
+        // Check bounds
+        const menuWidth = 150;
+        const menuHeight = 160;
+
+        let finalX = x;
+        let finalY = y;
+
+        if (x + menuWidth > window.innerWidth) finalX = x - menuWidth;
+        if (y + menuHeight > window.innerHeight) finalY = y - menuHeight;
+
+        contextMenu.style.left = `${finalX}px`;
+        contextMenu.style.top = `${finalY}px`;
+        contextMenu.classList.remove('hidden');
+    }
+
+    function hideContextMenu() {
+        if (contextMenu) contextMenu.classList.add('hidden');
+    }
+
+    // --- Event Listeners ---
+
+    if (newSessionBtn) {
+        newSessionBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('editingSessionId');
+            window.location.href = 'select-deck.html';
+        });
+    }
+
+    // Back button in header (Library)
+    const sidebarHeader = document.querySelector('.sidebar-header');
+    if (sidebarHeader) {
+        sidebarHeader.addEventListener('click', (e) => {
+            if (e.target.closest('a')) return; // let link handle it
+            appState.currentView = 'all';
+            renderApp();
+        });
+    }
+
+    if (addFolderBtn) {
+        addFolderBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (newFolderInput) newFolderInput.value = '';
+            if (createFolderModal) {
+                createFolderModal.classList.remove('hidden');
+                setTimeout(() => newFolderInput && newFolderInput.focus(), 100);
+            }
+        });
+    }
+
+    if (confirmCreateFolderBtn) {
+        confirmCreateFolderBtn.addEventListener('click', createFolder);
+    }
+
+    if (newFolderInput) {
+        newFolderInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') createFolder();
+        });
+    }
+
+    // Close Modals logic
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+        // Cancel buttons
+        modal.querySelectorAll('[data-action="cancel"], .btn.secondary, #cancel-move').forEach(btn => {
+            btn.onclick = () => modal.classList.add('hidden');
+        });
+    });
+
+    // Document click closes context menu
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.context-menu')) {
+            hideContextMenu();
+        }
+    });
+
+    // Context Menu Actions
+    if (ctxActivate) {
+        ctxActivate.addEventListener('click', () => {
+            if (appState.contextMenuTargetId) activateSession(appState.contextMenuTargetId);
+            hideContextMenu();
+        });
+    }
+
+    if (ctxEdit) {
+        ctxEdit.addEventListener('click', () => {
+            if (appState.contextMenuTargetId) {
+                sessionStorage.setItem('editingSessionId', appState.contextMenuTargetId);
+                window.location.href = 'select-deck.html';
+            }
+            hideContextMenu();
+        });
+    }
+
+    if (ctxDelete) {
+        ctxDelete.addEventListener('click', () => {
+            if (appState.contextMenuTargetId) deleteSession(appState.contextMenuTargetId);
+            hideContextMenu();
+        });
+    }
+
+    if (ctxMove) {
+        ctxMove.addEventListener('click', () => {
+            hideContextMenu();
+            if (!appState.contextMenuTargetId) return;
+
+            // Populate folder list
+            if (folderSelectionList) {
+                folderSelectionList.innerHTML = '';
+
+                // Option: No Folder
+                const noFolder = document.createElement('div');
+                noFolder.className = 'folder-select-item';
+                noFolder.innerHTML = '<span>(No Folder / Uncategorized)</span>';
+                noFolder.onclick = () => moveSession(appState.contextMenuTargetId, "");
+                folderSelectionList.appendChild(noFolder);
+
+                appState.folders.forEach(folder => {
+                    const item = document.createElement('div');
+                    item.className = 'folder-select-item';
+                    item.innerHTML = `<span>📁 ${folder}</span>`;
+                    item.onclick = () => moveSession(appState.contextMenuTargetId, folder);
+                    folderSelectionList.appendChild(item);
+                });
+            }
+
+            if (moveModal) moveModal.classList.remove('hidden');
+        });
+    }
+
+    // --- Init ---
+    // Check for QWebChannel
     if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
-        new QWebChannel(qt.webChannelTransport, async (channel) => {
+        new QWebChannel(qt.webChannelTransport, (channel) => {
             window.py = channel.objects.py;
-
-            const enabled = await ensureSessionsEnabled();
-            if (!enabled) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            bindActions();
-
-            await refreshAll();
-            setNewSessionDraft();
+            refreshData();
         });
+    } else {
+        // Fallback or dev mode
+        refreshData();
     }
 });

@@ -19,13 +19,7 @@
     <div class="page-header">
         <h1>Today's Tasks</h1>
         <div class="header-actions">
-            <!-- Analytics Button -->
-            <button id="btn-analytics" class="icon-btn" title="View Analytics">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="currentColor"
-                        d="M16,11.78L20.24,4.45L21.97,5.45L16.74,14.5L10.23,10.75L5.46,19H22V21H2V3H4V17.54L9.5,8L16,11.78Z" />
-                </svg>
-            </button>
+
             <!-- Stats Button -->
             <button id="btn-stats" class="icon-btn" title="View Stats">
                 <svg viewBox="0 0 24 24" width="24" height="24">
@@ -56,18 +50,45 @@
     </div>
 
     <div id="selected-decks-stats" class="selected-decks-stats" style="display: none;">
-        <div class="stats-summary">
-            <div class="stat-item">
-                <div class="stat-label">Selected Decks</div>
-                <div id="stats-deck-count" class="stat-value">0 </div>
+        <!-- Decks Count -->
+        <div class="stat-item decks">
+            <!-- <div class="stat-icon-wrapper">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path
+                        d="M7 2h10a2 2 0 012 2v2H5V4a2 2 0 012-2zm12 5H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2zm-2 10H7v-6h10v6z" />
+                </svg>
+            </div> -->
+            <div class="stat-content">
+                <div class="stat-label">Decks</div>
+                <div id="stats-deck-count" class="stat-value">0</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">Total/Completed</div>
-                <div id="stats-cards-format" class="stat-value">0/0 </div>
+        </div>
+
+        <!-- Cards Count -->
+        <div class="stat-item cards">
+            <!-- <div class="stat-icon-wrapper">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path
+                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-7-2h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V7h-2v2z" />
+                </svg>
+            </div> -->
+            <div class="stat-content">
+                <div class="stat-label">Cards</div>
+                <div id="stats-cards-format" class="stat-value">0 / 0</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">Est. Minutes</div>
-                <div id="stats-estimated-time" class="stat-value">~0 </div>
+        </div>
+
+        <!-- Time Estimate -->
+        <div class="stat-item time">
+            <!-- <div class="stat-icon-wrapper">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path
+                        d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                </svg>
+            </div> -->
+            <div class="stat-content">
+                <div class="stat-label">Time</div>
+                <div id="stats-estimated-time" class="stat-value">~0m</div>
             </div>
         </div>
     </div>
@@ -91,11 +112,11 @@
         <!-- Active Decks -->
         <div id="task-list-container"></div>
 
-            <div class="section-divider" id="completed-section">
-                <span class="section-title">✓ Completed</span>
-            </div>
-            <div id="completed-list-container"></div>
+        <div class="section-divider" id="completed-section">
+            <span class="section-title">✓ Completed</span>
         </div>
+        <div id="completed-list-container"></div>
+    </div>
     </div>
 
     <!-- Stats Modal -->
@@ -106,44 +127,7 @@
         </div>
     </div>
 
-    <!-- Analytics Modal -->
-    <div id="analytics-modal" class="modal hidden">
-        <div class="modal-content analytics-modal">
-            <button class="modal-close" id="analytics-close">&times;</button>
-            <h2>📊 Analytics</h2>
 
-            <div class="analytics-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Current Streak</div>
-                    <div class="stat-value" id="current-streak">-</div>
-                    <div class="stat-unit">days</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-label">Total Days</div>
-                    <div class="stat-value" id="total-days">-</div>
-                    <div class="stat-unit">studied</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-label">Total Cards</div>
-                    <div class="stat-value" id="total-cards">-</div>
-                    <div class="stat-unit">reviewed</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-label">Avg Per Day</div>
-                    <div class="stat-value" id="avg-cards">-</div>
-                    <div class="stat-unit">cards</div>
-                </div>
-            </div>
-
-            <div class="recent-activity">
-                <h3>Last 7 Days</h3>
-                <div id="recent-days-list"></div>
-            </div>
-        </div>
-    </div>
 
     <button id="grind-btn">Back to Grinding</button>
 

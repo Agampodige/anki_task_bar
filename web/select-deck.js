@@ -13,13 +13,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     const cfg = data ? JSON.parse(data) : {};
                     const sessionsEnabled = cfg.sessionsEnabled !== false; // Default to enabled
-                    
+
+                    // Apply Theme
+                    const theme = cfg.theme || 'green';
+                    const compactMode = !!cfg.compactMode;
+                    document.documentElement.setAttribute('data-theme', theme);
+                    if (compactMode) document.body.classList.add('compact');
+                    else document.body.classList.remove('compact');
+
                     // Hide session creation UI if disabled
                     const sessionCreateRow = document.querySelector('.session-create-row');
                     if (sessionCreateRow) {
                         sessionCreateRow.style.display = sessionsEnabled ? 'flex' : 'none';
                     }
-                    
+
                     // If editing but sessions disabled, clear editing state
                     if (isEditing && !sessionsEnabled) {
                         sessionStorage.removeItem('editingSessionId');
@@ -112,6 +119,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+// Disable Ctrl+Scroll Zoom
+window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
 /**
  * Recursively builds the HTML for the deck tree.

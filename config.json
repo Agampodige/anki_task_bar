@@ -2,5 +2,10 @@
     "hideCompleted": false,
     "enableSessions": true,
     "sessionsEnabled": true,
-    "showStatsBar": true
+    "showStatsBar": true,
+    "hideSearchBar": true,
+    "compactMode": true,
+    "confettiEnabled": false,
+    "theme": "green",
+    "zoomLevel": 1.2
 }
