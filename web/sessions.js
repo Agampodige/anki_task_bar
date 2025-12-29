@@ -251,27 +251,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <div class="card-header">
+                    ${String(session.id) === String(appState.activeSessionId)
+                    ? '<div class="active-tag">Active</div>'
+                    : '<div></div>'}
                      <button class="card-menu-btn" data-id="${session.id}">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                         </svg>
                     </button>
                 </div>
-                <div>
+                <div class="card-body">
                     <div class="card-title" title="${session.name}">${session.name || 'Untitled Session'}</div>
                     <div class="card-meta">${deckCount} deck${deckCount !== 1 ? 's' : ''}</div>
                     ${folderBadge}
                     ${progressBar}
                 </div>
                 <div class="card-footer">
-                    ${String(session.id) === String(appState.activeSessionId)
-                    ? '<div class="active-tag">Active</div>'
-                    : '<div></div>'}
-                    <button class="play-btn" data-id="${session.id}">
-                        ${String(session.id) === String(appState.activeSessionId) ? 'Current' : 'Activate'}
-                    </button>
+                    <div></div>
                 </div>
             `;
+
+            // Card click to activate
+            card.onclick = () => {
+                if (String(session.id) !== String(appState.activeSessionId)) {
+                    activateSession(session.id);
+                }
+            };
 
             const menuBtn = card.querySelector('.card-menu-btn');
             if (menuBtn) {
@@ -281,13 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
 
-            const playBtn = card.querySelector('.play-btn');
-            if (playBtn) {
-                playBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    activateSession(session.id);
-                };
-            }
 
             // Allow right click anywhere on card
             card.oncontextmenu = (e) => {
