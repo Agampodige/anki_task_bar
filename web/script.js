@@ -1,4 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Disable Ctrl+Scroll Zoom
+    window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
+
     // Establish connection with Python backend
     new QWebChannel(qt.webChannelTransport, function (channel) {
         window.py = channel.objects.py;

@@ -158,6 +158,11 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
+            // Disable Ctrl+Scroll Zoom
+            window.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) e.preventDefault();
+            }, { passive: false });
+
             const hideToggle = document.getElementById("hideDecksToggle");
             const sessionToggle = document.getElementById("sessionToggle");
             const sessionsEnabledToggle = document.getElementById("sessionsEnabledToggle");

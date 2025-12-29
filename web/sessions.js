@@ -1,5 +1,10 @@
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Disable Ctrl+Scroll Zoom
+    window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey) e.preventDefault();
+    }, { passive: false });
+
     // --- Elements ---
     const sessionsGridEl = document.getElementById('sessions-grid');
     const foldersListEl = document.getElementById('folders-list');
