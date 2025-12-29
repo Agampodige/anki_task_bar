@@ -415,12 +415,23 @@ class Bridge(QObject):
                 start_ms,
                 end_ms,
             ))
+            
+            # Sum of review time in milliseconds
+            total_time_ms = int(_scalar(
+                "SELECT SUM(time) FROM revlog WHERE id >= ? AND id < ?",
+                start_ms,
+                end_ms,
+            ) or 0)
 
-            return json.dumps({"total_cards": total_cards, "total_reviews": total_reviews})
+            return json.dumps({
+                "total_cards": total_cards, 
+                "total_reviews": total_reviews,
+                "total_time_ms": total_time_ms
+            })
         except Exception as e:
             print(f"Error in get_today_review_totals: {e}")
             traceback.print_exc()
-            return json.dumps({"total_cards": 0, "total_reviews": 0})
+            return json.dumps({"total_cards": 0, "total_reviews": 0, "total_time_ms": 0})
 
     @pyqtSlot(result=str)
     def get_deck_tree(self):

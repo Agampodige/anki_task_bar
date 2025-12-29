@@ -102,36 +102,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Active decks calculate pending work
         const pendingCards = allDecks.reduce((sum, t) => sum + (t.dueNow || 0), 0);
-        // Completed cards is Total - Pending (or use t.done, but dueStart might include learned today)
         const completedCards = allDecks.reduce((sum, t) => sum + (t.done || 0), 0);
 
-        // Estimate time (assuming 1 minute per card for remaining cards)
-        const estimatedMinutes = pendingCards;
-        const estimatedTime = estimatedMinutes < 60
-            ? `${estimatedMinutes}m`
-            : `${Math.floor(estimatedMinutes / 60)}h ${estimatedMinutes % 60}m`;
+        // Fetch today's review totals for better time estimation
+        if (window.py && typeof window.py.get_today_review_totals === 'function') {
+            window.py.get_today_review_totals((jsonData) => {
+                let totals = { total_cards: 0, total_reviews: 0, total_time_ms: 0 };
+                try {
+                    totals = JSON.parse(jsonData);
+                } catch (e) { }
 
-        // Update global stats object
-        window.selectedDecksStats = {
-            totalDecks,
-            totalCards,
-            completedCards,
-            estimatedTime
-        };
+                // Calculate average time per card (seconds)
+                // Use total_cards for a more conservative estimate of cards vs. total reviews
+                let secondsPerCard = 60; // Fallback: 1 minute
+                if (totals.total_cards > 5 && totals.total_time_ms > 0) {
+                    secondsPerCard = (totals.total_time_ms / 1000) / totals.total_cards;
+                    // Sanity check: cap between 5s and 180s
+                    secondsPerCard = Math.min(Math.max(secondsPerCard, 5), 180);
+                }
 
-        // Update DOM elements
-        const deckCountEl = document.getElementById('stats-deck-count');
-        const cardsFormatEl = document.getElementById('stats-cards-format');
-        const timeEl = document.getElementById('stats-estimated-time');
+                const estimatedSeconds = pendingCards * secondsPerCard;
+                const estimatedMinutes = Math.round(estimatedSeconds / 60);
 
-        if (deckCountEl) deckCountEl.textContent = `${totalDecks}`;
-        if (cardsFormatEl) cardsFormatEl.textContent = `${completedCards} / ${totalCards}`;
-        if (timeEl) timeEl.textContent = estimatedTime;
+                let estimatedTime = '';
+                if (estimatedMinutes < 1) {
+                    estimatedTime = pendingCards > 0 ? '<1m' : '0m';
+                } else if (estimatedMinutes < 60) {
+                    estimatedTime = `${estimatedMinutes}m`;
+                } else {
+                    estimatedTime = `${Math.floor(estimatedMinutes / 60)}h ${estimatedMinutes % 60}m`;
+                }
 
-        // Show/hide based on settings and data
-        const cfg = window.ankiTaskBarSettings || {};
-        const showStatsBar = cfg.showStatsBar !== false; // Default to true
-        statsBar.style.display = showStatsBar && totalDecks > 0 ? 'flex' : 'none';
+                // Estimated Finish Time
+                let finishTimeStr = '';
+                if (pendingCards > 0) {
+                    const finishDate = new Date(Date.now() + estimatedSeconds * 1000);
+                    const hours = finishDate.getHours();
+                    const minutes = finishDate.getMinutes();
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    const displayHours = hours % 12 || 12;
+                    const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+                    finishTimeStr = `Finish: ${displayHours}:${displayMinutes} ${ampm}`;
+                }
+
+                // Update Globals
+                window.selectedDecksStats = {
+                    totalDecks,
+                    totalCards,
+                    completedCards,
+                    estimatedTime,
+                    finishTimeStr
+                };
+
+                _renderStatsUI();
+            });
+        } else {
+            // Fallback for no backend
+            const estimatedMinutes = pendingCards;
+            const estimatedTime = estimatedMinutes < 60
+                ? `${estimatedMinutes}m`
+                : `${Math.floor(estimatedMinutes / 60)}h ${estimatedMinutes % 60}m`;
+
+            window.selectedDecksStats = {
+                totalDecks,
+                totalCards,
+                completedCards,
+                estimatedTime,
+                finishTimeStr: ''
+            };
+            _renderStatsUI();
+        }
+
+        function _renderStatsUI() {
+            const stats = window.selectedDecksStats;
+            const deckCountEl = document.getElementById('stats-deck-count');
+            const cardsFormatEl = document.getElementById('stats-cards-format');
+            const timeEl = document.getElementById('stats-estimated-time');
+
+            if (deckCountEl) deckCountEl.textContent = `${stats.totalDecks}`;
+            if (cardsFormatEl) cardsFormatEl.textContent = `${stats.completedCards} / ${stats.totalCards}`;
+
+            if (timeEl) {
+                if (stats.finishTimeStr) {
+                    timeEl.innerHTML = `<span>${stats.estimatedTime}</span><span class="finish-time">${stats.finishTimeStr}</span>`;
+                } else {
+                    timeEl.textContent = stats.estimatedTime;
+                }
+            }
+
+            // Show/hide based on settings and data
+            const cfg = window.ankiTaskBarSettings || {};
+            const showStatsBar = cfg.showStatsBar !== false;
+            statsBar.style.display = showStatsBar && stats.totalDecks > 0 ? 'flex' : 'none';
+        }
     }
 
     // Refactored Data Fetching Logic

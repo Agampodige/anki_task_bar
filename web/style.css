@@ -230,16 +230,19 @@ body {
     margin-bottom: 2px;
 }
 
-.stat-value {
-    font-size: 1rem !important;
-    font-weight: 600;
-    color: var(--text-primary);
-    white-space: nowrap;
-    /* Prevent text wrapping */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Ellipsis if too long */
-    line-height: 1.1;
+/* Time Item Special Layout */
+.stat-item.time .stat-value {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+}
+
+.finish-time {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    opacity: 0.8;
 }
 
 /* Priority Dropdown Styling */
@@ -1272,39 +1275,55 @@ mark.highlight {
 .tour-tooltip {
     position: fixed;
     z-index: 10000;
+    background: #252526;
+    /* Hard-coded fallback for dark mode */
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--accent-color);
+    /* Stronger border */
     border-radius: var(--radius);
-    padding: 20px;
-    width: 300px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 24px;
+    width: 320px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.7);
     animation: tooltipFadeIn 0.3s ease;
     pointer-events: auto;
+    backdrop-filter: blur(20px);
+    color: var(--text-primary);
+    color-scheme: dark;
+    /* Force dark context for better text rendering */
+}
+
+[data-appearance='light'] .tour-tooltip {
+    background: #ffffff;
+    /* Hard-coded fallback for light mode */
+    background: var(--bg-card);
 }
 
 @keyframes tooltipFadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(15px) scale(0.95);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
 .tour-tooltip h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.1rem;
+    margin: 0 0 12px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .tour-tooltip p {
-    margin: 0 0 20px 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
+    margin: 0 0 24px 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
     color: var(--text-primary);
+    opacity: 0.9;
 }
 
 .tour-footer {
