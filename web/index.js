@@ -22,8 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const completedSection = document.getElementById('completed-section');
-        if (completedSection && hideCompleted) {
-            completedSection.style.display = 'none';
+        const completedContainer = document.getElementById('completed-list-container');
+        if (hideCompleted) {
+            if (completedSection) completedSection.style.display = 'none';
+            if (completedContainer) completedContainer.style.display = 'none';
+        } else {
+            // Only show if there's actually data, refreshData handles this usually
+            // but we ensure it's not forced 'none' if we just toggled it off.
         }
 
         const sessionsBtn = document.getElementById('btn-sessions');
@@ -653,10 +658,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
 
-                // Hide completed section if no completed tasks match
+                // Hide completed section if no completed tasks match OR if hidden by settings
                 if (completedSection) {
-                    if (completedVisibleCount > 0) {
+                    const hideCompleted = window.ankiTaskBarSettings && window.ankiTaskBarSettings.hideCompleted;
+                    if (hideCompleted) {
+                        completedSection.style.display = 'none';
+                        if (completedContainer) completedContainer.style.display = 'none';
+                    } else if (completedVisibleCount > 0) {
                         completedSection.style.display = 'block';
+                        if (completedContainer) completedContainer.style.display = 'block';
                     } else if (term !== '') {
                         completedSection.style.display = 'none';
                     }

@@ -255,9 +255,9 @@
       "folder": "Evolution",
       "created_at_ms": 1766941324328,
       "updated_at_ms": 1766941324328,
-      "progress": 0.0,
+      "progress": 0.034,
       "total_cards": 118,
-      "done_cards": 0
+      "done_cards": 4
     },
     {
       "id": "1766941345759",
@@ -839,7 +839,7 @@
       "done_cards": 0
     }
   ],
-  "active_session_id": "1766941324328",
+  "active_session_id": "1766935815996",
   "folders": [
     "Genetics",
     "Applied",

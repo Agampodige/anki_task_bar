@@ -1,5 +1,5 @@
 {
-    "hideCompleted": false,
+    "hideCompleted": true,
     "enableSessions": true,
     "sessionsEnabled": true,
     "showStatsBar": true,
