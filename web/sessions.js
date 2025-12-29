@@ -251,9 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             card.innerHTML = `
                 <div class="card-header">
-                    <div class="card-icon">
-                        ${session.name ? session.name[0].toUpperCase() : 'S'}
-                    </div>
                      <button class="card-menu-btn" data-id="${session.id}">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
@@ -523,6 +520,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
         new QWebChannel(qt.webChannelTransport, (channel) => {
             window.py = channel.objects.py;
+
+            // Load and apply theme
+            if (window.py && typeof window.py.load_settings_from_file === 'function') {
+                window.py.load_settings_from_file((data) => {
+                    try {
+                        const cfg = data ? JSON.parse(data) : {};
+                        document.documentElement.setAttribute('data-theme', cfg.theme || 'green');
+                        document.documentElement.setAttribute('data-appearance', cfg.appearance || 'dark');
+                        if (cfg.zoomLevel) document.body.style.zoom = cfg.zoomLevel;
+                    } catch (e) { }
+                });
+            }
+
             refreshData();
         });
     } else {

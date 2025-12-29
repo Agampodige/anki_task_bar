@@ -16,8 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Apply Theme
                     const theme = cfg.theme || 'green';
+                    const appearance = cfg.appearance || 'dark';
                     const compactMode = !!cfg.compactMode;
                     document.documentElement.setAttribute('data-theme', theme);
+                    document.documentElement.setAttribute('data-appearance', appearance);
                     if (compactMode) document.body.classList.add('compact');
                     else document.body.classList.remove('compact');
 

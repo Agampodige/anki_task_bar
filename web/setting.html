@@ -92,6 +92,17 @@
         <hr class="divider">
         <h3 style="margin: 10px 0; font-size: 1rem; color: var(--text-secondary);">Appearance</h3>
 
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">White Theme</span>
+                <span class="setting-desc">Use a light background for the interface.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="appearanceToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
         <div class="setting-card" style="flex-direction: column; align-items: flex-start; gap: 10px;">
             <div class="setting-info">
                 <span class="setting-label">Accent Color</span>
@@ -154,7 +165,17 @@
             <div class="setting-label">Import Sessions</div>
             <span class="icon">↑</span>
         </button>
+
+        <hr class="divider">
+
+        <button type="button" id="start-tour" class="setting-card link-card"
+            style="border: 1px solid var(--accent-color);">
+            <div class="setting-label" style="color: var(--accent-color);">Quick Tour</div>
+            <span class="icon" style="color: var(--accent-color);">✨</span>
+        </button>
     </main>
+
+
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -167,8 +188,11 @@
             const sessionToggle = document.getElementById("sessionToggle");
             const sessionsEnabledToggle = document.getElementById("sessionsEnabledToggle");
             const showStatsBarToggle = document.getElementById("showStatsBarToggle");
+            const alwaysOnTopToggle = document.getElementById("alwaysOnTopToggle");
+            const startTourBtn = document.getElementById("start-tour");
             const hideSearchBarToggle = document.getElementById("hideSearchBarToggle");
             const compactModeToggle = document.getElementById("compactModeToggle");
+            const appearanceToggle = document.getElementById("appearanceToggle");
             const confettiToggle = document.getElementById("confettiToggle");
             const colorBtns = document.querySelectorAll('.color-btn');
 
@@ -209,6 +233,7 @@
                 compactMode: false,
                 confettiEnabled: true,
                 theme: 'green',
+                appearance: 'dark',
                 zoomLevel: 1.0
             };
 
@@ -230,6 +255,7 @@
                     compactMode: !!compactModeToggle?.checked,
                     confettiEnabled: !!confettiToggle?.checked,
                     theme: theme,
+                    appearance: appearanceToggle?.checked ? 'light' : 'dark',
                     zoomLevel: currentZoom
                 };
             }
@@ -240,6 +266,7 @@
 
                 // Apply immediate previews
                 document.documentElement.setAttribute('data-theme', settings.theme);
+                document.documentElement.setAttribute('data-appearance', settings.appearance);
                 document.body.style.zoom = settings.zoomLevel;
 
                 try {
@@ -271,6 +298,8 @@
                 if (hideSearchBarToggle) hideSearchBarToggle.checked = !!merged.hideSearchBar;
                 if (compactModeToggle) compactModeToggle.checked = !!merged.compactMode;
                 if (confettiToggle) confettiToggle.checked = !!merged.confettiEnabled;
+                if (alwaysOnTopToggle) alwaysOnTopToggle.checked = !!merged.alwaysOnTop;
+                if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
 
                 currentZoom = merged.zoomLevel !== undefined ? merged.zoomLevel : 1.0;
                 updateZoomDisplay();
@@ -286,6 +315,7 @@
 
                 // Apply theme/zoom to body for preview
                 document.documentElement.setAttribute('data-theme', merged.theme);
+                document.documentElement.setAttribute('data-appearance', merged.appearance);
                 document.body.style.zoom = currentZoom;
 
                 if (openSessionsBtn) {
@@ -321,7 +351,9 @@
                 showStatsBarToggle?.addEventListener("change", saveAllSettings);
                 hideSearchBarToggle?.addEventListener("change", saveAllSettings);
                 compactModeToggle?.addEventListener("change", saveAllSettings);
+                appearanceToggle?.addEventListener("change", saveAllSettings);
                 confettiToggle?.addEventListener("change", saveAllSettings);
+                alwaysOnTopToggle?.addEventListener("change", saveAllSettings);
 
                 // Zoom Handlers
                 zoomInBtn?.addEventListener('click', () => {
@@ -404,6 +436,11 @@
                             }
                         });
                     }
+                });
+
+                // Tour Logic - Redirect to home with startTour param
+                startTourBtn?.addEventListener('click', () => {
+                    window.location.href = 'index.html?startTour=true';
                 });
             }
 

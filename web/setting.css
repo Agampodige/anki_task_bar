@@ -136,27 +136,21 @@ button.setting-card {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
-    /* Removes the underline */
-    color: #555;
-    /* Neutral dark grey */
+    color: var(--text-secondary);
     font-size: 16px;
     font-weight: 500;
     padding: 8px 12px;
     border-radius: 8px;
     transition: all 0.3s ease;
-    /* Makes the hover effect smooth */
     background-color: transparent;
     margin-bottom: 20px;
 }
 
 /* Hover effect */
 .back-link:hover {
-    background-color: #e0e0e0;
-    /* Light grey background on hover */
-    color: #000;
-    /* Darker text */
+    background-color: var(--bg-hover);
+    color: var(--accent-color);
     transform: translateX(-3px);
-    /* Subtle nudge to the left */
 }
 
 /* Optional: Styling the arrow specifically */

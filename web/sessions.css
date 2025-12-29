@@ -52,16 +52,15 @@ body {
 .app-container {
     display: flex;
     height: 100vh;
-    background: rgba(30, 30, 30, 0.95);
-    color: #e0e0e0;
+    background: var(--bg-color);
+    color: var(--text-primary);
 }
 
 /* Sidebar */
 .sidebar {
     width: 200px;
-    /* Reduced from 250px */
-    background: rgba(25, 25, 25, 0.8);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     padding: 20px 12px;
@@ -81,17 +80,18 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: #aaaaaa;
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
-    transition: color 0.2s;
+    transition: all 0.2s;
     width: fit-content;
     cursor: pointer;
 }
 
 .back-link:hover {
-    color: #ffffff;
+    color: var(--accent-color);
+    transform: translateX(-3px);
 }
 
 .sidebar-header h2 {
@@ -99,11 +99,12 @@ body {
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.5px;
+    color: var(--text-primary);
 }
 
 .primary-btn {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
+    background: var(--accent-color);
+    color: var(--accent-text);
     border: none;
     padding: 10px 12px;
     border-radius: 8px;
@@ -142,7 +143,7 @@ body {
 
 .nav-label {
     font-size: 0.75rem;
-    color: #666;
+    color: var(--text-secondary);
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -180,7 +181,7 @@ body {
     padding: 8px 10px;
     border-radius: 6px;
     cursor: pointer;
-    color: #ccc;
+    color: var(--text-secondary);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -189,20 +190,20 @@ body {
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
+    background: var(--bg-hover);
+    color: var(--text-primary);
 }
 
 .nav-item.active {
-    background: rgba(76, 175, 80, 0.15);
-    color: #4CAF50;
+    background: var(--accent-soft);
+    color: var(--accent-color);
     font-weight: 600;
 }
 
 .nav-item-count {
     font-size: 0.75rem;
-    opacity: 0.6;
-    background: rgba(0, 0, 0, 0.2);
+    opacity: 0.8;
+    background: var(--bg-hover);
     padding: 1px 6px;
     border-radius: 10px;
 }
@@ -240,20 +241,22 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 200px;
+    color: var(--text-primary);
 }
 
 .count-badge {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     padding: 4px 10px;
     border-radius: 12px;
     font-size: 0.85rem;
-    color: #aaa;
+    color: var(--text-secondary);
 }
 
 .sessions-grid {
     display: grid;
     /* Adjusted for smaller screens: min-width 200px */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, 240px);
     gap: 16px;
     flex: 1;
     overflow-y: auto;
@@ -269,18 +272,18 @@ body {
 }
 
 .sessions-grid::-webkit-scrollbar-track {
-    background: #222;
+    background: var(--scrollbar-track);
 }
 
 .sessions-grid::-webkit-scrollbar-thumb {
-    background: #444;
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
 
 /* Session Cards */
 .session-card {
-    background: rgba(40, 40, 40, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 14px;
     position: relative;
@@ -293,29 +296,17 @@ body {
 
 .session-card:hover {
     transform: translateY(-4px);
-    background: rgba(50, 50, 50, 0.8);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-color);
 }
 
 .session-card.active-session {
-    border: 1px solid rgba(76, 175, 80, 0.5);
-    background: linear-gradient(145deg, rgba(40, 40, 40, 0.9), rgba(28, 56, 31, 0.4));
+    border: 2px solid var(--accent-color);
+    background: var(--accent-soft);
 }
 
-.card-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #4CAF50, #009688);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-}
+/* .card-icon removed */
 
 .card-header {
     display: flex;
@@ -326,7 +317,7 @@ body {
 .card-title {
     font-weight: 600;
     font-size: 1rem;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
@@ -336,7 +327,7 @@ body {
 
 .card-meta {
     font-size: 0.8rem;
-    color: #888;
+    color: var(--text-secondary);
 }
 
 .card-menu-btn {
@@ -349,8 +340,8 @@ body {
 }
 
 .card-menu-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--accent-soft);
+    color: var(--accent-color);
 }
 
 .card-footer {
@@ -359,12 +350,12 @@ body {
     align-items: center;
     margin-top: auto;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid var(--border-color);
 }
 
 .active-tag {
     font-size: 0.7rem;
-    color: #4CAF50;
+    color: var(--accent-color);
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -378,14 +369,14 @@ body {
     display: inline-block;
     width: 6px;
     height: 6px;
-    background: #4CAF50;
+    background: var(--accent-color);
     border-radius: 50%;
 }
 
 .play-btn {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #eee;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -394,19 +385,19 @@ body {
 }
 
 .play-btn:hover {
-    background: #4CAF50;
-    border-color: #4CAF50;
-    color: white;
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--accent-text);
 }
 
 /* Context Menu */
 .context-menu {
     position: fixed;
-    background: #2d2d2d;
-    border: 1px solid #444;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 4px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 5000;
     min-width: 150px;
 }
@@ -418,17 +409,17 @@ body {
 .menu-item {
     padding: 8px 12px;
     font-size: 0.9rem;
-    color: #e0e0e0;
+    color: var(--text-primary);
     cursor: pointer;
     border-radius: 4px;
 }
 
 .menu-item:hover {
-    background: #3d3d3d;
+    background: var(--bg-hover);
 }
 
 .menu-item.destructive {
-    color: #f44336;
+    color: var(--learn-color);
 }
 
 .menu-item.destructive:hover {
@@ -437,7 +428,7 @@ body {
 
 .menu-divider {
     height: 1px;
-    background: #444;
+    background: var(--border-color);
     margin: 4px 0;
 }
 
@@ -465,13 +456,13 @@ body {
 }
 
 .modal-card {
-    background: #252526;
+    background: var(--bg-card);
     padding: 24px;
     border-radius: 12px;
     width: 90%;
     max-width: 400px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
     transform: translateY(0);
     transition: transform 0.2s;
 }
@@ -495,17 +486,17 @@ body {
 .modal-input {
     width: 100%;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid #444;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    color: white;
+    color: var(--text-primary);
     font-size: 1rem;
     box-sizing: border-box;
 }
 
 .modal-input:focus {
-    outline: 1px solid #4CAF50;
-    border-color: #4CAF50;
+    outline: 1px solid var(--accent-color);
+    border-color: var(--accent-color);
 }
 
 .modal-footer {
@@ -525,30 +516,32 @@ body {
 }
 
 .btn.secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ddd;
+    background: var(--bg-hover);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 .btn.secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--accent-soft);
+    border-color: var(--accent-color);
 }
 
 .btn.primary {
-    background: #4CAF50;
-    color: white;
+    background: var(--accent-color);
+    color: var(--accent-text);
 }
 
 .btn.primary:hover {
-    background: #45a049;
+    background: var(--accent-hover);
 }
 
 /* Move Selection List */
 .folder-selection-list {
     max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-input);
     margin-top: 10px;
 }
 
@@ -558,12 +551,12 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #ccc;
+    color: var(--text-secondary);
 }
 
 .folder-select-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
+    background: var(--bg-hover);
+    color: var(--text-primary);
 }
 
 /* Toast */
@@ -572,14 +565,13 @@ body {
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
-    background: #333;
-    color: white;
+    background: var(--bg-card);
+    color: var(--text-primary);
     padding: 10px 20px;
     border-radius: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    font-size: 0.9rem;
+    border: 1px solid var(--border-color);
     z-index: 6000;
-    opacity: 1;
     transition: opacity 0.3s, transform 0.3s;
 }
 
@@ -590,7 +582,7 @@ body {
 }
 
 .toast.success {
-    border-bottom: 2px solid #4CAF50;
+    border-bottom: 2px solid var(--accent-color);
 }
 
 .toast.error {
@@ -666,7 +658,7 @@ body {
 
 .session-progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #4CAF50, #009688);
+    background: var(--accent-color);
     border-radius: 2px;
     transition: width 0.3s ease;
     min-height: 4px;
@@ -675,7 +667,7 @@ body {
 }
 
 .session-progress-container {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-hover);
     height: 4px;
     border-radius: 2px;
     width: 100%;

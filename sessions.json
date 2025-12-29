@@ -18,9 +18,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766935815996,
       "updated_at_ms": 1766935815996,
-      "progress": 1.0,
-      "total_cards": 63,
-      "done_cards": 63
+      "progress": 0.0,
+      "total_cards": 59,
+      "done_cards": 0
     },
     {
       "id": "1766936619253",
@@ -40,9 +40,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936619253,
       "updated_at_ms": 1766936619253,
-      "progress": 1.0,
-      "total_cards": 69,
-      "done_cards": 69
+      "progress": 0.0,
+      "total_cards": 24,
+      "done_cards": 0
     },
     {
       "id": "1766936663139",
@@ -62,9 +62,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936663140,
       "updated_at_ms": 1766936663140,
-      "progress": 1.0,
-      "total_cards": 62,
-      "done_cards": 62
+      "progress": 0.0,
+      "total_cards": 30,
+      "done_cards": 0
     },
     {
       "id": "1766936704084",
@@ -84,9 +84,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936704085,
       "updated_at_ms": 1766936704085,
-      "progress": 1.0,
-      "total_cards": 93,
-      "done_cards": 93
+      "progress": 0.0,
+      "total_cards": 27,
+      "done_cards": 0
     },
     {
       "id": "1766936733273",
@@ -101,9 +101,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936733274,
       "updated_at_ms": 1766936733274,
-      "progress": 1.0,
-      "total_cards": 42,
-      "done_cards": 42
+      "progress": 0.0,
+      "total_cards": 17,
+      "done_cards": 0
     },
     {
       "id": "1766941062595",
@@ -123,9 +123,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941062595,
       "updated_at_ms": 1766941062595,
-      "progress": 1.0,
-      "total_cards": 105,
-      "done_cards": 105
+      "progress": 0.0,
+      "total_cards": 44,
+      "done_cards": 0
     },
     {
       "id": "1766941099674",
@@ -145,9 +145,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941099674,
       "updated_at_ms": 1766941099674,
-      "progress": 1.0,
-      "total_cards": 83,
-      "done_cards": 83
+      "progress": 0.0,
+      "total_cards": 44,
+      "done_cards": 0
     },
     {
       "id": "1766941120372",
@@ -167,9 +167,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941120372,
       "updated_at_ms": 1766941120372,
-      "progress": 1.0,
-      "total_cards": 100,
-      "done_cards": 100
+      "progress": 0.0,
+      "total_cards": 45,
+      "done_cards": 0
     },
     {
       "id": "1766941141218",
@@ -189,9 +189,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941141218,
       "updated_at_ms": 1766941141218,
-      "progress": 1.0,
-      "total_cards": 108,
-      "done_cards": 108
+      "progress": 0.0,
+      "total_cards": 68,
+      "done_cards": 0
     },
     {
       "id": "1766941278153",
@@ -211,9 +211,9 @@
       "folder": "Evolution",
       "created_at_ms": 1766941278153,
       "updated_at_ms": 1766941278153,
-      "progress": 1.0,
-      "total_cards": 164,
-      "done_cards": 164
+      "progress": 0.0,
+      "total_cards": 76,
+      "done_cards": 0
     },
     {
       "id": "1766941301577",
@@ -233,9 +233,9 @@
       "folder": "Evolution",
       "created_at_ms": 1766941301578,
       "updated_at_ms": 1766941301578,
-      "progress": 1.0,
-      "total_cards": 108,
-      "done_cards": 108
+      "progress": 0.0,
+      "total_cards": 47,
+      "done_cards": 0
     },
     {
       "id": "1766941324328",
@@ -255,9 +255,9 @@
       "folder": "Evolution",
       "created_at_ms": 1766941324328,
       "updated_at_ms": 1766941324328,
-      "progress": 0.034,
-      "total_cards": 118,
-      "done_cards": 4
+      "progress": 0.0,
+      "total_cards": 132,
+      "done_cards": 0
     },
     {
       "id": "1766941345759",
@@ -278,7 +278,7 @@
       "created_at_ms": 1766941345760,
       "updated_at_ms": 1766941345760,
       "progress": 0.0,
-      "total_cards": 130,
+      "total_cards": 134,
       "done_cards": 0
     },
     {
@@ -297,7 +297,7 @@
       "created_at_ms": 1766941369672,
       "updated_at_ms": 1766941369672,
       "progress": 0.0,
-      "total_cards": 96,
+      "total_cards": 104,
       "done_cards": 0
     },
     {
@@ -425,7 +425,7 @@
       "created_at_ms": 1766941781718,
       "updated_at_ms": 1766941781718,
       "progress": 0.0,
-      "total_cards": 267,
+      "total_cards": 298,
       "done_cards": 0
     },
     {
@@ -447,7 +447,7 @@
       "created_at_ms": 1766941803205,
       "updated_at_ms": 1766941803205,
       "progress": 0.0,
-      "total_cards": 150,
+      "total_cards": 162,
       "done_cards": 0
     },
     {
@@ -551,9 +551,9 @@
       "folder": "C-paper-point",
       "created_at_ms": 1766942029453,
       "updated_at_ms": 1766942029453,
-      "progress": 1.0,
-      "total_cards": 308,
-      "done_cards": 308
+      "progress": 0.0,
+      "total_cards": 253,
+      "done_cards": 0
     },
     {
       "id": "1766942053251",
@@ -573,9 +573,9 @@
       "folder": "C-paper-point",
       "created_at_ms": 1766942053251,
       "updated_at_ms": 1766942053251,
-      "progress": 1.0,
-      "total_cards": 1113,
-      "done_cards": 1113
+      "progress": 0.0,
+      "total_cards": 773,
+      "done_cards": 0
     },
     {
       "id": "1766942076011",
@@ -592,9 +592,9 @@
       "folder": "C-paper-point",
       "created_at_ms": 1766942076012,
       "updated_at_ms": 1766942207603,
-      "progress": 1.0,
-      "total_cards": 518,
-      "done_cards": 518
+      "progress": 0.0,
+      "total_cards": 371,
+      "done_cards": 0
     },
     {
       "id": "1766942291735",
@@ -629,9 +629,9 @@
       "folder": "C-other",
       "created_at_ms": 1766942291735,
       "updated_at_ms": 1766942291735,
-      "progress": 1.0,
-      "total_cards": 320,
-      "done_cards": 320
+      "progress": 0.0,
+      "total_cards": 325,
+      "done_cards": 0
     },
     {
       "id": "1766942489465",
@@ -652,7 +652,7 @@
       "created_at_ms": 1766942489466,
       "updated_at_ms": 1766942489466,
       "progress": 0.0,
-      "total_cards": 1159,
+      "total_cards": 1162,
       "done_cards": 0
     },
     {
@@ -668,7 +668,7 @@
       "created_at_ms": 1766942505023,
       "updated_at_ms": 1766942505023,
       "progress": 0.0,
-      "total_cards": 363,
+      "total_cards": 372,
       "done_cards": 0
     },
     {
@@ -686,9 +686,9 @@
       "folder": "B-paper-point",
       "created_at_ms": 1766942655190,
       "updated_at_ms": 1766942655190,
-      "progress": 1.0,
-      "total_cards": 503,
-      "done_cards": 503
+      "progress": 0.0,
+      "total_cards": 411,
+      "done_cards": 0
     },
     {
       "id": "1766942859075",
@@ -705,9 +705,9 @@
       "folder": "B-others",
       "created_at_ms": 1766942859076,
       "updated_at_ms": 1766942859076,
-      "progress": 0.005,
-      "total_cards": 923,
-      "done_cards": 5
+      "progress": 0.0,
+      "total_cards": 1034,
+      "done_cards": 0
     },
     {
       "id": "1766943471659",
@@ -728,7 +728,7 @@
       "created_at_ms": 1766943471659,
       "updated_at_ms": 1766943471659,
       "progress": 0.0,
-      "total_cards": 361,
+      "total_cards": 417,
       "done_cards": 0
     },
     {
@@ -750,7 +750,7 @@
       "created_at_ms": 1766943526716,
       "updated_at_ms": 1766943526716,
       "progress": 0.0,
-      "total_cards": 741,
+      "total_cards": 744,
       "done_cards": 0
     },
     {
@@ -766,7 +766,7 @@
       "created_at_ms": 1766943564384,
       "updated_at_ms": 1766943564384,
       "progress": 0.0,
-      "total_cards": 139,
+      "total_cards": 140,
       "done_cards": 0
     },
     {

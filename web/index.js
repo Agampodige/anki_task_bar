@@ -5,9 +5,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const compactMode = !!cfg.compactMode;
         const hideSearchBar = !!cfg.hideSearchBar;
         const theme = cfg.theme || 'green';
+        const appearance = cfg.appearance || 'dark';
         const zoomLevel = cfg.zoomLevel !== undefined ? cfg.zoomLevel : 1.0;
 
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-appearance', appearance);
         document.body.style.zoom = zoomLevel;
 
         if (compactMode) {
@@ -32,9 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const sessionsBtn = document.getElementById('btn-sessions');
+        const manageBtn = document.getElementById('btn-manage');
         if (sessionsBtn) {
             const sessionsEnabled = cfg.sessionsEnabled !== false;
             sessionsBtn.style.display = sessionsEnabled ? 'flex' : 'none';
+            if (manageBtn) {
+                manageBtn.style.display = sessionsEnabled ? 'none' : 'flex';
+            }
         }
 
         // Apply statistics bar visibility setting
