@@ -659,6 +659,12 @@ class Bridge(QObject):
         # Trigger native window drag
         if self.parent() and self.parent().windowHandle():
             self.parent().windowHandle().startSystemMove()
+
+    @pyqtSlot(bool)
+    def set_always_on_top(self, enabled):
+        """Toggle always on top status via the parent window."""
+        if self.parent() and hasattr(self.parent(), 'set_always_on_top'):
+            self.parent().set_always_on_top(enabled)
     
     @pyqtSlot()
     def save_daily_snapshot(self):

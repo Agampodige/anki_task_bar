@@ -43,11 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Apply statistics bar visibility setting
         const statsBar = document.getElementById('selected-decks-stats');
         if (statsBar) {
             const showStatsBar = cfg.showStatsBar !== false; // Default to true
             statsBar.style.display = showStatsBar && window.selectedDecksStats && window.selectedDecksStats.totalDecks > 0 ? 'flex' : 'none';
+        }
+
+        if (window.py && typeof window.py.set_always_on_top === 'function') {
+            const alwaysOnTop = cfg.alwaysOnTop !== false; // Default to true
+            window.py.set_always_on_top(alwaysOnTop);
         }
 
         window.ankiTaskBarSettings = cfg;

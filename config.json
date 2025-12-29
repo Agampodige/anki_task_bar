@@ -1,12 +1,13 @@
 {
     "hideCompleted": false,
     "enableSessions": true,
-    "sessionsEnabled": false,
+    "sessionsEnabled": true,
     "showStatsBar": true,
     "hideSearchBar": true,
     "compactMode": true,
     "confettiEnabled": false,
+    "alwaysOnTop": false,
     "theme": "green",
-    "appearance": "light",
+    "appearance": "dark",
     "zoomLevel": 1
 }

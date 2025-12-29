@@ -101,6 +101,21 @@ class Taskbar(QWidget):
         self._dragging = False
         self._drag_start_pos = QPoint()
 
+    def set_always_on_top(self, enabled: bool):
+        """Update window flags to toggle always on top status."""
+        flags = self.windowFlags()
+        if enabled:
+            flags |= Qt.WindowType.WindowStaysOnTopHint
+        else:
+            flags &= ~Qt.WindowType.WindowStaysOnTopHint
+        
+        # We must re-enable FramelessWindowHint and Tool as well since flag replacement can reset them
+        flags |= Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
+        
+        self.setWindowFlags(flags)
+        self.show() # Necessary to make the window reappear with new flags
+
+
     # -----------------------------
     # Drag Handling
     # -----------------------------
