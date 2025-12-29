@@ -145,9 +145,14 @@
             <span class="icon">›</span>
         </button>
 
-        <button type="button" id="open-sessions-page" class="setting-card link-card" style="display: none;">
-            <div class="setting-label">Manage Sessions</div>
-            <span class="icon">›</span>
+        <button type="button" id="export-sessions" class="setting-card link-card">
+            <div class="setting-label">Export Sessions</div>
+            <span class="icon">↓</span>
+        </button>
+
+        <button type="button" id="import-sessions" class="setting-card link-card">
+            <div class="setting-label">Import Sessions</div>
+            <span class="icon">↑</span>
         </button>
     </main>
 
@@ -173,6 +178,8 @@
             const openProjectBtn = document.getElementById("open-project-page");
             const openHelpBtn = document.getElementById("open-help-page");
             const openSessionsBtn = document.getElementById("open-sessions-page");
+            const exportSessionsBtn = document.getElementById("export-sessions");
+            const importSessionsBtn = document.getElementById("import-sessions");
 
             let currentSettings = {};
 
@@ -358,6 +365,40 @@
 
                 openSessionsBtn?.addEventListener('click', () => {
                     window.location.href = 'sessions.html';
+                });
+
+                exportSessionsBtn?.addEventListener('click', () => {
+                    if (window.py && typeof window.py.export_sessions === 'function') {
+                        window.py.export_sessions((res) => {
+                            try {
+                                const data = JSON.parse(res);
+                                if (data.ok) {
+                                    setStatus('Exported to ' + data.path.split(/[\\/]/).pop(), 'ok');
+                                } else if (data.error !== 'cancelled') {
+                                    setStatus('Export failed', 'error');
+                                }
+                            } catch (e) {
+                                console.error('Export error:', e);
+                            }
+                        });
+                    }
+                });
+
+                importSessionsBtn?.addEventListener('click', () => {
+                    if (window.py && typeof window.py.import_sessions === 'function') {
+                        window.py.import_sessions((res) => {
+                            try {
+                                const data = JSON.parse(res);
+                                if (data.ok) {
+                                    setStatus('Imported successfully', 'ok');
+                                } else if (data.error !== 'cancelled') {
+                                    setStatus('Import failed: ' + data.error, 'error');
+                                }
+                            } catch (e) {
+                                console.error('Import error:', e);
+                            }
+                        });
+                    }
                 });
             }
 

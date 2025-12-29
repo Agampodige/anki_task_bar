@@ -1,5 +1,5 @@
 
-from aqt.qt import QObject, pyqtSlot
+from aqt.qt import QObject, pyqtSlot, QFileDialog
 from aqt import mw
 import json
 import traceback
@@ -772,6 +772,51 @@ class Bridge(QObject):
             return json.dumps({"ok": True, "path": str(output_path)})
         except Exception as e:
             print(f"Error exporting CSV: {e}")
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(result=str)
+    def export_sessions(self):
+        try:
+            filename, _ = QFileDialog.getSaveFileName(
+                mw, 
+                "Export Sessions", 
+                "anki_task_sessions.json", 
+                "JSON Files (*.json)"
+            )
+            if not filename:
+                return json.dumps({"ok": False, "error": "cancelled"})
+
+            data = self._read_sessions()
+            Path(filename).write_text(json.dumps(data, indent=2), encoding="utf-8")
+            return json.dumps({"ok": True, "path": filename})
+        except Exception as e:
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(result=str)
+    def import_sessions(self):
+        try:
+            filename, _ = QFileDialog.getOpenFileName(
+                mw, 
+                "Import Sessions", 
+                "", 
+                "JSON Files (*.json)"
+            )
+            if not filename:
+                return json.dumps({"ok": False, "error": "cancelled"})
+
+            raw = Path(filename).read_text(encoding="utf-8")
+            data = json.loads(raw)
+
+            # Basic validation
+            if not isinstance(data, dict) or "sessions" not in data:
+                return json.dumps({"ok": False, "error": "Invalid sessions file"})
+
+            # Merge or replace? Overwrite is simpler and usually what's expected for 'Import'
+            self._write_sessions(data)
+            return json.dumps({"ok": True})
+        except Exception as e:
             traceback.print_exc()
             return json.dumps({"ok": False, "error": str(e)})
 
