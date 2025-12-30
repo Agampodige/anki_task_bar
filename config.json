@@ -2,15 +2,15 @@
     "hideCompleted": false,
     "enableSessions": true,
     "sessionsEnabled": true,
-    "showStatsBar": false,
+    "showStatsBar": true,
     "hideSearchBar": false,
     "compactMode": true,
     "confettiEnabled": false,
     "alwaysOnTop": false,
     "theme": "green",
-    "appearance": "light",
+    "appearance": "dark",
     "zoomLevel": 1,
     "movable": true,
     "resizable": true,
-    "hideCompletedSessions": true
+    "hideCompletedSessions": false
 }

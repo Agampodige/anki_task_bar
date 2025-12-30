@@ -718,4 +718,23 @@ document.addEventListener('DOMContentLoaded', () => {
             emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
         }
     }
+
+    // Window Dragging logic
+    document.addEventListener('mousedown', (e) => {
+        // Only allow dragging from the page header or window title bar
+        const header = e.target.closest('.page-header');
+        const titleBar = e.target.closest('.window-title-bar');
+        if (!header && !titleBar) return;
+
+        // Don't drag if clicking on buttons or links
+        if (e.target.closest('button') ||
+            e.target.closest('a') ||
+            e.target.closest('input')) {
+            return;
+        }
+
+        if (window.py && typeof window.py.drag_window === 'function') {
+            window.py.drag_window();
+        }
+    });
 });
