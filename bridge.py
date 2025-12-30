@@ -666,6 +666,16 @@ class Bridge(QObject):
             self.parent().hide()
 
     @pyqtSlot()
+    def minimize_window(self):
+        if self.parent():
+            self.parent().showMinimized()
+
+    @pyqtSlot()
+    def toggle_expand(self):
+        if self.parent() and hasattr(self.parent(), 'toggle_expand'):
+            self.parent().toggle_expand()
+
+    @pyqtSlot()
     def drag_window(self):
         # Trigger native window drag
         if self.parent() and self.parent().windowHandle():

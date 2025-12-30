@@ -100,6 +100,8 @@ class Taskbar(QWidget):
         # Dragging state
         self._dragging = False
         self._drag_start_pos = QPoint()
+        self._expanded = False
+        self._normal_size = self.size()
 
     def set_always_on_top(self, enabled: bool):
         """Update window flags to toggle always on top status."""
@@ -114,6 +116,16 @@ class Taskbar(QWidget):
         
         self.setWindowFlags(flags)
         self.show() # Necessary to make the window reappear with new flags
+
+    def toggle_expand(self):
+        """Toggle between normal and expanded size."""
+        if not self._expanded:
+            self._normal_size = self.size()
+            self.resize(800, 800)
+            self._expanded = True
+        else:
+            self.resize(self._normal_size)
+            self._expanded = False
 
 
     # -----------------------------

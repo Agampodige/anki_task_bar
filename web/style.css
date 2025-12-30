@@ -152,6 +152,70 @@ body {
     /* Context for absolute positioning if needed */
 }
 
+/* --- Window Title Bar --- */
+.window-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 4px 0 12px;
+    -webkit-app-region: drag;
+    user-select: none;
+    flex-shrink: 0;
+    margin: -20px -20px 10px -20px;
+    border-radius: 0;
+}
+
+.window-title-bar.hidden {
+    display: none;
+}
+
+.drag-region {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.window-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.window-controls {
+    display: flex;
+    gap: 2px;
+    -webkit-app-region: no-drag;
+}
+
+.win-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.win-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.win-btn.close-btn:hover {
+    background: #e81123;
+    color: white;
+}
+
 /* --- Global Progress Bar --- */
 #global-progress-bar {
     position: fixed;
@@ -708,6 +772,11 @@ mark.highlight {
     color: inherit;
     border-radius: 2px;
     padding: 0 2px;
+}
+
+.review-count {
+    color: var(--accent-color);
+    font-weight: 700;
 }
 
 .empty-state {

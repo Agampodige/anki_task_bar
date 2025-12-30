@@ -12,6 +12,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.documentElement.setAttribute('data-appearance', appearance);
         document.body.style.zoom = zoomLevel;
 
+        const titleBar = document.getElementById('window-title-bar');
+        if (titleBar) {
+            const showTitleBar = cfg.showTitleBar !== false;
+            if (showTitleBar) {
+                titleBar.classList.remove('hidden');
+            } else {
+                titleBar.classList.add('hidden');
+            }
+        }
+
         if (compactMode) {
             document.body.classList.add('compact');
         } else {
@@ -180,7 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const timeEl = document.getElementById('stats-estimated-time');
 
             if (deckCountEl) deckCountEl.textContent = `${stats.totalDecks}`;
-            if (cardsFormatEl) cardsFormatEl.textContent = `${stats.completedCards} / ${stats.totalCards}`;
+
+            // Prioritize: Pending / Done / Total
+            const pending = stats.totalCards - stats.completedCards;
+            if (cardsFormatEl) cardsFormatEl.textContent = `${pending} / ${stats.completedCards} / ${stats.totalCards}`;
 
             if (timeEl) {
                 if (stats.finishTimeStr) {
@@ -378,7 +391,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (task) {
                         const total = task.dueStart;
                         const done = task.done;
-                        counts.innerHTML = `<span class="highlight">${done}</span><span class="separator"> / </span>${total}`;
+                        const pending = task.dueNow;
+                        counts.innerHTML = `<span class="highlight review-count">${pending}</span><span class="separator"> / </span>${done}<span class="separator"> / </span>${total}`;
                     } else {
                         counts.textContent = '';
                     }
@@ -566,6 +580,35 @@ document.addEventListener("DOMContentLoaded", () => {
             window.refreshData();
         });
     });
+
+    // Window Control Handlers
+    const winMin = document.getElementById('win-min');
+    const winExpand = document.getElementById('win-expand');
+    const winClose = document.getElementById('win-close');
+
+    if (winMin) {
+        winMin.addEventListener('click', () => {
+            if (window.py && typeof window.py.minimize_window === 'function') {
+                window.py.minimize_window();
+            }
+        });
+    }
+
+    if (winExpand) {
+        winExpand.addEventListener('click', () => {
+            if (window.py && typeof window.py.toggle_expand === 'function') {
+                window.py.toggle_expand();
+            }
+        });
+    }
+
+    if (winClose) {
+        winClose.addEventListener('click', () => {
+            if (window.py && typeof window.py.close_window === 'function') {
+                window.py.close_window();
+            }
+        });
+    }
 
     // Grind Button
     const grindBtn = document.getElementById('grind-btn');

@@ -20,6 +20,28 @@
     </div>
 
     <main id="settings-main" class="settings-container">
+        <div class="setting-card" style="border: 1px solid var(--accent-color);">
+            <div class="setting-info">
+                <span class="setting-label" style="color: var(--accent-color);">Enable Taskbar (Main)</span>
+                <span class="setting-desc">General switch to enable or disable the taskbar widget.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="taskbarEnabledToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Show Window Title Bar</span>
+                <span class="setting-desc">Show the top bar with close/minimize/expand buttons.</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="showTitleBarToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
         <div class="setting-card">
             <div class="setting-info">
                 <span class="setting-label">Hide Completed Decks</span>
@@ -205,6 +227,8 @@
             const compactModeToggle = document.getElementById("compactModeToggle");
             const appearanceToggle = document.getElementById("appearanceToggle");
             const confettiToggle = document.getElementById("confettiToggle");
+            const taskbarEnabledToggle = document.getElementById("taskbarEnabledToggle");
+            const showTitleBarToggle = document.getElementById("showTitleBarToggle");
             const colorBtns = document.querySelectorAll('.color-btn');
 
             // Zoom controls
@@ -246,7 +270,9 @@
                 alwaysOnTop: true,
                 theme: 'green',
                 appearance: 'dark',
-                zoomLevel: 1.0
+                zoomLevel: 1.0,
+                taskbarEnabled: true,
+                showTitleBar: true
             };
 
             function updateZoomDisplay() {
@@ -269,7 +295,9 @@
                     alwaysOnTop: !!alwaysOnTopToggle?.checked,
                     theme: theme,
                     appearance: appearanceToggle?.checked ? 'light' : 'dark',
-                    zoomLevel: currentZoom
+                    zoomLevel: currentZoom,
+                    taskbarEnabled: !!taskbarEnabledToggle?.checked,
+                    showTitleBar: !!showTitleBarToggle?.checked
                 };
             }
 
@@ -317,6 +345,8 @@
                 if (confettiToggle) confettiToggle.checked = !!merged.confettiEnabled;
                 if (alwaysOnTopToggle) alwaysOnTopToggle.checked = !!merged.alwaysOnTop;
                 if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
+                if (taskbarEnabledToggle) taskbarEnabledToggle.checked = merged.taskbarEnabled !== false;
+                if (showTitleBarToggle) showTitleBarToggle.checked = merged.showTitleBar !== false;
 
                 currentZoom = merged.zoomLevel !== undefined ? merged.zoomLevel : 1.0;
                 updateZoomDisplay();
@@ -370,6 +400,8 @@
                 compactModeToggle?.addEventListener("change", saveAllSettings);
                 appearanceToggle?.addEventListener("change", saveAllSettings);
                 confettiToggle?.addEventListener("change", saveAllSettings);
+                taskbarEnabledToggle?.addEventListener("change", saveAllSettings);
+                showTitleBarToggle?.addEventListener("change", saveAllSettings);
                 alwaysOnTopToggle?.addEventListener("change", saveAllSettings);
 
                 // Zoom Handlers

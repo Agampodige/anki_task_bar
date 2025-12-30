@@ -6,7 +6,7 @@
     "hideSearchBar": true,
     "compactMode": true,
     "confettiEnabled": false,
-    "alwaysOnTop": false,
+    "alwaysOnTop": true,
     "theme": "green",
     "appearance": "dark",
     "zoomLevel": 1

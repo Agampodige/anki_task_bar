@@ -12,8 +12,26 @@ mw.taskbar_widget = None
 mw.taskbar_devtools = None
 
 
+import json
+from pathlib import Path
+
+def is_taskbar_enabled():
+    try:
+        addon_dir = Path(__file__).parent
+        config_path = addon_dir / "config.json"
+        if not config_path.exists():
+            return True
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+        return config.get("taskbarEnabled", True)
+    except:
+        return True
+
 def toggle_taskbar():
     print("Toggle Taskbar Triggered!")
+    
+    if not is_taskbar_enabled():
+        print("Taskbar is disabled in settings.")
+        return
 
     if mw.taskbar_widget is None:
         mw.taskbar_widget = Taskbar()
