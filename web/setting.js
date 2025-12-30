@@ -14,7 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const compactModeToggle = document.getElementById("compactModeToggle");
     const appearanceToggle = document.getElementById("appearanceToggle");
     const confettiToggle = document.getElementById("confettiToggle");
+    const hideCompletedSessionsToggle = document.getElementById("hideCompletedSessionsToggle");
     const movableToggle = document.getElementById("movableToggle");
+    const resizableToggle = document.getElementById("resizableToggle");
     const colorBtns = document.querySelectorAll('.color-btn');
 
     // Zoom controls
@@ -55,7 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
         theme: 'green',
         appearance: 'dark',
         zoomLevel: 1.0,
-        movable: true
+        movable: true,
+        resizable: true,
+        hideCompletedSessions: false
     };
 
     function updateZoomDisplay() {
@@ -78,7 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
             theme: theme,
             appearance: appearanceToggle?.checked ? 'light' : 'dark',
             zoomLevel: currentZoom,
-            movable: !!movableToggle?.checked
+            movable: !!movableToggle?.checked,
+            resizable: !!resizableToggle?.checked,
+            hideCompletedSessions: !!hideCompletedSessionsToggle?.checked
         };
     }
 
@@ -121,6 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (alwaysOnTopToggle) alwaysOnTopToggle.checked = !!merged.alwaysOnTop;
         if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
         if (movableToggle) movableToggle.checked = merged.movable !== false;
+        if (resizableToggle) resizableToggle.checked = merged.resizable !== false;
+        if (hideCompletedSessionsToggle) hideCompletedSessionsToggle.checked = !!merged.hideCompletedSessions;
 
         document.body.classList.toggle('locked', merged.movable === false);
 
@@ -156,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function bindUI() {
         const toggles = [hideToggle, sessionToggle, sessionsEnabledToggle, showStatsBarToggle,
             hideSearchBarToggle, compactModeToggle, appearanceToggle, confettiToggle,
-            movableToggle, alwaysOnTopToggle];
+            movableToggle, resizableToggle, hideCompletedSessionsToggle, alwaysOnTopToggle];
         toggles.forEach(t => t?.addEventListener("change", saveAllSettings));
 
         zoomInBtn?.addEventListener('click', () => {

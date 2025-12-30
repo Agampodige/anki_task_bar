@@ -8,7 +8,9 @@
     "confettiEnabled": false,
     "alwaysOnTop": false,
     "theme": "green",
-    "appearance": "dark",
+    "appearance": "light",
     "zoomLevel": 1,
-    "movable": true
+    "movable": true,
+    "resizable": true,
+    "hideCompletedSessions": true
 }

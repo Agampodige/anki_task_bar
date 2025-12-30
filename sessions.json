@@ -40,9 +40,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936619253,
       "updated_at_ms": 1766936619253,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 24,
-      "done_cards": 0
+      "done_cards": 24
     },
     {
       "id": "1766936663139",
@@ -62,9 +62,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936663140,
       "updated_at_ms": 1766936663140,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 30,
-      "done_cards": 0
+      "done_cards": 30
     },
     {
       "id": "1766936704084",
@@ -84,9 +84,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936704085,
       "updated_at_ms": 1766936704085,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 27,
-      "done_cards": 0
+      "done_cards": 27
     },
     {
       "id": "1766936733273",
@@ -101,9 +101,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936733274,
       "updated_at_ms": 1766936733274,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 17,
-      "done_cards": 0
+      "done_cards": 17
     },
     {
       "id": "1766941062595",
@@ -839,7 +839,7 @@
       "done_cards": 0
     }
   ],
-  "active_session_id": "1766936619253",
+  "active_session_id": "1766941062595",
   "folders": [
     "Genetics",
     "Applied",

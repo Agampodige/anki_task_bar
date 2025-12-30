@@ -48,7 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const statsBar = document.getElementById('selected-decks-stats');
         if (statsBar) {
             const showStatsBar = cfg.showStatsBar !== false; // Default to true
-            statsBar.style.display = showStatsBar && window.selectedDecksStats && window.selectedDecksStats.totalDecks > 0 ? 'flex' : 'none';
+            const hasDecks = window.selectedDecksStats && window.selectedDecksStats.totalDecks > 0;
+            statsBar.style.display = showStatsBar && hasDecks ? 'flex' : 'none';
         }
 
         if (window.py && typeof window.py.set_always_on_top === 'function') {
@@ -385,12 +386,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     deckName.textContent = displayName(node.name);
 
                     const counts = document.createElement('span');
-                    counts.className = 'task-counts';
+                    counts.className = 'counts';
                     if (task) {
-                        const total = task.dueStart;
-                        const done = task.done;
-                        const pending = task.dueNow;
-                        counts.innerHTML = `<span class="highlight review-count">${pending}</span><span class="separator"> / </span>${done}<span class="separator"> / </span>${total}`;
+                        counts.textContent = task.dueStart;
                     } else {
                         counts.textContent = '';
                     }
@@ -468,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     deckName.textContent = task.name;
 
                     const counts = document.createElement('span');
-                    counts.className = 'task-counts status-completed';
+                    counts.className = 'counts status-completed';
                     counts.textContent = "Completed";
 
                     content.appendChild(deckName);

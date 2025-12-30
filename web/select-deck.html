@@ -50,7 +50,13 @@
                 </a>
                 <h1>Select Decks</h1>
             </div>
-            <button id="save-selection-btn" class="btn">Save</button>
+            <button id="save-selection-btn" class="btn primary-action">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                    <path
+                        d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
+                </svg>
+                <span>Save Selection</span>
+            </button>
         </div>
 
 
@@ -71,23 +77,45 @@
             <span id="selection-count">0 decks selected</span>
         </div>
 
-        <div class="session-create-row" style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
-            <input type="text" id="new-session-name" class="search-input" placeholder="New session name"
-                autocomplete="off" style="flex: 1;" />
-            <button id="create-session-btn" class="btn">Create Session</button>
+        <div class="session-create-row">
+            <div class="input-with-action">
+                <input type="text" id="new-session-name" class="search-input" placeholder="New session name"
+                    autocomplete="off" />
+                <button id="create-session-btn" class="btn primary-action">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                    <span>Create Session</span>
+                </button>
+            </div>
             <div id="session-create-status" class="settings-status" aria-live="polite" style="display: none;"></div>
         </div>
 
-        <div class="toolbar glass"
-            style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: 10px; border-radius: 12px;">
-            <div class="btn-group" style="display: flex; gap: 4px;">
-                <button id="btn-all" class="btn small" title="Select All">All</button>
-                <button id="btn-none" class="btn small" title="Deselect All">None</button>
-                <button id="btn-invert" class="btn small" title="Invert Selection">Invert</button>
+        <div class="toolbar glass">
+            <div class="toolbar-group">
+                <div class="group-label">Selection</div>
+                <div class="btn-group">
+                    <button id="btn-all" class="btn small" title="Select All">All</button>
+                    <button id="btn-none" class="btn small" title="Deselect All">None</button>
+                    <button id="btn-invert" class="btn small" title="Invert Selection">Invert</button>
+                </div>
             </div>
-            <div class="btn-group" style="display: flex; gap: 4px;">
-                <button id="btn-expand-all" class="btn small secondary" title="Expand All Tree">Expand</button>
-                <button id="btn-collapse-all" class="btn small secondary" title="Collapse All Tree">Collapse</button>
+            <div class="toolbar-group">
+                <div class="group-label">Tree</div>
+                <div class="btn-group">
+                    <button id="btn-expand-all" class="btn small secondary" title="Expand All Tree">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
+                        </svg>
+                        <span>Expand</span>
+                    </button>
+                    <button id="btn-collapse-all" class="btn small secondary" title="Collapse All Tree">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                            <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z" />
+                        </svg>
+                        <span>Collapse</span>
+                    </button>
+                </div>
             </div>
         </div>
 

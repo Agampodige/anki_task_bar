@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         folders: [],
         activeSessionId: null,
         currentView: 'all', // 'all', 'uncategorized', or specific folder name
-        contextMenuTargetId: null // ID of session right-clicked
+        contextMenuTargetId: null, // ID of session right-clicked
+        settings: {}
     };
 
     // --- Timers ---
@@ -190,6 +191,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             filtered = appState.sessions.filter(s => s.folder === appState.currentView);
             if (currentViewTitleEl) currentViewTitleEl.textContent = appState.currentView;
+        }
+
+        // Final filter: Hide Completed Sessions if setting enabled
+        const hideCompleted = appState.settings && appState.settings.hideCompletedSessions === true;
+        if (hideCompleted) {
+            filtered = filtered.filter(s => {
+                const progress = s.progress || 0;
+                const done_cards = s.done_cards || 0;
+                const total_cards = s.total_cards || 0;
+
+                // If it has card counts, use them for accuracy
+                if (total_cards > 0) return done_cards < total_cards;
+                // Fallback to progress float
+                return progress < 0.999;
+            });
         }
 
         if (sessionCountBadgeEl) sessionCountBadgeEl.textContent = filtered.length;
@@ -524,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.py.load_settings_from_file((data) => {
                     try {
                         const cfg = data ? JSON.parse(data) : {};
+                        appState.settings = cfg; // Save to state
                         document.documentElement.setAttribute('data-theme', cfg.theme || 'green');
                         document.documentElement.setAttribute('data-appearance', cfg.appearance || 'dark');
                         if (cfg.zoomLevel) document.body.style.zoom = cfg.zoomLevel;

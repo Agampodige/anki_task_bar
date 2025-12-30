@@ -148,6 +148,11 @@ class Taskbar(QWidget):
                 if self._resizing:
                     self.mouseMoveEvent(event)
                     return True
+                
+                # Check for resize edges even if not current resizing to show correct cursor
+                pos = self.mapFromGlobal(event.globalPosition().toPoint())
+                edge = self._get_edge(pos)
+                self._update_cursor(edge)
             elif event.type() == QEvent.Type.MouseButtonPress:
                 pos = self.mapFromGlobal(event.globalPosition().toPoint())
                 edge = self._get_edge(pos)
@@ -199,6 +204,12 @@ class Taskbar(QWidget):
         edge = self._get_edge(pos)
         
         if edge:
+            # Use native resize if possible
+            if self.windowHandle() and hasattr(self.windowHandle(), "startSystemResize"):
+                self.windowHandle().startSystemResize(edge)
+                event.accept()
+                return
+            
             self._resizing = True
             self._resize_edge = edge
             self._drag_start_pos = event.globalPosition().toPoint()
@@ -208,11 +219,16 @@ class Taskbar(QWidget):
 
         # Only allow dragging if movable is enabled in settings
         movable = True
+        resizable = True
         try:
-            cfg = self.bridge._load_settings()
+            cfg = self.bridge._read_settings()
             movable = cfg.get("movable", True)
+            resizable = cfg.get("resizable", True)
         except:
             pass
+
+        if edge and not resizable:
+            return
 
         if not movable:
             return
@@ -227,6 +243,7 @@ class Taskbar(QWidget):
         global_pos = event.globalPosition().toPoint()
 
         if self._resizing:
+            # Re-check resizable setting during move if needed, but usually once started it's fine
             rect = self._start_geometry
             diff = global_pos - self._drag_start_pos
             
