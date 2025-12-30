@@ -64,6 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
             window.py.set_always_on_top(alwaysOnTop);
         }
 
+        const isMovable = cfg.movable !== false;
+        if (isMovable) {
+            document.body.classList.remove('locked');
+        } else {
+            document.body.classList.add('locked');
+        }
+
         window.ankiTaskBarSettings = cfg;
     }
 
@@ -191,9 +198,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (deckCountEl) deckCountEl.textContent = `${stats.totalDecks}`;
 
-            // Prioritize: Pending / Done / Total
-            const pending = stats.totalCards - stats.completedCards;
-            if (cardsFormatEl) cardsFormatEl.textContent = `${pending} / ${stats.completedCards} / ${stats.totalCards}`;
+            // Format: Total / Completed
+            if (cardsFormatEl) cardsFormatEl.textContent = `${stats.totalCards} / ${stats.completedCards}`;
 
             if (timeEl) {
                 if (stats.finishTimeStr) {
@@ -631,7 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const countDisplay = document.getElementById('total-done-count');
         const titleEl = document.getElementById('stats-title');
 
-        let statsMode = 0; // 0 = cards, 1 = reviews
+        let statsMode = 1; // Default to 1 (reviews) instead of 0 (cards)
 
         const renderStats = () => {
             const totals = window._todayTotals || { total_cards: 0, total_reviews: 0 };
@@ -796,11 +802,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Window Dragging logic - Only from header
     document.addEventListener('mousedown', (e) => {
-        // Only allow dragging from the page header
-        const header = e.target.closest('.page-header');
-        if (!header) return;
+        // Check if movable
+        const isMovable = window.ankiTaskBarSettings ? window.ankiTaskBarSettings.movable !== false : true;
+        if (!isMovable) return;
 
-        // Don't drag if clicking on buttons or links in the header
+        // Only allow dragging from the page header or window title bar
+        const header = e.target.closest('.page-header');
+        const titleBar = e.target.closest('.window-title-bar');
+        if (!header && !titleBar) return;
+
+        // Don't drag if clicking on buttons or links
         if (e.target.closest('button') ||
             e.target.closest('a') ||
             e.target.closest('input')) {

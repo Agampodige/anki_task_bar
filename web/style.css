@@ -168,6 +168,10 @@ body {
     border-radius: 0;
 }
 
+body.locked .window-title-bar {
+    -webkit-app-region: no-drag;
+}
+
 .window-title-bar.hidden {
     display: none;
 }

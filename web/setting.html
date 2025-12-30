@@ -20,13 +20,15 @@
     </div>
 
     <main id="settings-main" class="settings-container">
-        <div class="setting-card" style="border: 1px solid var(--accent-color);">
+        <!-- Window & Behavior -->
+        <h3 class="section-title">Window & Behavior</h3>
+        <div class="setting-card">
             <div class="setting-info">
-                <span class="setting-label" style="color: var(--accent-color);">Enable Taskbar (Main)</span>
-                <span class="setting-desc">General switch to enable or disable the taskbar widget.</span>
+                <span class="setting-label">Movable</span>
+                <span class="setting-desc">Allow moving the taskbar by dragging.</span>
             </div>
             <label class="switch">
-                <input type="checkbox" id="taskbarEnabledToggle">
+                <input type="checkbox" id="movableToggle">
                 <span class="slider"></span>
             </label>
         </div>
@@ -44,11 +46,11 @@
 
         <div class="setting-card">
             <div class="setting-info">
-                <span class="setting-label">Hide Completed Decks</span>
-                <span class="setting-desc">Hide the completed section on the home page.</span>
+                <span class="setting-label">Always on Top</span>
+                <span class="setting-desc">Keep the widget visible above other windows.</span>
             </div>
             <label class="switch">
-                <input type="checkbox" id="hideDecksToggle">
+                <input type="checkbox" id="alwaysOnTopToggle">
                 <span class="slider"></span>
             </label>
         </div>
@@ -56,7 +58,7 @@
         <div class="setting-card">
             <div class="setting-info">
                 <span class="setting-label">Auto Hide on Review</span>
-                <span class="setting-desc">Automatically hide the widget when you start reviewing a deck.</span>
+                <span class="setting-desc">Automatically hide the widget when you start reviewing.</span>
             </div>
             <label class="switch">
                 <input type="checkbox" id="sessionToggle">
@@ -64,21 +66,12 @@
             </label>
         </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Enable Sessions</span>
-                <span class="setting-desc">Create and activate saved groups of decks.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="sessionsEnabledToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-
+        <!-- Dashboard & Content -->
+        <h3 class="section-title">Dashboard & Content</h3>
         <div class="setting-card">
             <div class="setting-info">
                 <span class="setting-label">Show Statistics Bar</span>
-                <span class="setting-desc">Display selected decks statistics at the top of the home page.</span>
+                <span class="setting-desc">Display deck statistics at the top of the home page.</span>
             </div>
             <label class="switch">
                 <input type="checkbox" id="showStatsBarToggle">
@@ -99,32 +92,28 @@
 
         <div class="setting-card">
             <div class="setting-info">
-                <span class="setting-label">Always on Top</span>
-                <span class="setting-desc">Keep the widget visible above other windows.</span>
+                <span class="setting-label">Hide Completed Decks</span>
+                <span class="setting-desc">Hide the completed section on the home page.</span>
             </div>
             <label class="switch">
-                <input type="checkbox" id="alwaysOnTopToggle">
+                <input type="checkbox" id="hideDecksToggle">
                 <span class="slider"></span>
             </label>
         </div>
 
         <div class="setting-card">
             <div class="setting-info">
-                <span class="setting-label">Zoom Level</span>
-                <span class="setting-desc">Adjust interface size. (Ctrl+Scroll disabled)</span>
+                <span class="setting-label">Enable Sessions</span>
+                <span class="setting-desc">Create and activate saved groups of decks.</span>
             </div>
-            <div class="zoom-controls" style="display: flex; align-items: center; gap: 10px;">
-                <button id="zoom-out" class="icon-btn-tiny"
-                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">-</button>
-                <span id="zoom-value" style="font-weight: bold; min-width: 40px; text-align: center;">100%</span>
-                <button id="zoom-in" class="icon-btn-tiny"
-                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">+</button>
-            </div>
+            <label class="switch">
+                <input type="checkbox" id="sessionsEnabledToggle">
+                <span class="slider"></span>
+            </label>
         </div>
 
-        <hr class="divider">
-        <h3 style="margin: 10px 0; font-size: 1rem; color: var(--text-secondary);">Appearance</h3>
-
+        <!-- Appearance & View -->
+        <h3 class="section-title">Appearance & View</h3>
         <div class="setting-card">
             <div class="setting-info">
                 <span class="setting-label">White Theme</span>
@@ -172,39 +161,54 @@
             </label>
         </div>
 
-        <hr class="divider">
+        <div class="setting-card">
+            <div class="setting-info">
+                <span class="setting-label">Zoom Level</span>
+                <span class="setting-desc">Adjust interface size.</span>
+            </div>
+            <div class="zoom-controls" style="display: flex; align-items: center; gap: 10px;">
+                <button id="zoom-out" class="icon-btn-tiny"
+                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">-</button>
+                <span id="zoom-value" style="font-weight: bold; min-width: 40px; text-align: center;">100%</span>
+                <button id="zoom-in" class="icon-btn-tiny"
+                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">+</button>
+            </div>
+        </div>
 
-        <button type="button" id="open-help-page" class="setting-card link-card">
-            <div class="setting-label">How to Use</div>
-            <span class="icon">?</span>
-        </button>
+        <!-- Data & Support -->
+        <h3 class="section-title">Data & Support</h3>
+        <div class="data-actions-grid"
+            style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <button type="button" id="export-sessions" class="btn secondary"
+                style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Export Sessions</span>
+                <span class="icon">↓</span>
+            </button>
+            <button type="button" id="import-sessions" class="btn secondary"
+                style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Import Sessions</span>
+                <span class="icon">↑</span>
+            </button>
+        </div>
 
-        <button type="button" id="open-addon-folder" class="setting-card link-card">
-            <div class="setting-label">Open Add-on Folder</div>
-            <span class="icon">›</span>
-        </button>
+        <div class="support-links">
+            <button type="button" id="open-help-page" class="setting-card link-card">
+                <div class="setting-label">How to Use (README)</div>
+                <span class="icon">?</span>
+            </button>
+            <button type="button" id="open-addon-folder" class="setting-card link-card">
+                <div class="setting-label">Open Add-on Folder</div>
+                <span class="icon">›</span>
+            </button>
+            <button type="button" id="open-project-page" class="setting-card link-card">
+                <div class="setting-label">GitHub Project Page</div>
+                <span class="icon">›</span>
+            </button>
+        </div>
 
-        <button type="button" id="open-project-page" class="setting-card link-card">
-            <div class="setting-label">Project Page</div>
-            <span class="icon">›</span>
-        </button>
-
-        <button type="button" id="export-sessions" class="setting-card link-card">
-            <div class="setting-label">Export Sessions</div>
-            <span class="icon">↓</span>
-        </button>
-
-        <button type="button" id="import-sessions" class="setting-card link-card">
-            <div class="setting-label">Import Sessions</div>
-            <span class="icon">↑</span>
-        </button>
-
-        <hr class="divider">
-
-        <button type="button" id="start-tour" class="setting-card link-card"
-            style="border: 1px solid var(--accent-color);">
-            <div class="setting-label" style="color: var(--accent-color);">Quick Tour</div>
-            <span class="icon" style="color: var(--accent-color);">✨</span>
+        <button type="button" id="start-tour" class="btn secondary"
+            style="width: 100%; margin-top: 10px; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 12px;">
+            <span>✨ Start Quick Tour</span>
         </button>
     </main>
 
@@ -227,7 +231,7 @@
             const compactModeToggle = document.getElementById("compactModeToggle");
             const appearanceToggle = document.getElementById("appearanceToggle");
             const confettiToggle = document.getElementById("confettiToggle");
-            const taskbarEnabledToggle = document.getElementById("taskbarEnabledToggle");
+            const movableToggle = document.getElementById("movableToggle");
             const showTitleBarToggle = document.getElementById("showTitleBarToggle");
             const colorBtns = document.querySelectorAll('.color-btn');
 
@@ -271,7 +275,7 @@
                 theme: 'green',
                 appearance: 'dark',
                 zoomLevel: 1.0,
-                taskbarEnabled: true,
+                movable: true,
                 showTitleBar: true
             };
 
@@ -296,7 +300,7 @@
                     theme: theme,
                     appearance: appearanceToggle?.checked ? 'light' : 'dark',
                     zoomLevel: currentZoom,
-                    taskbarEnabled: !!taskbarEnabledToggle?.checked,
+                    movable: !!movableToggle?.checked,
                     showTitleBar: !!showTitleBarToggle?.checked
                 };
             }
@@ -345,7 +349,7 @@
                 if (confettiToggle) confettiToggle.checked = !!merged.confettiEnabled;
                 if (alwaysOnTopToggle) alwaysOnTopToggle.checked = !!merged.alwaysOnTop;
                 if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
-                if (taskbarEnabledToggle) taskbarEnabledToggle.checked = merged.taskbarEnabled !== false;
+                if (movableToggle) movableToggle.checked = merged.movable !== false;
                 if (showTitleBarToggle) showTitleBarToggle.checked = merged.showTitleBar !== false;
 
                 currentZoom = merged.zoomLevel !== undefined ? merged.zoomLevel : 1.0;
@@ -400,7 +404,7 @@
                 compactModeToggle?.addEventListener("change", saveAllSettings);
                 appearanceToggle?.addEventListener("change", saveAllSettings);
                 confettiToggle?.addEventListener("change", saveAllSettings);
-                taskbarEnabledToggle?.addEventListener("change", saveAllSettings);
+                movableToggle?.addEventListener("change", saveAllSettings);
                 showTitleBarToggle?.addEventListener("change", saveAllSettings);
                 alwaysOnTopToggle?.addEventListener("change", saveAllSettings);
 

@@ -9,5 +9,7 @@
     "alwaysOnTop": true,
     "theme": "green",
     "appearance": "dark",
-    "zoomLevel": 1
+    "zoomLevel": 1,
+    "movable": true,
+    "showTitleBar": true
 }
