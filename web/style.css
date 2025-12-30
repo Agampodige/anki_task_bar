@@ -99,6 +99,13 @@
     --accent-soft-hover: rgba(0, 150, 136, 0.25);
 }
 
+.app-container, 
+#main-content-container,
+.window-title-bar,
+.drag-region {
+    pointer-events: auto;
+}
+
 /* Compact Mode */
 body.compact .task-item {
     min-height: 40px;
@@ -221,8 +228,21 @@ body {
     display: flex;
     gap: 2px;
     -webkit-app-region: no-drag;
+    pointer-events: auto;
 }
 
+body:not(.locked) .drag-region {
+    pointer-events: auto;
+}
+
+body.locked .drag-region {
+    pointer-events: none;
+}
+
+#main-content-container {
+    -webkit-user-select: none;
+    user-select: none;
+}
 /* --- App Container --- */
 .app-container {
     height: calc(100vh - 36px);

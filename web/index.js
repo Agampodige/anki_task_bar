@@ -790,6 +790,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Remove or comment out the entire drag event listener at the bottom
+    // or modify it to work with your Python implementation
+
     // Window Dragging logic - Only from header
     document.addEventListener('mousedown', (e) => {
         // Check if movable
@@ -808,9 +811,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (window.py && typeof window.py.drag_window === 'function') {
-            window.py.drag_window();
-        }
+        // Let the Python code handle the drag via mouse events
+        // Don't call py.drag_window() as it doesn't exist
+        // The drag is handled in taskui.py mousePressEvent
     });
 });
 
