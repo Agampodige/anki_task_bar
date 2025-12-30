@@ -527,9 +527,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.documentElement.setAttribute('data-theme', cfg.theme || 'green');
                         document.documentElement.setAttribute('data-appearance', cfg.appearance || 'dark');
                         if (cfg.zoomLevel) document.body.style.zoom = cfg.zoomLevel;
+                        document.body.classList.toggle('locked', cfg.movable === false);
                     } catch (e) { }
                 });
             }
+
+            // Window Controls
+            document.getElementById('win-min')?.addEventListener('click', () => {
+                if (window.py && typeof window.py.minimize_window === 'function') window.py.minimize_window();
+            });
+            document.getElementById('win-expand')?.addEventListener('click', () => {
+                if (window.py && typeof window.py.toggle_expand === 'function') window.py.toggle_expand();
+            });
+            document.getElementById('win-close')?.addEventListener('click', () => {
+                if (window.py && typeof window.py.close_window === 'function') window.py.close_window();
+            });
 
             refreshData();
         });

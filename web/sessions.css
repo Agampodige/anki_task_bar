@@ -11,7 +11,7 @@
 .sessions-layout {
     display: flex;
     gap: 20px;
-    height: calc(100vh - 120px);
+    height: 100%;
     min-height: 400px;
 }
 
@@ -41,19 +41,9 @@
 }
 
 /* Compact Action Bar */
-/* Modern App Layout */
-body {
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-    background: transparent;
-}
 
 .app-container {
-    display: flex;
-    height: 100vh;
-    background: var(--bg-color);
-    color: var(--text-primary);
+    flex-direction: row !important;
 }
 
 /* Sidebar */
@@ -63,9 +53,8 @@ body {
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    padding: 20px 12px;
+    padding: 12px;
     gap: 16px;
-    backdrop-filter: blur(10px);
     flex-shrink: 0;
     transition: width 0.3s ease;
 }
@@ -165,8 +154,8 @@ body {
 }
 
 .icon-btn-tiny:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-color);
+    background: var(--accent-soft);
 }
 
 .nav-list {
@@ -263,8 +252,8 @@ body {
     padding-bottom: 20px;
     padding-right: 8px;
     /* Custom scrollbar styling support */
-    scrollbar-color: #444 #222;
     scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 .sessions-grid::-webkit-scrollbar {
@@ -278,6 +267,10 @@ body {
 .sessions-grid::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 4px;
+}
+
+.sessions-grid::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
 }
 
 /* Session Cards */
@@ -300,7 +293,7 @@ body {
 .session-card:hover {
     transform: translateY(-4px);
     background: var(--bg-hover);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     border-color: var(--accent-color);
 }
 
@@ -364,10 +357,13 @@ body {
 .card-menu-btn {
     background: none;
     border: none;
-    color: #666;
+    color: var(--text-secondary);
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .card-menu-btn:hover {
@@ -478,7 +474,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -516,7 +512,7 @@ body {
 }
 
 .modal-subtitle {
-    color: #888;
+    color: var(--text-secondary);
     font-size: 0.9rem;
     margin: 0 0 16px 0;
 }

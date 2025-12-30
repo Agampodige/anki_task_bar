@@ -18,8 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     const theme = cfg.theme || 'green';
                     const appearance = cfg.appearance || 'dark';
                     const compactMode = !!cfg.compactMode;
+                    const zoomLevel = cfg.zoomLevel !== undefined ? cfg.zoomLevel : 1.0;
+                    const movable = cfg.movable !== false;
+
                     document.documentElement.setAttribute('data-theme', theme);
                     document.documentElement.setAttribute('data-appearance', appearance);
+                    document.body.style.zoom = zoomLevel;
+                    document.body.classList.toggle('locked', !movable);
                     if (compactMode) document.body.classList.add('compact');
                     else document.body.classList.remove('compact');
 
@@ -39,6 +44,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
+
+        // Window Controls
+        document.getElementById('win-min')?.addEventListener('click', () => {
+            if (window.py && typeof window.py.minimize_window === 'function') window.py.minimize_window();
+        });
+        document.getElementById('win-expand')?.addEventListener('click', () => {
+            if (window.py && typeof window.py.toggle_expand === 'function') window.py.toggle_expand();
+        });
+        document.getElementById('win-close')?.addEventListener('click', () => {
+            if (window.py && typeof window.py.close_window === 'function') window.py.close_window();
+        });
 
         // Fetch the deck tree and render it
         py.get_deck_tree(function (jsonTree) {

@@ -11,504 +11,211 @@
 </head>
 
 <body>
-    <div class="page-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <a href="index.html" class="btn secondary" style="padding: 6px 12px;">← Back</a>
-            <h1>Settings</h1>
+    <div id="global-progress-bar">
+        <div id="global-progress-value"></div>
+    </div>
+    <div id="window-title-bar" class="window-title-bar">
+        <div class="drag-region">
+            <span class="window-title">Anki Taskbar</span>
         </div>
-        <div id="settings-status" class="settings-status" aria-live="polite"></div>
+        <div class="window-controls">
+            <button id="win-min" class="win-btn min-btn" title="Minimize">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="currentColor" d="M19 13H5v-2h14v2z" />
+                </svg>
+            </button>
+            <button id="win-expand" class="win-btn expand-btn" title="Expand">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="currentColor"
+                        d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                </svg>
+            </button>
+            <button id="win-close" class="win-btn close-btn" title="Close">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                    <path fill="currentColor"
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                </svg>
+            </button>
+        </div>
     </div>
 
-    <main id="settings-main" class="settings-container">
-        <!-- Window & Behavior -->
-        <h3 class="section-title">Window & Behavior</h3>
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Movable</span>
-                <span class="setting-desc">Allow moving the taskbar by dragging.</span>
+    <div class="app-container" style="padding: 20px; overflow-y: auto;">
+        <header class="header">
+            <div class="header-left">
+                <a href="index.html" class="back-link">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                    </svg>
+                    <span>Back</span>
+                </a>
+                <h1>Settings</h1>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="movableToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Show Window Title Bar</span>
-                <span class="setting-desc">Show the top bar with close/minimize/expand buttons.</span>
+            <div id="settings-status" class="settings-status" aria-live="polite"></div>
+        </header>
+
+        <div class="settings-grid">
+            <!-- Window & Behavior -->
+            <div class="settings-section">
+                <h2 class="section-title">Window & Behavior</h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Always on Top</div>
+                        <div class="setting-desc">Keep taskbar above other windows</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="alwaysOnTopToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Movable (Drag to Move)</div>
+                        <div class="setting-desc">Disable to lock window position</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="movableToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Auto Hide on Review</div>
+                        <div class="setting-desc">Automatically hide when starting reviews</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="sessionToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="showTitleBarToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Always on Top</span>
-                <span class="setting-desc">Keep the widget visible above other windows.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="alwaysOnTopToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+            <!-- Dashboard & Content -->
+            <div class="settings-section">
+                <h2 class="section-title">Dashboard & Content</h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Compact Mode</div>
+                        <div class="setting-desc">Smaller task items and tighter layout</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="compactModeToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Auto Hide on Review</span>
-                <span class="setting-desc">Automatically hide the widget when you start reviewing.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="sessionToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Hide Completed Decks</div>
+                        <div class="setting-desc">Show only decks with remaining cards</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="hideDecksToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-        <!-- Dashboard & Content -->
-        <h3 class="section-title">Dashboard & Content</h3>
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Show Statistics Bar</span>
-                <span class="setting-desc">Display deck statistics at the top of the home page.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="showStatsBarToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Enable Sessions</div>
+                        <div class="setting-desc">Create and activate groups of decks</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="sessionsEnabledToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Hide Search Bar</span>
-                <span class="setting-desc">Remove the search input from the home page.</span>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Confetti Effects</div>
+                        <div class="setting-desc">Celebrate completion</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="confettiToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="hideSearchBarToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Hide Completed Decks</span>
-                <span class="setting-desc">Hide the completed section on the home page.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="hideDecksToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+            <!-- Appearance & View -->
+            <div class="settings-section">
+                <h2 class="section-title">Appearance & View</h2>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Light Theme</div>
+                        <div class="setting-desc">Switch between light and dark mode</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="appearanceToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Enable Sessions</span>
-                <span class="setting-desc">Create and activate saved groups of decks.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="sessionsEnabledToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Zoom Level</div>
+                        <div class="setting-desc">Adjust UI scale</div>
+                    </div>
+                    <div class="zoom-controls">
+                        <button class="btn small secondary" id="zoom-out">-</button>
+                        <span id="zoom-value" class="zoom-display">100%</span>
+                        <button class="btn small secondary" id="zoom-in">+</button>
+                    </div>
+                </div>
 
-        <!-- Appearance & View -->
-        <h3 class="section-title">Appearance & View</h3>
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">White Theme</span>
-                <span class="setting-desc">Use a light background for the interface.</span>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label">Theme Accent</div>
+                        <div class="setting-desc">Select main accent color</div>
+                    </div>
+                    <div class="color-options" style="display: flex; gap: 8px;">
+                        <div class="color-btn theme-green" data-color="green" title="Green"
+                            style="width: 24px; height: 24px; border-radius: 50%; cursor: pointer; background: #4CAF50;">
+                        </div>
+                        <div class="color-btn theme-blue" data-color="blue" title="Blue"
+                            style="width: 24px; height: 24px; border-radius: 50%; cursor: pointer; background: #2196F3;">
+                        </div>
+                        <div class="color-btn theme-purple" data-color="purple" title="Purple"
+                            style="width: 24px; height: 24px; border-radius: 50%; cursor: pointer; background: #9C27B0;">
+                        </div>
+                        <div class="color-btn theme-orange" data-color="orange" title="Orange"
+                            style="width: 24px; height: 24px; border-radius: 50%; cursor: pointer; background: #FF9800;">
+                        </div>
+                    </div>
+                </div>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="appearanceToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
 
-        <div class="setting-card" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-            <div class="setting-info">
-                <span class="setting-label">Accent Color</span>
-            </div>
-            <div class="color-options">
-                <button class="color-btn" data-color="green" style="background: #4CAF50;" title="Green"></button>
-                <button class="color-btn" data-color="blue" style="background: #2196F3;" title="Blue"></button>
-                <button class="color-btn" data-color="purple" style="background: #9C27B0;" title="Purple"></button>
-                <button class="color-btn" data-color="orange" style="background: #FF9800;" title="Orange"></button>
-                <button class="color-btn" data-color="pink" style="background: #E91E63;" title="Pink"></button>
-                <button class="color-btn" data-color="teal" style="background: #009688;" title="Teal"></button>
-            </div>
-        </div>
+            <!-- Data & Support -->
+            <div class="settings-section">
+                <h2 class="section-title">Data & Support</h2>
+                <div class="data-actions-grid"
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                    <button type="button" id="export-sessions" class="btn secondary">Export Sessions</button>
+                    <button type="button" id="import-sessions" class="btn secondary">Import Sessions</button>
+                </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Compact Mode</span>
-                <span class="setting-desc">Denser view with smaller padding.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="compactModeToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
+                <div class="link-card-grid" style="display: grid; gap: 10px;">
+                    <div class="setting-card link-card" id="open-addon-folder" style="cursor: pointer;">
+                        <div class="setting-label">Open Add-on Folder</div>
+                        <span class="icon">›</span>
+                    </div>
+                    <div class="setting-card link-card" id="open-project-page" style="cursor: pointer;">
+                        <div class="setting-label">GitHub Project Page</div>
+                        <span class="icon">›</span>
+                    </div>
+                </div>
 
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Confetti Effects</span>
-                <span class="setting-desc">Celebrate when finding or completing tasks.</span>
-            </div>
-            <label class="switch">
-                <input type="checkbox" id="confettiToggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="setting-card">
-            <div class="setting-info">
-                <span class="setting-label">Zoom Level</span>
-                <span class="setting-desc">Adjust interface size.</span>
-            </div>
-            <div class="zoom-controls" style="display: flex; align-items: center; gap: 10px;">
-                <button id="zoom-out" class="icon-btn-tiny"
-                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">-</button>
-                <span id="zoom-value" style="font-weight: bold; min-width: 40px; text-align: center;">100%</span>
-                <button id="zoom-in" class="icon-btn-tiny"
-                    style="width: 30px; height: 30px; border: 1px solid var(--border-color);">+</button>
+                <button type="button" id="start-tour" class="btn secondary"
+                    style="width: 100%; margin-top: 10px; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 12px; border-radius: 8px; cursor: pointer;">
+                    <span>✨ Start Quick Tour</span>
+                </button>
             </div>
         </div>
+    </div>
 
-        <!-- Data & Support -->
-        <h3 class="section-title">Data & Support</h3>
-        <div class="data-actions-grid"
-            style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-            <button type="button" id="export-sessions" class="btn secondary"
-                style="display: flex; justify-content: space-between; align-items: center;">
-                <span>Export Sessions</span>
-                <span class="icon">↓</span>
-            </button>
-            <button type="button" id="import-sessions" class="btn secondary"
-                style="display: flex; justify-content: space-between; align-items: center;">
-                <span>Import Sessions</span>
-                <span class="icon">↑</span>
-            </button>
-        </div>
+    <script src="setting.js"></script>
 
-        <div class="support-links">
-            <button type="button" id="open-help-page" class="setting-card link-card">
-                <div class="setting-label">How to Use (README)</div>
-                <span class="icon">?</span>
-            </button>
-            <button type="button" id="open-addon-folder" class="setting-card link-card">
-                <div class="setting-label">Open Add-on Folder</div>
-                <span class="icon">›</span>
-            </button>
-            <button type="button" id="open-project-page" class="setting-card link-card">
-                <div class="setting-label">GitHub Project Page</div>
-                <span class="icon">›</span>
-            </button>
-        </div>
-
-        <button type="button" id="start-tour" class="btn secondary"
-            style="width: 100%; margin-top: 10px; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 12px;">
-            <span>✨ Start Quick Tour</span>
-        </button>
-    </main>
-
-
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Disable Ctrl+Scroll Zoom
-            window.addEventListener('wheel', (e) => {
-                if (e.ctrlKey) e.preventDefault();
-            }, { passive: false });
-
-            const hideToggle = document.getElementById("hideDecksToggle");
-            const sessionToggle = document.getElementById("sessionToggle");
-            const sessionsEnabledToggle = document.getElementById("sessionsEnabledToggle");
-            const showStatsBarToggle = document.getElementById("showStatsBarToggle");
-            const alwaysOnTopToggle = document.getElementById("alwaysOnTopToggle");
-            const startTourBtn = document.getElementById("start-tour");
-            const hideSearchBarToggle = document.getElementById("hideSearchBarToggle");
-            const compactModeToggle = document.getElementById("compactModeToggle");
-            const appearanceToggle = document.getElementById("appearanceToggle");
-            const confettiToggle = document.getElementById("confettiToggle");
-            const movableToggle = document.getElementById("movableToggle");
-            const showTitleBarToggle = document.getElementById("showTitleBarToggle");
-            const colorBtns = document.querySelectorAll('.color-btn');
-
-            // Zoom controls
-            const zoomInBtn = document.getElementById("zoom-in");
-            const zoomOutBtn = document.getElementById("zoom-out");
-            const zoomValueEl = document.getElementById("zoom-value");
-            let currentZoom = 1.0;
-
-            const statusEl = document.getElementById("settings-status");
-            const openAddonFolderBtn = document.getElementById("open-addon-folder");
-            const openProjectBtn = document.getElementById("open-project-page");
-            const openHelpBtn = document.getElementById("open-help-page");
-            const openSessionsBtn = document.getElementById("open-sessions-page");
-            const exportSessionsBtn = document.getElementById("export-sessions");
-            const importSessionsBtn = document.getElementById("import-sessions");
-
-            let currentSettings = {};
-
-            function setStatus(text, kind) {
-                if (!statusEl) return;
-                statusEl.textContent = text || '';
-                statusEl.dataset.kind = kind || '';
-                if (!text) return;
-                window.clearTimeout(window._settingsStatusTimer);
-                window._settingsStatusTimer = window.setTimeout(() => {
-                    statusEl.textContent = '';
-                    statusEl.dataset.kind = '';
-                }, 1500);
-            }
-
-            const defaultSettings = {
-                hideCompleted: false,
-                enableSessions: true,
-                sessionsEnabled: true,
-                showStatsBar: true,
-                hideSearchBar: false,
-                compactMode: false,
-                confettiEnabled: true,
-                alwaysOnTop: true,
-                theme: 'green',
-                appearance: 'dark',
-                zoomLevel: 1.0,
-                movable: true,
-                showTitleBar: true
-            };
-
-            function updateZoomDisplay() {
-                if (zoomValueEl) zoomValueEl.textContent = `${Math.round(currentZoom * 100)}%`;
-            }
-
-            function getSettingsFromUI() {
-                // Find selected color
-                const selectedBtn = document.querySelector('.color-btn.selected');
-                const theme = selectedBtn ? selectedBtn.dataset.color : 'green';
-
-                return {
-                    hideCompleted: !!hideToggle?.checked,
-                    enableSessions: !!sessionToggle?.checked,
-                    sessionsEnabled: !!sessionsEnabledToggle?.checked,
-                    showStatsBar: !!showStatsBarToggle?.checked,
-                    hideSearchBar: !!hideSearchBarToggle?.checked,
-                    compactMode: !!compactModeToggle?.checked,
-                    confettiEnabled: !!confettiToggle?.checked,
-                    alwaysOnTop: !!alwaysOnTopToggle?.checked,
-                    theme: theme,
-                    appearance: appearanceToggle?.checked ? 'light' : 'dark',
-                    zoomLevel: currentZoom,
-                    movable: !!movableToggle?.checked,
-                    showTitleBar: !!showTitleBarToggle?.checked
-                };
-            }
-
-            function saveAllSettings() {
-                const settings = getSettingsFromUI();
-                const jsonString = JSON.stringify(settings);
-
-                // Apply immediate previews
-                document.documentElement.setAttribute('data-theme', settings.theme);
-                document.documentElement.setAttribute('data-appearance', settings.appearance);
-                document.body.style.zoom = settings.zoomLevel;
-
-                if (window.py && typeof window.py.set_always_on_top === 'function') {
-                    window.py.set_always_on_top(settings.alwaysOnTop);
-                }
-
-                try {
-                    localStorage.setItem('anki_task_bar_settings', jsonString);
-                } catch (e) {
-                }
-
-                if (window.py && typeof window.py.save_settings_to_file === 'function') {
-                    try {
-                        window.py.save_settings_to_file(jsonString);
-                        setStatus('Saved', 'ok');
-                    } catch (e) {
-                        setStatus('Error', 'error');
-                        console.error('Error saving settings:', e);
-                    }
-                } else {
-                    setStatus('Saved (local)', 'ok');
-                }
-            }
-
-            function applySettingsToUI(settings) {
-                const merged = { ...defaultSettings, ...(settings || {}) };
-                currentSettings = merged;
-
-                if (hideToggle) hideToggle.checked = !!merged.hideCompleted;
-                if (sessionToggle) sessionToggle.checked = !!merged.enableSessions;
-                if (sessionsEnabledToggle) sessionsEnabledToggle.checked = !!merged.sessionsEnabled;
-                if (showStatsBarToggle) showStatsBarToggle.checked = !!merged.showStatsBar;
-                if (hideSearchBarToggle) hideSearchBarToggle.checked = !!merged.hideSearchBar;
-                if (compactModeToggle) compactModeToggle.checked = !!merged.compactMode;
-                if (confettiToggle) confettiToggle.checked = !!merged.confettiEnabled;
-                if (alwaysOnTopToggle) alwaysOnTopToggle.checked = !!merged.alwaysOnTop;
-                if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
-                if (movableToggle) movableToggle.checked = merged.movable !== false;
-                if (showTitleBarToggle) showTitleBarToggle.checked = merged.showTitleBar !== false;
-
-                currentZoom = merged.zoomLevel !== undefined ? merged.zoomLevel : 1.0;
-                updateZoomDisplay();
-
-                // Color selection
-                colorBtns.forEach(btn => {
-                    if (btn.dataset.color === merged.theme) {
-                        btn.classList.add('selected');
-                    } else {
-                        btn.classList.remove('selected');
-                    }
-                });
-
-                // Apply theme/zoom to body for preview
-                document.documentElement.setAttribute('data-theme', merged.theme);
-                document.documentElement.setAttribute('data-appearance', merged.appearance);
-                document.body.style.zoom = currentZoom;
-
-                if (openSessionsBtn) {
-                    openSessionsBtn.style.display = merged.sessionsEnabled ? 'flex' : 'none';
-                }
-            }
-
-            function loadInitialSettings() {
-                if (window.py && typeof window.py.load_settings_from_file === 'function') {
-                    window.py.load_settings_from_file((data) => {
-                        try {
-                            const cfg = data ? JSON.parse(data) : {};
-                            applySettingsToUI(cfg);
-                        } catch (e) {
-                            applySettingsToUI(defaultSettings);
-                        }
-                    });
-                    return;
-                }
-
-                try {
-                    const local = localStorage.getItem('anki_task_bar_settings');
-                    applySettingsToUI(local ? JSON.parse(local) : defaultSettings);
-                } catch (e) {
-                    applySettingsToUI(defaultSettings);
-                }
-            }
-
-            function bindUI() {
-                hideToggle?.addEventListener("change", saveAllSettings);
-                sessionToggle?.addEventListener("change", saveAllSettings);
-                sessionsEnabledToggle?.addEventListener("change", saveAllSettings);
-                showStatsBarToggle?.addEventListener("change", saveAllSettings);
-                hideSearchBarToggle?.addEventListener("change", saveAllSettings);
-                compactModeToggle?.addEventListener("change", saveAllSettings);
-                appearanceToggle?.addEventListener("change", saveAllSettings);
-                confettiToggle?.addEventListener("change", saveAllSettings);
-                movableToggle?.addEventListener("change", saveAllSettings);
-                showTitleBarToggle?.addEventListener("change", saveAllSettings);
-                alwaysOnTopToggle?.addEventListener("change", saveAllSettings);
-
-                // Zoom Handlers
-                zoomInBtn?.addEventListener('click', () => {
-                    currentZoom = Math.min(Math.round((currentZoom + 0.1) * 10) / 10, 2.0);
-                    updateZoomDisplay();
-                    saveAllSettings();
-                });
-
-                zoomOutBtn?.addEventListener('click', () => {
-                    currentZoom = Math.max(Math.round((currentZoom - 0.1) * 10) / 10, 0.5);
-                    updateZoomDisplay();
-                    saveAllSettings();
-                });
-
-                colorBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        colorBtns.forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        saveAllSettings();
-                    });
-                });
-
-                openAddonFolderBtn?.addEventListener('click', () => {
-                    if (window.py && typeof window.py.open_addon_folder === 'function') {
-                        window.py.open_addon_folder();
-                    }
-                });
-
-                openHelpBtn?.addEventListener('click', () => {
-                    const url = 'https://github.com/Agampoci/anki-task-bar/blob/main/README.md'; // Fallback link
-                    if (window.py && typeof window.py.open_link === 'function') {
-                        window.py.open_link(url);
-                    } else {
-                        try { window.open(url, '_blank'); } catch (e) { }
-                    }
-                });
-
-                openProjectBtn?.addEventListener('click', () => {
-                    const url = 'https://github.com/Agampodige/anki_task_bar';
-                    if (window.py && typeof window.py.open_link === 'function') {
-                        window.py.open_link(url);
-                    } else {
-                        try { window.open(url, '_blank'); } catch (e) { }
-                    }
-                });
-
-                openSessionsBtn?.addEventListener('click', () => {
-                    window.location.href = 'sessions.html';
-                });
-
-                exportSessionsBtn?.addEventListener('click', () => {
-                    if (window.py && typeof window.py.export_sessions === 'function') {
-                        window.py.export_sessions((res) => {
-                            try {
-                                const data = JSON.parse(res);
-                                if (data.ok) {
-                                    setStatus('Exported to ' + data.path.split(/[\\/]/).pop(), 'ok');
-                                } else if (data.error !== 'cancelled') {
-                                    setStatus('Export failed', 'error');
-                                }
-                            } catch (e) {
-                                console.error('Export error:', e);
-                            }
-                        });
-                    }
-                });
-
-                importSessionsBtn?.addEventListener('click', () => {
-                    if (window.py && typeof window.py.import_sessions === 'function') {
-                        window.py.import_sessions((res) => {
-                            try {
-                                const data = JSON.parse(res);
-                                if (data.ok) {
-                                    setStatus('Imported successfully', 'ok');
-                                } else if (data.error !== 'cancelled') {
-                                    setStatus('Import failed: ' + data.error, 'error');
-                                }
-                            } catch (e) {
-                                console.error('Import error:', e);
-                            }
-                        });
-                    }
-                });
-
-                // Tour Logic - Redirect to home with startTour param
-                startTourBtn?.addEventListener('click', () => {
-                    window.location.href = 'index.html?startTour=true';
-                });
-            }
-
-            bindUI();
-
-            if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
-                new QWebChannel(qt.webChannelTransport, function (channel) {
-                    window.py = channel.objects.py;
-                    loadInitialSettings();
-                });
-            } else {
-                loadInitialSettings();
-            }
-        });
-    </script>
 </body>
 
 </html>

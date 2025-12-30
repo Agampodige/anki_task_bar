@@ -2,14 +2,13 @@
     "hideCompleted": false,
     "enableSessions": true,
     "sessionsEnabled": true,
-    "showStatsBar": true,
-    "hideSearchBar": true,
+    "showStatsBar": false,
+    "hideSearchBar": false,
     "compactMode": true,
     "confettiEnabled": false,
-    "alwaysOnTop": true,
+    "alwaysOnTop": false,
     "theme": "green",
     "appearance": "dark",
     "zoomLevel": 1,
-    "movable": true,
-    "showTitleBar": true
+    "movable": true
 }

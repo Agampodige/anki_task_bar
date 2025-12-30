@@ -7,20 +7,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const theme = cfg.theme || 'green';
         const appearance = cfg.appearance || 'dark';
         const zoomLevel = cfg.zoomLevel !== undefined ? cfg.zoomLevel : 1.0;
+        const movable = cfg.movable !== false;
 
         document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.setAttribute('data-appearance', appearance);
         document.body.style.zoom = zoomLevel;
-
-        const titleBar = document.getElementById('window-title-bar');
-        if (titleBar) {
-            const showTitleBar = cfg.showTitleBar !== false;
-            if (showTitleBar) {
-                titleBar.classList.remove('hidden');
-            } else {
-                titleBar.classList.add('hidden');
-            }
-        }
+        document.body.classList.toggle('locked', !movable);
 
         if (compactMode) {
             document.body.classList.add('compact');
@@ -198,8 +190,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (deckCountEl) deckCountEl.textContent = `${stats.totalDecks}`;
 
-            // Format: Total / Completed
-            if (cardsFormatEl) cardsFormatEl.textContent = `${stats.totalCards} / ${stats.completedCards}`;
+            // Show only total cards
+            if (cardsFormatEl) cardsFormatEl.textContent = `${stats.totalCards}`;
 
             if (timeEl) {
                 if (stats.finishTimeStr) {
