@@ -11,15 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced mouse event tracking with detailed coordinate logging
 - System move and resize fallback detection
 - drag option to main window titile
+- copy sessions as todolist to clipboard item to setting page
+- keyboard short keys for session page
+- Ctrl+H(home)   Ctrl+S(session)  Escap(back) UpArrow(move up) DownArrow(Move Down) Enter(select/Active new session) 
 
 ### Fixed
 - Window dragging functionality in title bar area
 - Drag window not working
 - setting window dropown meneu Ui fixed
+- session page folder not selecting
 
 ### Changed
 - Improved event filtering for mouse press events
--
 
 ### Removed
 - conflicting css and js with drag window.
