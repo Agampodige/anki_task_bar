@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             
             appState.currentView = 'all';
-            renderSessions();
+            renderMainContent();
             renderFolders();
             // Update navigation state
             if (window.navigationState) {
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 
                 appState.currentView = 'uncategorized';
-                renderSessions();
+                renderMainContent();
                 renderFolders();
                 // Update navigation state
                 if (window.navigationState) {
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
                 
                 appState.currentView = folder;
-                renderSessions();
+                renderMainContent();
                 renderFolders();
                 // Reset navigation state when switching folders
                 if (window.navigationState) {
