@@ -90,6 +90,7 @@ def init_taskbar_menu():
     # Tools Menu
     mw.form.menuTools.addSeparator()
     action = QAction("Open Taskbar Widget", mw)
+    action.setShortcut("Alt+Q")
     qconnect(action.triggered, toggle_taskbar)
     mw.form.menuTools.addAction(action)
 
