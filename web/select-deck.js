@@ -1,4 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Add drag functionality to all pages
+    function addDragFunctionality() {
+        const dragRegion = document.querySelector('.drag-region');
+        if (dragRegion) {
+            dragRegion.addEventListener('mousedown', (e) => {
+                if (window.py && typeof window.py.drag_window === 'function') {
+                    window.py.drag_window();
+                }
+            });
+        }
+    }
+    
     // Check if we're editing an existing session
     const editingSessionId = sessionStorage.getItem('editingSessionId');
     let isEditing = !!editingSessionId;
@@ -6,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Establish connection with Python backend
     new QWebChannel(qt.webChannelTransport, function (channel) {
         window.py = channel.objects.py;
+        
+        // Initialize drag functionality
+        addDragFunctionality();
 
         // Check if sessions are enabled
         if (window.py && typeof window.py.load_settings_from_file === 'function') {

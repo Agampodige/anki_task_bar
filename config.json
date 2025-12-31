@@ -11,6 +11,6 @@
     "appearance": "dark",
     "zoomLevel": 1,
     "movable": true,
-    "resizable": true,
+    "windowSizePreset": "large",
     "hideCompletedSessions": false
 }

@@ -1,4 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Add drag functionality to all pages
+    function addDragFunctionality() {
+        const dragRegion = document.querySelector('.drag-region');
+        if (dragRegion) {
+            dragRegion.addEventListener('mousedown', (e) => {
+                if (window.py && typeof window.py.drag_window === 'function') {
+                    window.py.drag_window();
+                }
+            });
+        }
+    }
+    
+    // Initialize drag functionality
+    addDragFunctionality();
+    
     function _applySettingsToHomeUI(settings) {
         const cfg = settings || {};
         const hideCompleted = !!cfg.hideCompleted;
@@ -13,6 +28,13 @@ document.addEventListener("DOMContentLoaded", () => {
         document.documentElement.setAttribute('data-appearance', appearance);
         document.body.style.zoom = zoomLevel;
         document.body.classList.toggle('locked', !movable);
+        
+        // Ensure drag region is always enabled when movable is true
+        if (movable) {
+            document.body.classList.remove('locked');
+        } else {
+            document.body.classList.add('locked');
+        }
 
         if (compactMode) {
             document.body.classList.add('compact');
@@ -55,13 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (window.py && typeof window.py.set_always_on_top === 'function') {
             const alwaysOnTop = cfg.alwaysOnTop !== false; // Default to true
             window.py.set_always_on_top(alwaysOnTop);
-        }
-
-        const isMovable = cfg.movable !== false;
-        if (isMovable) {
-            document.body.classList.remove('locked');
-        } else {
-            document.body.classList.add('locked');
         }
 
         window.ankiTaskBarSettings = cfg;

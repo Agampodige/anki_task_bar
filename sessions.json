@@ -18,9 +18,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766935815996,
       "updated_at_ms": 1766935815996,
-      "progress": 1.0,
-      "total_cards": 59,
-      "done_cards": 59
+      "progress": 0.0,
+      "total_cards": 71,
+      "done_cards": 0
     },
     {
       "id": "1766936619253",
@@ -40,9 +40,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936619253,
       "updated_at_ms": 1766936619253,
-      "progress": 1.0,
-      "total_cards": 24,
-      "done_cards": 24
+      "progress": 0.0,
+      "total_cards": 36,
+      "done_cards": 0
     },
     {
       "id": "1766936663139",
@@ -62,9 +62,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936663140,
       "updated_at_ms": 1766936663140,
-      "progress": 1.0,
-      "total_cards": 30,
-      "done_cards": 30
+      "progress": 0.0,
+      "total_cards": 51,
+      "done_cards": 0
     },
     {
       "id": "1766936704084",
@@ -84,9 +84,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936704085,
       "updated_at_ms": 1766936704085,
-      "progress": 1.0,
-      "total_cards": 27,
-      "done_cards": 27
+      "progress": 0.0,
+      "total_cards": 65,
+      "done_cards": 0
     },
     {
       "id": "1766936733273",
@@ -101,9 +101,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936733274,
       "updated_at_ms": 1766936733274,
-      "progress": 1.0,
-      "total_cards": 17,
-      "done_cards": 17
+      "progress": 0.0,
+      "total_cards": 32,
+      "done_cards": 0
     },
     {
       "id": "1766941062595",
@@ -123,9 +123,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941062595,
       "updated_at_ms": 1766941062595,
-      "progress": 1.0,
-      "total_cards": 44,
-      "done_cards": 44
+      "progress": 0.0,
+      "total_cards": 92,
+      "done_cards": 0
     },
     {
       "id": "1766941099674",
@@ -145,9 +145,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941099674,
       "updated_at_ms": 1766941099674,
-      "progress": 1.0,
-      "total_cards": 44,
-      "done_cards": 44
+      "progress": 0.0,
+      "total_cards": 59,
+      "done_cards": 0
     },
     {
       "id": "1766941120372",
@@ -167,9 +167,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941120372,
       "updated_at_ms": 1766941120372,
-      "progress": 1.0,
-      "total_cards": 45,
-      "done_cards": 45
+      "progress": 0.0,
+      "total_cards": 73,
+      "done_cards": 0
     },
     {
       "id": "1766941141218",
@@ -189,9 +189,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941141218,
       "updated_at_ms": 1766941141218,
-      "progress": 1.0,
-      "total_cards": 68,
-      "done_cards": 68
+      "progress": 0.0,
+      "total_cards": 75,
+      "done_cards": 0
     },
     {
       "id": "1766941278153",
@@ -212,7 +212,7 @@
       "created_at_ms": 1766941278153,
       "updated_at_ms": 1766941278153,
       "progress": 0.0,
-      "total_cards": 76,
+      "total_cards": 115,
       "done_cards": 0
     },
     {
@@ -234,7 +234,7 @@
       "created_at_ms": 1766941301578,
       "updated_at_ms": 1766941301578,
       "progress": 0.0,
-      "total_cards": 47,
+      "total_cards": 87,
       "done_cards": 0
     },
     {
@@ -256,7 +256,7 @@
       "created_at_ms": 1766941324328,
       "updated_at_ms": 1766941324328,
       "progress": 0.0,
-      "total_cards": 132,
+      "total_cards": 134,
       "done_cards": 0
     },
     {
@@ -278,7 +278,7 @@
       "created_at_ms": 1766941345760,
       "updated_at_ms": 1766941345760,
       "progress": 0.0,
-      "total_cards": 134,
+      "total_cards": 92,
       "done_cards": 0
     },
     {
@@ -425,7 +425,7 @@
       "created_at_ms": 1766941781718,
       "updated_at_ms": 1766941781718,
       "progress": 0.0,
-      "total_cards": 298,
+      "total_cards": 324,
       "done_cards": 0
     },
     {
@@ -447,7 +447,7 @@
       "created_at_ms": 1766941803205,
       "updated_at_ms": 1766941803205,
       "progress": 0.0,
-      "total_cards": 162,
+      "total_cards": 170,
       "done_cards": 0
     },
     {
@@ -531,7 +531,7 @@
       "created_at_ms": 1766941885525,
       "updated_at_ms": 1766941885525,
       "progress": 0.0,
-      "total_cards": 85,
+      "total_cards": 86,
       "done_cards": 0
     },
     {
@@ -552,7 +552,7 @@
       "created_at_ms": 1766942029453,
       "updated_at_ms": 1766942029453,
       "progress": 0.0,
-      "total_cards": 253,
+      "total_cards": 254,
       "done_cards": 0
     },
     {
@@ -574,7 +574,7 @@
       "created_at_ms": 1766942053251,
       "updated_at_ms": 1766942053251,
       "progress": 0.0,
-      "total_cards": 773,
+      "total_cards": 1488,
       "done_cards": 0
     },
     {
@@ -593,7 +593,7 @@
       "created_at_ms": 1766942076012,
       "updated_at_ms": 1766942207603,
       "progress": 0.0,
-      "total_cards": 371,
+      "total_cards": 626,
       "done_cards": 0
     },
     {
@@ -630,7 +630,7 @@
       "created_at_ms": 1766942291735,
       "updated_at_ms": 1766942291735,
       "progress": 0.0,
-      "total_cards": 325,
+      "total_cards": 709,
       "done_cards": 0
     },
     {
@@ -652,7 +652,7 @@
       "created_at_ms": 1766942489466,
       "updated_at_ms": 1766942489466,
       "progress": 0.0,
-      "total_cards": 1162,
+      "total_cards": 1168,
       "done_cards": 0
     },
     {
@@ -668,7 +668,7 @@
       "created_at_ms": 1766942505023,
       "updated_at_ms": 1766942505023,
       "progress": 0.0,
-      "total_cards": 372,
+      "total_cards": 376,
       "done_cards": 0
     },
     {
@@ -687,7 +687,7 @@
       "created_at_ms": 1766942655190,
       "updated_at_ms": 1766942655190,
       "progress": 0.0,
-      "total_cards": 411,
+      "total_cards": 507,
       "done_cards": 0
     },
     {
@@ -706,7 +706,7 @@
       "created_at_ms": 1766942859076,
       "updated_at_ms": 1766942859076,
       "progress": 0.0,
-      "total_cards": 1034,
+      "total_cards": 1108,
       "done_cards": 0
     },
     {
@@ -728,7 +728,7 @@
       "created_at_ms": 1766943471659,
       "updated_at_ms": 1766943471659,
       "progress": 0.0,
-      "total_cards": 417,
+      "total_cards": 463,
       "done_cards": 0
     },
     {
@@ -750,7 +750,7 @@
       "created_at_ms": 1766943526716,
       "updated_at_ms": 1766943526716,
       "progress": 0.0,
-      "total_cards": 744,
+      "total_cards": 748,
       "done_cards": 0
     },
     {
@@ -766,7 +766,7 @@
       "created_at_ms": 1766943564384,
       "updated_at_ms": 1766943564384,
       "progress": 0.0,
-      "total_cards": 140,
+      "total_cards": 143,
       "done_cards": 0
     },
     {
@@ -837,9 +837,160 @@
       "progress": 0.0,
       "total_cards": 54,
       "done_cards": 0
+    },
+    {
+      "id": "1767150727523",
+      "name": "Molecular 1-10",
+      "deck_ids": [
+        1767025811098,
+        1767088071344,
+        1767026323574,
+        1767026913011,
+        1767027876348,
+        1767029179108,
+        1767086187887,
+        1767086992486,
+        1767087149887,
+        1767087932770
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767150727523,
+      "updated_at_ms": 1767150727523,
+      "progress": 0.0,
+      "total_cards": 184,
+      "done_cards": 0
+    },
+    {
+      "id": "1767150841976",
+      "name": "Molecular 11-20",
+      "deck_ids": [
+        1767088261551,
+        1767088649629,
+        1767088889003,
+        1767089027601,
+        1767089373623,
+        1767089609797,
+        1767089974341,
+        1767092506896,
+        1767093424131,
+        1767094553828
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767150841976,
+      "updated_at_ms": 1767150841976,
+      "progress": 0.0,
+      "total_cards": 219,
+      "done_cards": 0
+    },
+    {
+      "id": "1767150883262",
+      "name": "Molecular 21-30",
+      "deck_ids": [
+        1767095369232,
+        1767095629614,
+        1767096208851,
+        1767097174516,
+        1767097470288,
+        1767097698289,
+        1767098162974,
+        1767100942601,
+        1767101149928,
+        1767101341528
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767150883262,
+      "updated_at_ms": 1767150883262,
+      "progress": 0.0,
+      "total_cards": 209,
+      "done_cards": 0
+    },
+    {
+      "id": "1767150907078",
+      "name": "Molecular 31-40",
+      "deck_ids": [
+        1767101636309,
+        1767101961411,
+        1767114346115,
+        1767114798255,
+        1767115651699,
+        1767115805353,
+        1767115956791,
+        1767116075095,
+        1767117124448,
+        1767117675244
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767150907079,
+      "updated_at_ms": 1767150907079,
+      "progress": 0.0,
+      "total_cards": 162,
+      "done_cards": 0
+    },
+    {
+      "id": "1767150926644",
+      "name": "Molecular 41-50",
+      "deck_ids": [
+        1767118133722,
+        1767118492206,
+        1767118917971,
+        1767119088309,
+        1767119658943,
+        1767119892767,
+        1767120459640,
+        1767120590657,
+        1767121024734,
+        1767121313140
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767150926644,
+      "updated_at_ms": 1767150926644,
+      "progress": 0.0,
+      "total_cards": 150,
+      "done_cards": 0
+    },
+    {
+      "id": "1767150988878",
+      "name": "Molecular 51-60",
+      "deck_ids": [
+        1767121668114,
+        1767121916432,
+        1767122218927,
+        1767122528571,
+        1767122719291,
+        1767122893931,
+        1767123109177,
+        1767123555334,
+        1767123701493,
+        1767123904658
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767150988878,
+      "updated_at_ms": 1767150988878,
+      "progress": 0.0,
+      "total_cards": 107,
+      "done_cards": 0
+    },
+    {
+      "id": "1767151015173",
+      "name": "Molecular 61-67",
+      "deck_ids": [
+        1767124072754,
+        1767147374117,
+        1767147765906,
+        1767148337125,
+        1767148579763,
+        1767149030321,
+        1767149814747
+      ],
+      "folder": "Molecular Biology",
+      "created_at_ms": 1767151015173,
+      "updated_at_ms": 1767151015173,
+      "progress": 0.0,
+      "total_cards": 118,
+      "done_cards": 0
     }
   ],
-  "active_session_id": "1766942029452",
+  "active_session_id": "1766942655190",
   "folders": [
     "Genetics",
     "Applied",
@@ -852,6 +1003,7 @@
     "B-paper-point",
     "B-others",
     "P-paper-point",
-    "PVG"
+    "PVG",
+    "Molecular Biology"
   ]
 }

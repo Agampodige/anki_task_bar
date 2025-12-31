@@ -80,13 +80,21 @@
                 </div>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Resizable (Drag edges)</div>
-                        <div class="setting-desc">Enable to allow window resizing</div>
+                        <div class="setting-label">Window Size Presets</div>
+                        <div class="setting-desc">Choose a predefined window size</div>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="resizableToggle">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="setting-control">
+                        <select id="windowSizePreset" class="setting-select">
+                            <option value="custom">Custom</option>
+                            <option value="small">Small (400x300)</option>
+                            <option value="medium">Medium (600x450)</option>
+                            <option value="large">Large (800x600)</option>
+                            <option value="xlarge">Extra Large (1000x750)</option>
+                            <option value="compact">Compact (350x500)</option>
+                            <option value="wide">Wide (1200x400)</option>
+                            <option value="tall">Tall (500x800)</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="setting-row">
                     <div class="setting-info">

@@ -1,3 +1,11 @@
+"""
+Anki Taskbar - A modern task management interface for Anki
+
+Version: 1.0.1
+Author: Agampodige
+License: MIT
+"""
+
 from aqt import mw
 from aqt.qt import QAction, QShortcut, QKeySequence, Qt
 from aqt import gui_hooks
@@ -6,17 +14,24 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineSettings
 
 from .taskui import Taskbar
+from .__version__ import __version__, get_version_info
 
 # Global instance to manage state
 mw.taskbar_widget = None
 mw.taskbar_devtools = None
+
+# Package metadata
+__author__ = "Agampodige"
+__license__ = "MIT"
+__description__ = "A modern task management interface for Anki"
+__url__ = "https://github.com/Agampodige/anki_task_bar"
 
 
 import json
 from pathlib import Path
 
 def toggle_taskbar():
-    print("Toggle Taskbar Triggered!")
+    print(f"Toggle Taskbar Triggered! (v{__version__})")
     
     if mw.taskbar_widget is None:
         mw.taskbar_widget = Taskbar()

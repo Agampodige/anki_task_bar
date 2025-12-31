@@ -1,0 +1,10 @@
+# Core dependencies for Anki Taskbar
+PyQt6>=6.0.0
+PyQt6-WebEngine>=6.0.0
+
+# Development dependencies (optional)
+# Uncomment for development setup
+# pytest>=6.0
+# black>=22.0
+# isort>=5.0
+# mypy>=0.900

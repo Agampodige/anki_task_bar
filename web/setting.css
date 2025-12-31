@@ -1,5 +1,13 @@
 @import url('style.css');
 
+/* Settings page specific drag functionality */
+#window-title-bar .drag-region {
+    -webkit-app-region: drag;
+}
+
+#window-title-bar .window-controls {
+    -webkit-app-region: no-drag;
+}
 
 .settings-container {
     max-width: 700px;
@@ -299,4 +307,75 @@ button.setting-card {
 .link-card-grid {
     display: grid;
     gap: 8px;
+}
+
+.resize-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.radio-option:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-color);
+}
+
+.radio-option input[type="radio"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.radio-option input[type="radio"]:checked {
+    border-color: var(--accent-color);
+    background: var(--accent-color);
+}
+
+.radio-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+}
+
+.radio-option input[type="radio"]:hover {
+    border-color: var(--accent-color);
+}
+
+.radio-label {
+    color: var(--text-primary);
+    font-weight: 500;
+    user-select: none;
+}
+
+.radio-option:has(input:checked) {
+    background: var(--accent-soft);
+    border-color: var(--accent-color);
+}
+
+.radio-option:has(input:checked) .radio-label {
+    color: var(--accent-color);
 }

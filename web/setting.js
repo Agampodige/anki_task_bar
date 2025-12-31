@@ -4,6 +4,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.ctrlKey) e.preventDefault();
     }, { passive: false });
 
+    // Window size presets
+    const WINDOW_SIZE_PRESETS = {
+        custom: { width: 0, height: 0, name: 'Custom' },
+        small: { width: 400, height: 300, name: 'Small (400x300)' },
+        medium: { width: 600, height: 450, name: 'Medium (600x450)' },
+        large: { width: 800, height: 600, name: 'Large (800x600)' },
+        xlarge: { width: 1000, height: 750, name: 'Extra Large (1000x750)' },
+        compact: { width: 350, height: 500, name: 'Compact (350x500)' },
+        wide: { width: 1200, height: 400, name: 'Wide (1200x400)' },
+        tall: { width: 500, height: 800, name: 'Tall (500x800)' }
+    };
+
     const hideToggle = document.getElementById("hideDecksToggle");
     const sessionToggle = document.getElementById("sessionToggle");
     const sessionsEnabledToggle = document.getElementById("sessionsEnabledToggle");
@@ -16,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const confettiToggle = document.getElementById("confettiToggle");
     const hideCompletedSessionsToggle = document.getElementById("hideCompletedSessionsToggle");
     const movableToggle = document.getElementById("movableToggle");
-    const resizableToggle = document.getElementById("resizableToggle");
+    const windowSizePreset = document.getElementById("windowSizePreset");
     const colorBtns = document.querySelectorAll('.color-btn');
 
     // Zoom controls
@@ -58,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
         appearance: 'dark',
         zoomLevel: 1.0,
         movable: true,
-        resizable: true,
+        windowSizePreset: 'custom',
         hideCompletedSessions: false
     };
 
@@ -69,6 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function getSettingsFromUI() {
         const selectedBtn = document.querySelector('.color-btn.selected');
         const theme = selectedBtn ? selectedBtn.dataset.color : 'green';
+        
+        const selectedPreset = windowSizePreset ? windowSizePreset.value : 'custom';
 
         return {
             hideCompleted: !!hideToggle?.checked,
@@ -83,14 +97,25 @@ document.addEventListener("DOMContentLoaded", () => {
             appearance: appearanceToggle?.checked ? 'light' : 'dark',
             zoomLevel: currentZoom,
             movable: !!movableToggle?.checked,
-            resizable: !!resizableToggle?.checked,
+            windowSizePreset: selectedPreset,
             hideCompletedSessions: !!hideCompletedSessionsToggle?.checked
         };
+    }
+
+    function applyWindowSizePreset(preset) {
+        if (!window.py || !window.py.apply_window_size_preset) return;
+        
+        const size = WINDOW_SIZE_PRESETS[preset];
+        if (size && size.width > 0 && size.height > 0) {
+            window.py.apply_window_size_preset(size.width, size.height);
+            console.log(`Applied window size preset: ${size.name} (${size.width}x${size.height})`);
+        }
     }
 
     function saveAllSettings() {
         const settings = getSettingsFromUI();
         document.body.classList.toggle('locked', settings.movable === false);
+        
         const jsonString = JSON.stringify(settings);
 
         document.documentElement.setAttribute('data-theme', settings.theme);
@@ -99,6 +124,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (window.py && typeof window.py.set_always_on_top === 'function') {
             window.py.set_always_on_top(settings.alwaysOnTop);
+        }
+
+        // Apply window size preset if changed
+        if (settings.windowSizePreset !== 'custom') {
+            applyWindowSizePreset(settings.windowSizePreset);
         }
 
         if (window.py && typeof window.py.save_settings_to_file === 'function') {
@@ -115,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function applySettingsToUI(settings) {
         const merged = { ...defaultSettings, ...(settings || {}) };
-        currentSettings = merged;
+        currentSettings = merged
 
         if (hideToggle) hideToggle.checked = !!merged.hideCompleted;
         if (sessionToggle) sessionToggle.checked = !!merged.enableSessions;
@@ -127,8 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (alwaysOnTopToggle) alwaysOnTopToggle.checked = !!merged.alwaysOnTop;
         if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
         if (movableToggle) movableToggle.checked = merged.movable !== false;
-        if (resizableToggle) resizableToggle.checked = merged.resizable !== false;
         if (hideCompletedSessionsToggle) hideCompletedSessionsToggle.checked = !!merged.hideCompletedSessions;
+        if (windowSizePreset) windowSizePreset.value = merged.windowSizePreset || 'custom';
 
         document.body.classList.toggle('locked', merged.movable === false);
 
@@ -158,15 +188,27 @@ document.addEventListener("DOMContentLoaded", () => {
                     applySettingsToUI(defaultSettings);
                 }
             });
+        } else {
+            applySettingsToUI(defaultSettings);
         }
     }
 
     function bindUI() {
-        const toggles = [hideToggle, sessionToggle, sessionsEnabledToggle, showStatsBarToggle,
-            hideSearchBarToggle, compactModeToggle, appearanceToggle, confettiToggle,
-            movableToggle, resizableToggle, hideCompletedSessionsToggle, alwaysOnTopToggle];
-        toggles.forEach(t => t?.addEventListener("change", saveAllSettings));
+        // Bind all toggle switches
+        [hideToggle, sessionToggle, sessionsEnabledToggle, showStatsBarToggle, 
+         hideSearchBarToggle, compactModeToggle, confettiToggle, alwaysOnTopToggle,
+         appearanceToggle, movableToggle, hideCompletedSessionsToggle].forEach(toggle => {
+            if (toggle) {
+                toggle.addEventListener('change', saveAllSettings);
+            }
+        });
 
+        // Bind window size preset
+        if (windowSizePreset) {
+            windowSizePreset.addEventListener('change', saveAllSettings);
+        }
+
+        // Bind zoom controls
         zoomInBtn?.addEventListener('click', () => {
             currentZoom = Math.min(Math.round((currentZoom + 0.1) * 10) / 10, 2.0);
             updateZoomDisplay();
@@ -179,6 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
             saveAllSettings();
         });
 
+        // Bind color buttons
         colorBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 colorBtns.forEach(b => b.classList.remove('selected'));
@@ -187,6 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
+        // Bind action buttons
         openAddonFolderBtn?.addEventListener('click', () => {
             if (window.py && typeof window.py.open_addon_folder === 'function') window.py.open_addon_folder();
         });
@@ -221,6 +265,16 @@ document.addEventListener("DOMContentLoaded", () => {
         startTourBtn?.addEventListener('click', () => {
             window.location.href = 'index.html?startTour=true';
         });
+        
+        // Add drag functionality for settings page
+        const dragRegion = document.querySelector('.drag-region');
+        if (dragRegion) {
+            dragRegion.addEventListener('mousedown', (e) => {
+                if (window.py && typeof window.py.drag_window === 'function') {
+                    window.py.drag_window();
+                }
+            });
+        }
     }
 
     bindUI();

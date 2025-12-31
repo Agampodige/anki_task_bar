@@ -1017,3 +1017,34 @@ class Bridge(QObject):
             print(f"Error in move_session_to_folder: {e}")
             traceback.print_exc()
             return json.dumps({"ok": False, "error": str(e)})
+
+    @pyqtSlot(int, int)
+    def apply_window_size_preset(self, width: int, height: int):
+        """Apply a window size preset to resize the Qt window."""
+        try:
+            if self.parent():
+                # Ensure minimum size constraints
+                min_width = 300
+                min_height = 200
+                width = max(width, min_width)
+                height = max(height, min_height)
+                
+                # Resize the window
+                self.parent().resize(width, height)
+                print(f"Window resized to preset: {width}x{height}")
+        except Exception as e:
+            print(f"Error applying window size preset: {e}")
+            traceback.print_exc()
+
+    @pyqtSlot()
+    def drag_window(self):
+        """Start dragging the window."""
+        try:
+            if self.parent():
+                # Use System Native Move for smooth dragging
+                if self.parent().windowHandle() and hasattr(self.parent().windowHandle(), "startSystemMove"):
+                    self.parent().windowHandle().startSystemMove()
+                print("Window drag started")
+        except Exception as e:
+            print(f"Error starting window drag: {e}")
+            traceback.print_exc()

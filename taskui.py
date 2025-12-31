@@ -98,19 +98,27 @@ class Taskbar(QWidget):
         layout.addWidget(self.web_view)
         self.setLayout(layout)
 
-        # Dragging and Resizing state
+        # Dragging state
         self._dragging = False
-        self._resizing = False
-        self._resize_edge = None
         self._drag_start_pos = QPoint()
         self._expanded = False
         self._normal_size = self.size()
-        self._margin = 15 # Resize margin
-        self._start_geometry = None
+        
+        # Load settings
+        self.load_settings()
 
+    def load_settings(self):
+        """Load window settings from bridge."""
+        try:
+            cfg = self.bridge._read_settings()
+            self.movable = cfg.get("movable", True)
+        except:
+            # Default settings
+            self.movable = True
+
+        # Enable mouse tracking for dragging
         self.setMouseTracking(True)
         self.web_view.setMouseTracking(True)
-        self.web_view.installEventFilter(self)
 
     def set_always_on_top(self, enabled: bool):
         """Update window flags to toggle always on top status."""
@@ -138,117 +146,37 @@ class Taskbar(QWidget):
 
 
     # -----------------------------
-    # Drag & Resize Handling
+    # Drag Handling
     # -----------------------------
     def eventFilter(self, obj, event):
         if obj == self.web_view:
-            # Handle Mouse Movement for Cursor and Resizing
-            if event.type() == QEvent.Type.MouseMove:
-                # Map global position to window local coordinates
-                pos = self.mapFromGlobal(event.globalPosition().toPoint())
-                edge = self._get_edge(pos)
-                self._update_cursor(edge)
-
-                # Forward mouse move event for resizing/dragging
-                if self._resizing or self._dragging:
-                    self.mouseMoveEvent(event)
-                    return True
-                
-            # Handle Mouse Press to start Resize/Drag
-            elif event.type() == QEvent.Type.MouseButtonPress:
-                # Get position in window coordinates
-                pos = self.mapFromGlobal(event.globalPosition().toPoint())
-                edge = self._get_edge(pos)
-                
-                # Only forward if we're on an edge (for resize) or if we're not on an edge (for drag)
-                # We'll let mousePressEvent decide based on position
+            # Handle Mouse Press to start Drag
+            if event.type() == QEvent.Type.MouseButtonPress:
                 self.mousePressEvent(event)
                 return True
                     
             # Handle Mouse Release
             elif event.type() == QEvent.Type.MouseButtonRelease:
-                if self._resizing or self._dragging:
+                if self._dragging:
                     self.mouseReleaseEvent(event)
                     return True
                     
         return super().eventFilter(obj, event)
 
-    def _get_edge(self, pos: QPoint):
-        """Determine which edge the mouse is over using bitwise flags."""
-        rect = self.rect()
-        x, y = pos.x(), pos.y()
-        edge = Qt.Edge(0) # Initialize with no edge
-
-        if x < self._margin:
-            edge |= Qt.Edge.LeftEdge
-        elif x > rect.width() - self._margin:
-            edge |= Qt.Edge.RightEdge
-
-        if y < self._margin:
-            edge |= Qt.Edge.TopEdge
-        elif y > rect.height() - self._margin:
-            edge |= Qt.Edge.BottomEdge
-
-        return edge if edge != Qt.Edge(0) else None
-
-
-    def _update_cursor(self, edge):
-        """ONE consolidated method for cursor updates."""
-        if not edge:
-            # Only reset to arrow if we aren't currently dragging/resizing
-            if not self._resizing and not self._dragging:
-                self.setCursor(Qt.CursorShape.ArrowCursor)
-            return
-
-        is_left = edge & Qt.Edge.LeftEdge
-        is_right = edge & Qt.Edge.RightEdge
-        is_top = edge & Qt.Edge.TopEdge
-        is_bottom = edge & Qt.Edge.BottomEdge
-
-        # Corner logic
-        if (is_left and is_top) or (is_right and is_bottom):
-            self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-        elif (is_right and is_top) or (is_left and is_bottom):
-            self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-        # Side logic
-        elif is_left or is_right:
-            self.setCursor(Qt.CursorShape.SizeHorCursor)
-        elif is_top or is_bottom:
-            self.setCursor(Qt.CursorShape.SizeVerCursor)
-
     def paintEvent(self, event):
         pass
 
     def mousePressEvent(self, event: QMouseEvent):
-        # Get position in window coordinates
-        pos = self.mapFromGlobal(event.globalPosition().toPoint())
-        edge = self._get_edge(pos)
-        
         # Load settings from bridge
-        movable = True
-        resizable = True
+        movable = self.movable
         try:
             cfg = self.bridge._read_settings()
             movable = cfg.get("movable", True)
-            resizable = cfg.get("resizable", True)
+            self.movable = movable
         except: 
             pass
 
-        # 1. Handle Resizing
-        if edge and resizable:
-            # Use System Native Resize (smoother on Windows/Linux)
-            if self.windowHandle() and hasattr(self.windowHandle(), "startSystemResize"):
-                self.windowHandle().startSystemResize(edge)
-            else:
-                # Manual Resize Fallback
-                self._resizing = True
-                self._resize_edge = edge
-                self._drag_start_pos = event.globalPosition().toPoint()
-                self._start_geometry = self.geometry()
-            event.accept()
-            return
-
-        # 2. Handle Dragging/Moving
+        # Handle Dragging/Moving
         if event.button() == Qt.MouseButton.LeftButton and movable:
             # Use System Native Move
             if self.windowHandle() and hasattr(self.windowHandle(), "startSystemMove"):
@@ -262,39 +190,12 @@ class Taskbar(QWidget):
     def mouseMoveEvent(self, event: QMouseEvent):
         global_pos = event.globalPosition().toPoint()
 
-        if self._resizing and self._start_geometry:
-            rect = self._start_geometry
-            diff = global_pos - self._drag_start_pos
-            
-            # Calculate new dimensions
-            new_x, new_y, new_w, new_h = rect.getRect()
-            
-            if self._resize_edge & Qt.Edge.LeftEdge:
-                new_x += diff.x()
-                new_w -= diff.x()
-            elif self._resize_edge & Qt.Edge.RightEdge:
-                new_w += diff.x()
-                
-            if self._resize_edge & Qt.Edge.TopEdge:
-                new_y += diff.y()
-                new_h -= diff.y()
-            elif self._resize_edge & Qt.Edge.BottomEdge:
-                new_h += diff.y()
-            
-            # Apply Constraints (Min Width: 300, Min Height: 200)
-            if new_w >= 300 and new_h >= 200:
-                self.setGeometry(new_x, new_y, new_w, new_h)
-            event.accept()
-
-        elif self._dragging:
+        if self._dragging:
             self.move(global_pos - self._drag_start_pos)
             event.accept()
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         self._dragging = False
-        self._resizing = False
-        self._resize_edge = None
-        self._start_geometry = None
 
     def on_context_menu(self, pos):
         # Optional: Keep context menu logic if needed

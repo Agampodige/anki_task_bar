@@ -530,10 +530,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Init ---
+    // Add drag functionality to all pages
+    function addDragFunctionality() {
+        const dragRegion = document.querySelector('.drag-region');
+        if (dragRegion) {
+            dragRegion.addEventListener('mousedown', (e) => {
+                if (window.py && typeof window.py.drag_window === 'function') {
+                    window.py.drag_window();
+                }
+            });
+        }
+    }
+    
     // Check for QWebChannel
     if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
         new QWebChannel(qt.webChannelTransport, (channel) => {
             window.py = channel.objects.py;
+            
+            // Initialize drag functionality
+            addDragFunctionality();
 
             // Load and apply theme
             if (window.py && typeof window.py.load_settings_from_file === 'function') {

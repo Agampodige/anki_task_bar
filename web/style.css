@@ -159,6 +159,51 @@ body {
     /* Let Qt transparency show through */
 }
 
+/* Resizable window styles */
+
+body.resizable {
+    overflow: visible !important; /* Allow scrollbars when resizable - force override */
+    cursor: default !important;
+}
+
+body.resize-horizontal {
+    resize: horizontal !important;
+}
+
+body.resize-vertical {
+    resize: vertical !important;
+}
+
+body.resize-both {
+    resize: both !important;
+}
+
+body.resizable {
+    overflow: visible !important; /* Allow scrollbars when resizable - force override */
+    cursor: default !important;
+}
+
+body.not-resizable {
+    overflow: hidden !important; /* Prevent scrollbars when not resizable - force override */
+    resize: none !important; /* Disable CSS resize */
+    cursor: default !important;
+}
+
+body.resizable * {
+    cursor: inherit !important;
+}
+
+/* Window edge cursor styles - ensure they take precedence */
+body.resizable:hover {
+    cursor: default !important;
+}
+
+/* Special handling for resize areas - ensure Qt can handle resize */
+body.resizable .window-title-bar,
+body.resizable .app-container {
+    cursor: default !important;
+}
+
 body {
     font-family: var(--font-family);
     color: var(--text-primary);
@@ -193,12 +238,14 @@ body {
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
     padding: 0;
-    /* Don't drag globally so edges are resizable */
+    /* Allow drag region for movable windows but don't block resize */
     -webkit-app-region: no-drag;
     user-select: none;
     flex-shrink: 0;
     z-index: 2000;
     box-sizing: border-box;
+    /* Ensure resize handles can work at edges */
+    pointer-events: auto;
 }
 
 [data-appearance='light'] .window-title-bar {
@@ -211,9 +258,11 @@ body {
     align-items: center;
     height: 100%;
     /* Leave a gap at the top and sides for resizing */
-    margin: 4px 0 0 4px;
+    margin: 2px 0 0 2px; /* Reduced margin for better resize access */
+    /* Enable drag region for window movement */
     -webkit-app-region: drag;
     padding-left: 8px;
+    pointer-events: auto;
 }
 
 .window-title {
