@@ -11,8 +11,53 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // Initialize drag functionality
+    // Add resizable functionality to all pages
+    function addResizableFunctionality() {
+        // Make window resizable by default
+        if (window.py && typeof window.py.make_window_resizable === 'function') {
+            window.py.make_window_resizable();
+        }
+    }
+    
+    // Initialize drag and resizable functionality
     addDragFunctionality();
+    addResizableFunctionality();
+    
+    // Add keyboard shortcuts for navigation
+    function addKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + S: Go to Sessions page
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (window.py && typeof window.py.load_sessions_page === 'function') {
+                    window.py.load_sessions_page();
+                }
+            }
+            // Ctrl/Cmd + H: Go to Home (main page)
+            else if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                e.preventDefault();
+                if (window.py && typeof window.py.load_home_page === 'function') {
+                    window.py.load_home_page();
+                }
+            }
+            // Ctrl/Cmd + ,: Go to Settings page
+            else if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+                e.preventDefault();
+                if (window.py && typeof window.py.load_settings_page === 'function') {
+                    window.py.load_settings_page();
+                }
+            }
+            // Escape: Return to main page if not already there
+            else if (e.key === 'Escape') {
+                if (window.py && typeof window.py.load_home_page === 'function') {
+                    window.py.load_home_page();
+                }
+            }
+        });
+    }
+    
+    // Initialize keyboard shortcuts
+    addKeyboardShortcuts();
     
     function _applySettingsToHomeUI(settings) {
         const cfg = settings || {};

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Window dragging functionality in title bar area
 - Drag window not working
+- setting window dropown meneu Ui fixed
 
 ### Changed
 - Improved event filtering for mouse press events

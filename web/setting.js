@@ -42,8 +42,59 @@ document.addEventListener("DOMContentLoaded", () => {
     const openProjectBtn = document.getElementById("open-project-page");
     const exportSessionsBtn = document.getElementById("export-sessions");
     const importSessionsBtn = document.getElementById("import-sessions");
+    const copySessionsTodoBtn = document.getElementById("copy-sessions-todo");
 
     let currentSettings = {};
+
+    function isSessionCompleted(session) {
+        // Check if session is completed based on progress or card counts
+        const progress = session.progress || 0;
+        const doneCards = session.done_cards || 0;
+        const totalCards = session.total_cards || 0;
+
+        // If it has card counts, use them for accuracy
+        if (totalCards > 0) return doneCards >= totalCards;
+        // Fallback to progress float (0.999 to account for floating point precision)
+        return progress >= 0.999;
+    }
+
+    function generateTodoList(sessions) {
+        return sessions.map(session => {
+            const isCompleted = isSessionCompleted(session);
+            const prefix = isCompleted ? '✅ ' : '';
+            return `${prefix}${session.name || 'Untitled Session'}`;
+        }).join('\n');
+    }
+
+    function copyToClipboard(text) {
+        // Create a temporary textarea element
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed'; // Prevent scrolling to bottom
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        
+        try {
+            textarea.select();
+            const successful = document.execCommand('copy');
+            if (!successful) {
+                throw new Error('Copy command failed');
+            }
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            // Fallback for modern browsers
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).catch(err => {
+                    console.error('Clipboard API failed: ', err);
+                    throw err;
+                });
+            } else {
+                throw err;
+            }
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    }
 
     function setStatus(text, kind) {
         if (!statusEl) return;
@@ -262,6 +313,27 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        copySessionsTodoBtn?.addEventListener('click', () => {
+            if (window.py && typeof window.py.get_sessions === 'function') {
+                window.py.get_sessions((response) => {
+                    try {
+                        const data = JSON.parse(response);
+                        if (data && data.sessions) {
+                            const todoList = generateTodoList(data.sessions);
+                            copyToClipboard(todoList);
+                            setStatus('Session list copied to clipboard', 'ok');
+                        } else {
+                            setStatus('No sessions found', 'error');
+                        }
+                    } catch (e) {
+                        setStatus('Error fetching sessions', 'error');
+                    }
+                });
+            } else {
+                setStatus('Backend not available', 'error');
+            }
+        });
+
         startTourBtn?.addEventListener('click', () => {
             window.location.href = 'index.html?startTour=true';
         });
@@ -275,6 +347,46 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
         }
+        
+        // Add resizable functionality to all pages
+        function addResizableFunctionality() {
+            // Make window resizable by default
+            if (window.py && typeof window.py.make_window_resizable === 'function') {
+                window.py.make_window_resizable();
+            }
+        }
+        
+        // Initialize resizable functionality
+        addResizableFunctionality();
+        
+        // Add keyboard shortcuts for navigation
+        function addKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + S: Go to Sessions page
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    if (window.py && typeof window.py.load_sessions_page === 'function') {
+                        window.py.load_sessions_page();
+                    }
+                }
+                // Ctrl/Cmd + H: Go to Home (main page)
+                else if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                    e.preventDefault();
+                    if (window.py && typeof window.py.load_home_page === 'function') {
+                        window.py.load_home_page();
+                    }
+                }
+                // Escape: Return to main page
+                else if (e.key === 'Escape') {
+                    if (window.py && typeof window.py.load_home_page === 'function') {
+                        window.py.load_home_page();
+                    }
+                }
+            });
+        }
+        
+        // Initialize keyboard shortcuts
+        addKeyboardShortcuts();
     }
 
     bindUI();

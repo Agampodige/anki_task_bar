@@ -15,6 +15,30 @@
     min-height: 400px;
 }
 
+/* Keyboard Navigation Focus Styles */
+.nav-item.keyboard-focus {
+    background: var(--accent-color) !important;
+    color: white !important;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.nav-item.keyboard-focus .nav-item-count {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+.session-card.keyboard-focus {
+    border: 2px solid var(--accent-color) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.session-card.keyboard-focus:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
 /* Animations */
 @keyframes fadeIn {
     from {
@@ -176,6 +200,8 @@
     align-items: center;
     transition: all 0.2s;
     font-size: 0.9rem;
+    pointer-events: auto !important;
+    user-select: none;
 }
 
 .nav-item:hover {

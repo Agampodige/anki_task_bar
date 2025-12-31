@@ -44,6 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Timers ---
     let toastTimer = null;
+    
+    // Make navigation state globally accessible
+    window.navigationState = {
+        currentFocus: 'folders', // 'folders' or 'sessions'
+        focusedFolderIndex: 0,
+        focusedSessionIndex: 0
+    };
 
     // --- Helpers ---
     function showToast(message, type = 'normal') {
@@ -89,11 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function refreshData() {
         try {
+            console.log('Refreshing sessions data...');
             const data = await callBackend('get_sessions');
             if (data) {
+                console.log('Received data:', data);
                 appState.sessions = data.sessions || [];
                 appState.folders = data.folders || [];
                 appState.activeSessionId = data.active_session_id;
+
+                console.log('Sessions loaded:', appState.sessions.length);
+                console.log('Folders loaded:', appState.folders.length);
+                console.log('Active session ID:', appState.activeSessionId);
 
                 // Ensure all sessions have a folder property
                 appState.sessions.forEach(s => {
@@ -110,11 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Rendering ---
     function renderApp() {
-        renderSidebar();
+        renderFolders();
         renderMainContent();
     }
 
-    function renderSidebar() {
+    function renderFolders() {
         if (!foldersListEl) return;
         foldersListEl.innerHTML = '';
 
@@ -126,9 +139,21 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>All Sessions</span>
             <span class="nav-item-count">${appState.sessions.length}</span>
         `;
-        allItem.onclick = () => {
+        allItem.onclick = (e) => {
+            console.log('All Sessions clicked - event:', e);
+            console.log('Event target:', e.target);
+            console.log('Event currentTarget:', e.currentTarget);
+            e.preventDefault();
+            e.stopPropagation();
+            
             appState.currentView = 'all';
-            renderApp();
+            renderSessions();
+            renderFolders();
+            // Update navigation state
+            if (window.navigationState) {
+                window.navigationState.currentFocus = 'sessions';
+                window.navigationState.focusedSessionIndex = 0;
+            }
         };
         foldersListEl.appendChild(allItem);
 
@@ -142,15 +167,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span>Uncategorized</span>
                 <span class="nav-item-count">${uncategorizedCount}</span>
             `;
-            item.onclick = () => {
+            item.onclick = (e) => {
+                console.log('Uncategorized clicked - event:', e);
+                console.log('Event target:', e.target);
+                console.log('Event currentTarget:', e.currentTarget);
+                e.preventDefault();
+                e.stopPropagation();
+                
                 appState.currentView = 'uncategorized';
-                renderApp();
+                renderSessions();
+                renderFolders();
+                // Update navigation state
+                if (window.navigationState) {
+                    window.navigationState.currentFocus = 'sessions';
+                    window.navigationState.focusedSessionIndex = 0;
+                }
             };
             foldersListEl.appendChild(item);
         }
 
         // Folders
-        appState.folders.forEach(folder => {
+        const folders = appState.folders || [];
+        folders.forEach(folder => {
             const count = appState.sessions.filter(s => s.folder === folder).length;
 
             const item = document.createElement('div');
@@ -164,21 +202,41 @@ document.addEventListener('DOMContentLoaded', () => {
             // Context menu for folders (delete/rename) - Simplified for now
             item.oncontextmenu = (e) => {
                 e.preventDefault();
-                if (confirm(`Delete folder "${folder}"?`)) {
-                    deleteFolder(folder);
+                // TODO: Implement folder context menu
+                console.log('Folder context menu for:', folder);
+            };
+
+            item.onclick = (e) => {
+                console.log('Folder clicked:', folder, '- event:', e);
+                console.log('Event target:', e.target);
+                console.log('Event currentTarget:', e.currentTarget);
+                e.preventDefault();
+                e.stopPropagation();
+                
+                appState.currentView = folder;
+                renderSessions();
+                renderFolders();
+                // Reset navigation state when switching folders
+                if (window.navigationState) {
+                    window.navigationState.focusedSessionIndex = 0;
+                    window.navigationState.currentFocus = 'sessions';
                 }
             };
 
-            item.onclick = () => {
-                appState.currentView = folder;
-                renderApp();
-            };
             foldersListEl.appendChild(item);
         });
+        
+        // Reset folder navigation index when folders are re-rendered
+        if (window.navigationState) {
+            window.navigationState.focusedFolderIndex = 0;
+        }
     }
 
     function renderMainContent() {
         if (!sessionsGridEl) return;
+
+        console.log('Rendering sessions for view:', appState.currentView);
+        console.log('Total sessions available:', appState.sessions.length);
 
         // Filter Sessions
         let filtered = [];
@@ -192,6 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
             filtered = appState.sessions.filter(s => s.folder === appState.currentView);
             if (currentViewTitleEl) currentViewTitleEl.textContent = appState.currentView;
         }
+
+        console.log('Filtered sessions count:', filtered.length);
+        console.log('Filtered sessions:', filtered.map(s => ({id: s.id, name: s.name, folder: s.folder})));
 
         // Final filter: Hide Completed Sessions if setting enabled
         const hideCompleted = appState.settings && appState.settings.hideCompletedSessions === true;
@@ -219,6 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="primary-btn" onclick="document.getElementById('new-session-btn').click()" style="margin:auto;">Create Session</button>
                 </div>
             `;
+            // Reset session navigation index when no sessions
+            if (window.navigationState) {
+                window.navigationState.focusedSessionIndex = 0;
+            }
             return;
         }
 
@@ -270,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${String(session.id) === String(appState.activeSessionId)
                     ? '<div class="active-tag">Active</div>'
                     : '<div></div>'}
-                     <button class="card-menu-btn" data-id="${session.id}">
+                     <button class="card-menu-btn session-delete-btn" data-id="${session.id}">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                         </svg>
@@ -311,6 +376,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             sessionsGridEl.appendChild(card);
         });
+        
+        console.log('Rendered session cards count:', sessionsGridEl.children.length);
+        console.log('Sessions grid inner HTML length:', sessionsGridEl.innerHTML.length);
+        
+        // Reset session navigation index when sessions are re-rendered
+        if (window.navigationState) {
+            window.navigationState.focusedSessionIndex = 0;
+        }
     }
 
     // --- Actions ---
@@ -542,13 +615,286 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // Add resizable functionality to all pages
+    function addResizableFunctionality() {
+        // Make window resizable by default
+        if (window.py && typeof window.py.make_window_resizable === 'function') {
+            window.py.make_window_resizable();
+        }
+    }
+    
     // Check for QWebChannel
     if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
         new QWebChannel(qt.webChannelTransport, (channel) => {
             window.py = channel.objects.py;
             
-            // Initialize drag functionality
+            // Initialize drag and resizable functionality
             addDragFunctionality();
+            addResizableFunctionality();
+            
+            // Add keyboard shortcuts for navigation
+            function addKeyboardShortcuts() {
+                console.log('Initializing keyboard shortcuts for sessions page');
+                document.addEventListener('keydown', (e) => {
+                    // Handle folder and session navigation
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                        console.log('Navigation key pressed:', e.key, 'Current focus:', window.navigationState.currentFocus);
+                        handleNavigation(e);
+                    }
+                    // Handle session activation
+                    else if (e.key === 'Enter' || e.key === ' ') {
+                        console.log('Activation key pressed:', e.key);
+                        handleSessionActivation(e);
+                    }
+                    // Handle folder switching
+                    else if (e.key === 'Tab') {
+                        console.log('Tab key pressed');
+                        handleTabNavigation(e);
+                    }
+                    // Ctrl/Cmd + H: Go to Home (main page)
+                    else if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                        e.preventDefault();
+                        if (window.py && typeof window.py.load_home_page === 'function') {
+                            window.py.load_home_page();
+                        }
+                    }
+                    // Ctrl/Cmd + ,: Go to Settings page
+                    else if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+                        e.preventDefault();
+                        if (window.py && typeof window.py.load_settings_page === 'function') {
+                            window.py.load_settings_page();
+                        }
+                    }
+                    // Escape: Return to main page
+                    else if (e.key === 'Escape') {
+                        if (window.py && typeof window.py.load_home_page === 'function') {
+                            window.py.load_home_page();
+                        }
+                    }
+                    // Ctrl/Cmd + N: New session
+                    else if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                        e.preventDefault();
+                        // Trigger new session creation
+                        const createBtn = document.getElementById('new-session-btn');
+                        if (createBtn) {
+                            createBtn.click();
+                        }
+                    }
+                    // Ctrl/Cmd + F: Add new folder
+                    else if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                        e.preventDefault();
+                        const addFolderBtn = document.getElementById('add-folder-btn');
+                        if (addFolderBtn) {
+                            addFolderBtn.click();
+                        }
+                    }
+                    // Delete: Delete selected session or folder
+                    else if (e.key === 'Delete') {
+                        handleDeleteAction(e);
+                    }
+                });
+            }
+            
+            function handleNavigation(e) {
+                e.preventDefault();
+                
+                if (window.navigationState.currentFocus === 'folders') {
+                    handleFolderNavigation(e.key);
+                } else {
+                    handleSessionNavigation(e.key);
+                }
+            }
+            
+            function handleFolderNavigation(key) {
+                const navItems = document.querySelectorAll('#folders-list .nav-item');
+                if (navItems.length === 0) return;
+                
+                console.log('Folder navigation:', key, 'Current index:', window.navigationState.focusedFolderIndex, 'Total items:', navItems.length);
+                
+                if (key === 'ArrowUp') {
+                    window.navigationState.focusedFolderIndex = Math.max(0, window.navigationState.focusedFolderIndex - 1);
+                } else if (key === 'ArrowDown') {
+                    window.navigationState.focusedFolderIndex = Math.min(navItems.length - 1, window.navigationState.focusedFolderIndex + 1);
+                } else if (key === 'ArrowRight' || key === 'Enter' || key === ' ') {
+                    // Switch to sessions view
+                    console.log('Activating folder at index:', window.navigationState.focusedFolderIndex);
+                    const folderItem = navItems[window.navigationState.focusedFolderIndex];
+                    console.log('Folder item found:', folderItem, 'Text content:', folderItem.textContent.trim());
+                    
+                    // Try multiple methods to trigger the folder click
+                    if (folderItem) {
+                        // Method 1: Direct click
+                        try {
+                            folderItem.click();
+                            console.log('Direct click successful');
+                        } catch (e) {
+                            console.log('Direct click failed:', e);
+                        }
+                        
+                        // Method 2: Dispatch click event
+                        try {
+                            const clickEvent = new MouseEvent('click', {
+                                bubbles: true,
+                                cancelable: true,
+                                view: window
+                            });
+                            folderItem.dispatchEvent(clickEvent);
+                            console.log('Event dispatch successful');
+                        } catch (e) {
+                            console.log('Event dispatch failed:', e);
+                        }
+                        
+                        // Method 3: Manually trigger the onclick function
+                        try {
+                            if (folderItem.onclick) {
+                                folderItem.onclick();
+                                console.log('Manual onclick successful');
+                            }
+                        } catch (e) {
+                            console.log('Manual onclick failed:', e);
+                        }
+                    }
+                    
+                    // Switch focus to sessions regardless of click success
+                    window.navigationState.currentFocus = 'sessions';
+                    window.navigationState.focusedSessionIndex = 0;
+                    return;
+                }
+                
+                // Update visual focus
+                updateFolderFocus(navItems);
+                console.log('Updated folder focus to index:', window.navigationState.focusedFolderIndex);
+            }
+            
+            function handleSessionNavigation(key) {
+                const sessionCards = document.querySelectorAll('#sessions-grid .session-card');
+                if (sessionCards.length === 0) return;
+                
+                if (key === 'ArrowUp') {
+                    window.navigationState.focusedSessionIndex = Math.max(0, window.navigationState.focusedSessionIndex - 1);
+                } else if (key === 'ArrowDown') {
+                    window.navigationState.focusedSessionIndex = Math.min(sessionCards.length - 1, window.navigationState.focusedSessionIndex + 1);
+                } else if (key === 'ArrowLeft') {
+                    // Switch back to folders
+                    window.navigationState.currentFocus = 'folders';
+                    updateFolderFocus(document.querySelectorAll('#folders-list .nav-item'));
+                    return;
+                } else if (key === 'ArrowRight' || key === 'Enter' || key === ' ') {
+                    // Activate session
+                    sessionCards[window.navigationState.focusedSessionIndex].click();
+                    return;
+                }
+                
+                // Update visual focus
+                updateSessionFocus(sessionCards);
+            }
+            
+            function updateFolderFocus(navItems) {
+                // Remove existing focus classes
+                navItems.forEach(item => item.classList.remove('keyboard-focus'));
+                
+                // Add focus to current item
+                if (navItems[window.navigationState.focusedFolderIndex]) {
+                    navItems[window.navigationState.focusedFolderIndex].classList.add('keyboard-focus');
+                    navItems[window.navigationState.focusedFolderIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    console.log('Applied keyboard-focus to folder:', navItems[window.navigationState.focusedFolderIndex].textContent.trim());
+                } else {
+                    console.log('No folder found at index:', window.navigationState.focusedFolderIndex);
+                }
+            }
+            
+            function updateSessionFocus(sessionCards) {
+                // Remove existing focus classes
+                sessionCards.forEach(card => card.classList.remove('keyboard-focus'));
+                
+                // Add focus to current card
+                if (sessionCards[window.navigationState.focusedSessionIndex]) {
+                    sessionCards[window.navigationState.focusedSessionIndex].classList.add('keyboard-focus');
+                    sessionCards[window.navigationState.focusedSessionIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+            
+            function handleSessionActivation(e) {
+                e.preventDefault();
+                
+                if (window.navigationState.currentFocus === 'folders') {
+                    const navItems = document.querySelectorAll('#folders-list .nav-item');
+                    if (navItems[window.navigationState.focusedFolderIndex]) {
+                        navItems[window.navigationState.focusedFolderIndex].click();
+                        window.navigationState.currentFocus = 'sessions';
+                        window.navigationState.focusedSessionIndex = 0;
+                    }
+                } else {
+                    const sessionCards = document.querySelectorAll('#sessions-grid .session-card');
+                    if (sessionCards[window.navigationState.focusedSessionIndex]) {
+                        sessionCards[window.navigationState.focusedSessionIndex].click();
+                    }
+                }
+            }
+            
+            function handleTabNavigation(e) {
+                e.preventDefault();
+                
+                // Switch between folders and sessions
+                if (window.navigationState.currentFocus === 'folders') {
+                    window.navigationState.currentFocus = 'sessions';
+                    const sessionCards = document.querySelectorAll('#sessions-grid .session-card');
+                    updateSessionFocus(sessionCards);
+                } else {
+                    window.navigationState.currentFocus = 'folders';
+                    const navItems = document.querySelectorAll('#folders-list .nav-item');
+                    updateFolderFocus(navItems);
+                }
+            }
+            
+            function handleDeleteAction(e) {
+                if (window.navigationState.currentFocus === 'sessions') {
+                    const sessionCards = document.querySelectorAll('#sessions-grid .session-card');
+                    const focusedCard = sessionCards[window.navigationState.focusedSessionIndex];
+                    
+                    if (focusedCard) {
+                        // Find and click the delete button on the focused session
+                        const deleteBtn = focusedCard.querySelector('.session-delete-btn');
+                        if (deleteBtn) {
+                            deleteBtn.click();
+                        }
+                    }
+                }
+            }
+            
+            // Initialize keyboard shortcuts
+            addKeyboardShortcuts();
+            
+            // Add mouse click debugging for folders
+            setTimeout(() => {
+                console.log('Setting up mouse click debugging');
+                const foldersList = document.getElementById('folders-list');
+                if (foldersList) {
+                    foldersList.addEventListener('click', (e) => {
+                        console.log('Folders list clicked:', e.target);
+                        console.log('Target class:', e.target.className);
+                        console.log('Target parent:', e.target.parentElement);
+                        console.log('Is nav-item?', e.target.classList.contains('nav-item'));
+                    });
+                }
+            }, 200);
+            
+            // Initialize navigation state after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                console.log('Setting initial navigation state');
+                window.navigationState.currentFocus = 'folders';
+                window.navigationState.focusedFolderIndex = 0;
+                window.navigationState.focusedSessionIndex = 0;
+                
+                // Apply initial focus to first folder
+                const navItems = document.querySelectorAll('#folders-list .nav-item');
+                if (navItems.length > 0) {
+                    console.log('Found', navItems.length, 'folders, applying initial focus');
+                    updateFolderFocus(navItems);
+                } else {
+                    console.log('No folders found');
+                }
+            }, 100);
 
             // Load and apply theme
             if (window.py && typeof window.py.load_settings_from_file === 'function') {

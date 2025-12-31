@@ -1,5 +1,4 @@
-
-from aqt.qt import QObject, pyqtSlot, QFileDialog
+from aqt.qt import QObject, pyqtSlot, QFileDialog, QUrl
 from aqt import mw
 import json
 import traceback
@@ -10,6 +9,21 @@ from .daily_stats import DailyStatsDB
 
 from aqt.utils import tooltip, showWarning
 import time
+
+# -----------------------------
+# Utility: find web/index.html
+# -----------------------------
+
+def find_web_file(start_dir: Path, filename: str, max_up: int = 10) -> Path | None:
+    current_path = start_dir.resolve()
+    for _ in range(max_up + 1):
+        candidate = current_path / "web" / filename
+        if candidate.is_file():
+            return candidate
+        if current_path.parent == current_path:
+            break
+        current_path = current_path.parent
+    return None
 
 # -----------------------------
 # Logic Helpers (Private)
@@ -1037,14 +1051,43 @@ class Bridge(QObject):
             traceback.print_exc()
 
     @pyqtSlot()
-    def drag_window(self):
-        """Start dragging the window."""
+    def load_home_page(self):
+        """Load the main home page."""
         try:
             if self.parent():
-                # Use System Native Move for smooth dragging
-                if self.parent().windowHandle() and hasattr(self.parent().windowHandle(), "startSystemMove"):
-                    self.parent().windowHandle().startSystemMove()
-                print("Window drag started")
+                addon_dir = Path(__file__).parent
+                html_path = find_web_file(addon_dir, "index.html")
+                if html_path:
+                    self.parent().web_view.load(QUrl.fromLocalFile(str(html_path)))
+                    print("Loaded home page")
         except Exception as e:
-            print(f"Error starting window drag: {e}")
+            print(f"Error loading home page: {e}")
+            traceback.print_exc()
+
+    @pyqtSlot()
+    def load_sessions_page(self):
+        """Load the sessions page."""
+        try:
+            if self.parent():
+                addon_dir = Path(__file__).parent
+                html_path = find_web_file(addon_dir, "sessions.html")
+                if html_path:
+                    self.parent().web_view.load(QUrl.fromLocalFile(str(html_path)))
+                    print("Loaded sessions page")
+        except Exception as e:
+            print(f"Error loading sessions page: {e}")
+            traceback.print_exc()
+
+    @pyqtSlot()
+    def load_settings_page(self):
+        """Load the settings page."""
+        try:
+            if self.parent():
+                addon_dir = Path(__file__).parent
+                html_path = find_web_file(addon_dir, "setting.html")
+                if html_path:
+                    self.parent().web_view.load(QUrl.fromLocalFile(str(html_path)))
+                    print("Loaded settings page")
+        except Exception as e:
+            print(f"Error loading settings page: {e}")
             traceback.print_exc()

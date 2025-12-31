@@ -11,6 +11,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
+    // Add resizable functionality to all pages
+    function addResizableFunctionality() {
+        // Make window resizable by default
+        if (window.py && typeof window.py.make_window_resizable === 'function') {
+            window.py.make_window_resizable();
+        }
+    }
+    
     // Check if we're editing an existing session
     const editingSessionId = sessionStorage.getItem('editingSessionId');
     let isEditing = !!editingSessionId;
@@ -19,8 +27,47 @@ document.addEventListener("DOMContentLoaded", () => {
     new QWebChannel(qt.webChannelTransport, function (channel) {
         window.py = channel.objects.py;
         
-        // Initialize drag functionality
+        // Initialize drag and resizable functionality
         addDragFunctionality();
+        addResizableFunctionality();
+
+        // Add keyboard shortcuts for navigation
+        function addKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + H: Go to Home (main page)
+                if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+                    e.preventDefault();
+                    if (window.py && typeof window.py.load_home_page === 'function') {
+                        window.py.load_home_page();
+                    }
+                }
+                // Ctrl/Cmd + S: Go to Sessions page
+                else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    if (window.py && typeof window.py.load_sessions_page === 'function') {
+                        window.py.load_sessions_page();
+                    }
+                }
+                // Escape: Return to main page
+                else if (e.key === 'Escape') {
+                    if (window.py && typeof window.py.load_home_page === 'function') {
+                        window.py.load_home_page();
+                    }
+                }
+                // Ctrl/Cmd + Enter: Create/Save session
+                else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    // Trigger create/save session button
+                    const createBtn = document.getElementById('create-session-btn');
+                    if (createBtn) {
+                        createBtn.click();
+                    }
+                }
+            });
+        }
+        
+        // Initialize keyboard shortcuts
+        addKeyboardShortcuts();
 
         // Check if sessions are enabled
         if (window.py && typeof window.py.load_settings_from_file === 'function') {

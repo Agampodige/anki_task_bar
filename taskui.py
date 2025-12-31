@@ -42,11 +42,14 @@ class Taskbar(QWidget):
         self.setWindowTitle("Taskbar")
         self.resize(500, 600) # Smaller default size for a widget
 
-        # Floating, Frameless, Transparent
+        # Floating, Frameless, Transparent, Resizable
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, False)
+        
+        # Make window resizable
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint)
         
         # Ensure palette is transparent
         pal = self.palette()
@@ -101,6 +104,9 @@ class Taskbar(QWidget):
         # Dragging state
         self._dragging = False
         self._drag_start_pos = QPoint()
+        self._resizing = False
+        self._resize_start_pos = QPoint()
+        self._resize_start_geometry = self.geometry()
         self._expanded = False
         self._normal_size = self.size()
         
@@ -146,7 +152,7 @@ class Taskbar(QWidget):
 
 
     # -----------------------------
-    # Drag Handling
+    # Drag & Resize Handling
     # -----------------------------
     def eventFilter(self, obj, event):
         if obj == self.web_view:
@@ -155,9 +161,14 @@ class Taskbar(QWidget):
                 self.mousePressEvent(event)
                 return True
                     
+            # Handle Mouse Move for Resize
+            elif event.type() == QEvent.Type.MouseMove:
+                self.mouseMoveEvent(event)
+                return True
+                    
             # Handle Mouse Release
             elif event.type() == QEvent.Type.MouseButtonRelease:
-                if self._dragging:
+                if self._dragging or self._resizing:
                     self.mouseReleaseEvent(event)
                     return True
                     
@@ -186,6 +197,14 @@ class Taskbar(QWidget):
                 self._dragging = True
                 self._drag_start_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
+        
+        # Handle Resizing
+        elif event.button() == Qt.MouseButton.RightButton and movable:
+            # Start resize operation
+            self._resizing = True
+            self._resize_start_pos = event.globalPosition().toPoint()
+            self._resize_start_geometry = self.geometry()
+            event.accept()
 
     def mouseMoveEvent(self, event: QMouseEvent):
         global_pos = event.globalPosition().toPoint()
@@ -193,9 +212,28 @@ class Taskbar(QWidget):
         if self._dragging:
             self.move(global_pos - self._drag_start_pos)
             event.accept()
+        elif self._resizing and self._resize_start_geometry:
+            # Handle window resizing
+            diff = global_pos - self._resize_start_pos
+            new_geometry = self._resize_start_geometry
+            
+            # Calculate new geometry based on mouse movement
+            if diff.x() != 0:
+                new_width = new_geometry.width() + diff.x()
+                if new_width >= 300:  # Minimum width constraint
+                    new_geometry.setWidth(new_width)
+            
+            if diff.y() != 0:
+                new_height = new_geometry.height() + diff.y()
+                if new_height >= 200:  # Minimum height constraint
+                    new_geometry.setHeight(new_height)
+            
+            self.setGeometry(new_geometry)
+            event.accept()
 
     def mouseReleaseEvent(self, event: QMouseEvent):
         self._dragging = False
+        self._resizing = False
 
     def on_context_menu(self, pos):
         # Optional: Keep context menu logic if needed
