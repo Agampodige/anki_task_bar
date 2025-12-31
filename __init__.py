@@ -90,15 +90,16 @@ def init_taskbar_menu():
     # Tools Menu
     mw.form.menuTools.addSeparator()
     action = QAction("Open Taskbar Widget", mw)
-    action.setShortcut("Alt+Q")
+    action.setShortcut(QKeySequence("Alt+Q"))
+    action.setShortcutContext(Qt.ShortcutContext.ApplicationShortcut)
     qconnect(action.triggered, toggle_taskbar)
     mw.form.menuTools.addAction(action)
 
-    # Toggle Taskbar shortcut (Alt+Q)
-    toggle_shortcut = QShortcut(QKeySequence("Alt+Q"), mw)
-    toggle_shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
-    qconnect(toggle_shortcut.activated, toggle_taskbar)
-    mw.taskbar_shortcut = toggle_shortcut
+    # # Toggle Taskbar shortcut (Alt+Q)
+    # toggle_shortcut = QShortcut(QKeySequence("Alt+Q"), mw)
+    # toggle_shortcut.setContext(Qt.ShortcutContext.ApplicationShortcut)
+    # qconnect(toggle_shortcut.activated, toggle_taskbar)
+    # mw.taskbar_shortcut = toggle_shortcut
 
     # DevTools shortcut (F12)
     inspect_shortcut = QShortcut(QKeySequence("F12"), mw)
