@@ -1,33 +1,51 @@
-# Anki Task by Sene🦎
+<img width="827" height="815" alt="image" src="https://github.com/user-attachments/assets/bf31e45e-04ab-439e-8d3e-5a4cca321044" /># Anki Task by Sene🦎
 
 A futuristic, floating task bar for Anki that keeps your spaced repetition goals front and center without being intrusive.
 <img width="1647" height="2246" alt="123123" src="https://github.com/user-attachments/assets/3a61ed43-288b-4549-84a3-03d9201e6357" />
 
 
+## 💡 How to make it work for you
 
-## ✨ Features
+- **Quick Open:** Press `Alt + Q` to instantly show or hide the widget.
+- **Fast Navigation:** Use arrow keys or your mouse to browse decks and start studying immediately.
+- **Pro Tip:** Map `Alt + Q` and arrow keys to a controller using **JoyToKey** (Windows) or **AntiMicroX** (Linux) to make reviews feel game-like.
 
-- **Floating Widget**: A frameless, draggable window that floats above your Anki session
-- **Quick Toggle**: Toggle the widget instantly with **Alt+Q** keyboard shortcut
-- **Visual Progress**: Tracks your "New", "Learn", and "Review" cards with sleek, animated progress bars
-- **Priority Sorting**: Decks are automatically sorted by priority (High → Medium → Low) with visual indicators
-- **Deck Selection**: Choose exactly which decks you want to track using the "Manage Decks" interface
-- **Bulk Actions**: Quickly "Select All", "Deselect All", or "Invert" your tracking list
-- **Search & Filter**: Quickly find decks with the built-in search functionality
-- **Analytics Dashboard**: View daily statistics, completion trends, and study patterns
-- **Seamless Integration**: Click any deck bar to immediately jump into reviewing that deck
-- **Persistent State**: Your deck selections and window position are saved automatically
+---
 
-## 🚀 Usage
+## ✨ Key Features
 
-If you have lots of decks and need a quick way to filter and manage them, this addon is super useful! Here's how to get started:
-- Open Anki
-- Press Alt+Q (or go to Tools → Open Taskbar Widget) to toggle the widget
-- Drag the widget anywhere on your screen by clicking and holding the background
-- Click "Manage Decks" to pick which decks you want to track
-- Set deck priorities (High/Medium/Low) to organize your study flow
-- Hit "Analytics" to check your study stats and trends
-- Press Escape or click "Back to Grinding" to hide the widget and get back to studying
+- **Floating Widget** – Borderless, minimal UI that stays on top
+- **Instant Toggle** – Open or hide the dashboard with `Alt + Q`
+- **Visual Progress** – Animated bars for **New**, **Learn**, and **Review** cards
+- **Priority System** – Mark decks as **High**, **Medium**, or **Low** priority  
+  *(Sessions must be disabled to use deck-level priorities)*
+- **Sessions System** – Group decks into sessions and load them instantly
+- **Session Summary** – View progress for each session at a glance
+- **Built-in Analytics** – Daily stats and trends without leaving Anki
+- **One-Click Study** – Click any deck or progress bar to start studying
+- **Theme Support** – Dark and Light themes
+- **Accent Colors** – Customize the UI accent color
+- **UI Scaling** – Zoom the interface for comfort
+- **Compact Mode** – Optimized for small screens
+- **Window Presets** – Multiple predefined window sizes *(new)*
+- **Always on Top** – Keep the widget visible at all times
+- **Import / Export Sessions** – Backup or share session presets
+- **Export Sessions as Todo Lists**
+- **Keyboard & Mouse Friendly** – Efficient browsing with keys or mouse
+
+> New to the interface? Enable the **Quick Tour** from Settings for a guided walkthrough.
+
+---
+
+## 🛠 How to Use
+
+1. **Open:** Press `Alt + Q` or go to **Tools → Open Taskbar Widget**
+2. **Sessions:** Press `Ctrl + S` or click **Sessions** to create and organize deck groups
+3. **Study:** Progress updates in real time as you complete cards
+4. **Analytics:** Open **Analytics** to track your daily performance
+
+---
+
 
 
 > use a Gamming Controller with keybindings.
