@@ -2,24 +2,19 @@
 Version information for Anki Taskbar
 """
 
-__version__ = "1.0.2"
-__version_info__ = (1, 0, 2)
+__version__ = "1.0.3"
+__version_info__ = (1, 0, 3)
 
 # Version history
 VERSION_HISTORY = {
-    "1.0.3": {
-        "date": "2025-12-31",
-        "changes": [
-            "fix drag issue in setting page",
-            "add drag fix to other ones"
-        ]
-    },
     "1.0.2": {
         "date": "2025-12-31",
         "changes": [
             "Added window size presets",
             "removed resizable setting from CSS",
             "remove resize logic from widget",
+            "fix drag issue in setting page",
+            "add drag fix to other ones"
         ]
     },
     "1.0.1": {

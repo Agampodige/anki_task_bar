@@ -8,18 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- File-based logging system for debugging mouse events
 - Enhanced mouse event tracking with detailed coordinate logging
 - System move and resize fallback detection
+- drag option to main window titile
 
 ### Fixed
 - Window dragging functionality in title bar area
-- CSS `-webkit-app-region` conflicts with Qt event handling
-- JavaScript movable setting application
+- Drag window not working
 
 ### Changed
 - Improved event filtering for mouse press events
-- Enhanced debug output with structured logging
+-
+
+### Removed
+- conflicting css and js with drag window.
 
 ## [1.0.0] - 2025-12-31
 
