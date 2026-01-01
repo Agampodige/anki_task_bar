@@ -685,6 +685,13 @@ h1 {
 [data-appearance='light'] .btn.secondary {
     background-color: #f0f0f0;
     border-color: #d0d0d0;
+    color: #333333;
+}
+
+[data-appearance='light'] .btn.small {
+    background-color: #f0f0f0;
+    border-color: #d0d0d0;
+    color: #333333;
 }
 
 .btn.small {
@@ -692,6 +699,7 @@ h1 {
     font-size: 0.8rem;
     background-color: var(--bg-hover);
     border: 1px solid var(--border-color);
+    border-radius: 8px;
 }
 
 .btn.small:hover {
