@@ -24,10 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Context Menu
     const contextMenu = document.getElementById('context-menu');
+    const folderContextMenu = document.getElementById('folder-context-menu');
     const ctxActivate = document.getElementById('ctx-activate');
     const ctxEdit = document.getElementById('ctx-edit');
     const ctxMove = document.getElementById('ctx-move');
     const ctxDelete = document.getElementById('ctx-delete');
+    const folderCtxDelete = document.getElementById('folder-ctx-delete');
 
     // Status
     const statusToast = document.getElementById('status-toast');
@@ -39,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeSessionId: null,
         currentView: 'all', // 'all', 'uncategorized', or specific folder name
         contextMenuTargetId: null, // ID of session right-clicked
+        contextMenuTargetFolder: null, // Name of folder right-clicked
         settings: {}
     };
 
@@ -199,11 +202,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="nav-item-count">${count}</span>
             `;
 
-            // Context menu for folders (delete/rename) - Simplified for now
+            // Context menu for folders (delete/rename)
             item.oncontextmenu = (e) => {
                 e.preventDefault();
-                // TODO: Implement folder context menu
-                console.log('Folder context menu for:', folder);
+                showFolderContextMenu(e, folder);
             };
 
             item.onclick = (e) => {
@@ -416,9 +418,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function deleteFolder(name) {
+        const sessionCount = appState.sessions.filter(s => s.folder === name).length;
+        const confirmMessage = sessionCount > 0 
+            ? `Are you sure you want to delete the folder "${name}"? ${sessionCount} session(s) in this folder will be moved to Uncategorized.`
+            : `Are you sure you want to delete the empty folder "${name}"?`;
+            
+        if (!confirm(confirmMessage)) return;
+        
         callBackend('delete_folder', [name]).then(res => {
             if (res.ok) {
-                showToast('Folder deleted', 'success');
+                const movedSessions = res.moved_sessions || 0;
+                const message = movedSessions > 0 
+                    ? `Folder deleted. ${movedSessions} session(s) moved to Uncategorized.`
+                    : 'Folder deleted';
+                showToast(message, 'success');
                 if (appState.currentView === name) appState.currentView = 'all';
                 refreshData();
             } else {
@@ -466,6 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showContextMenu(e, sessionId) {
         if (!contextMenu) return;
         appState.contextMenuTargetId = sessionId;
+        appState.contextMenuTargetFolder = null;
 
         // Position menu
         const x = e.clientX;
@@ -484,10 +498,41 @@ document.addEventListener('DOMContentLoaded', () => {
         contextMenu.style.left = `${finalX}px`;
         contextMenu.style.top = `${finalY}px`;
         contextMenu.classList.remove('hidden');
+        
+        // Hide folder context menu if shown
+        if (folderContextMenu) folderContextMenu.classList.add('hidden');
+    }
+
+    function showFolderContextMenu(e, folderName) {
+        if (!folderContextMenu) return;
+        appState.contextMenuTargetFolder = folderName;
+        appState.contextMenuTargetId = null;
+
+        // Position menu
+        const x = e.clientX;
+        const y = e.clientY;
+
+        // Check bounds
+        const menuWidth = 150;
+        const menuHeight = 50;
+
+        let finalX = x;
+        let finalY = y;
+
+        if (x + menuWidth > window.innerWidth) finalX = x - menuWidth;
+        if (y + menuHeight > window.innerHeight) finalY = y - menuHeight;
+
+        folderContextMenu.style.left = `${finalX}px`;
+        folderContextMenu.style.top = `${finalY}px`;
+        folderContextMenu.classList.remove('hidden');
+        
+        // Hide session context menu if shown
+        if (contextMenu) contextMenu.classList.add('hidden');
     }
 
     function hideContextMenu() {
         if (contextMenu) contextMenu.classList.add('hidden');
+        if (folderContextMenu) folderContextMenu.classList.add('hidden');
     }
 
     // --- Event Listeners ---
@@ -569,6 +614,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ctxDelete) {
         ctxDelete.addEventListener('click', () => {
             if (appState.contextMenuTargetId) deleteSession(appState.contextMenuTargetId);
+            hideContextMenu();
+        });
+    }
+
+    if (folderCtxDelete) {
+        folderCtxDelete.addEventListener('click', () => {
+            if (appState.contextMenuTargetFolder) deleteFolder(appState.contextMenuTargetFolder);
             hideContextMenu();
         });
     }

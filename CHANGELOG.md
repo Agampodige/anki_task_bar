@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drag window not working
 - setting window dropown meneu Ui fixed
 - session page folder not selecting
+- folder cannot delete
+
 
 ### Changed
 - Improved event filtering for mouse press events
