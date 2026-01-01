@@ -11,9 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Random Session Arrangement feature
 - Session shuffle Feature
+- Quick tour to introduce session page
 
 ### Fixed
--       
+- Small btn lightheme issue fixed
+- deck select status fixed
+- deck ui overlap fixed (special tanks @Namelesstogo)
 
 ### Changed
 - 

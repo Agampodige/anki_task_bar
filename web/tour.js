@@ -138,6 +138,15 @@ class Tour {
     next() {
         if (this.currentStep < this.steps.length - 1) {
             this.currentStep++;
+            const step = this.steps[this.currentStep];
+            
+            // Check if this step has a navigation instruction
+            if (step.navigateTo) {
+                // Navigate to the next page with tour parameter
+                window.location.href = step.navigateTo;
+                return;
+            }
+            
             this.showStep();
         } else {
             this.finish();
@@ -180,7 +189,7 @@ if (window.location.pathname.endsWith('index.html') || window.location.pathname 
                 {
                     element: '.page-header h1',
                     title: "Today's Tasks",
-                    content: "This is your main dashboard. It shows all the decks that have cards due today."
+                    content: "This is your main dashboard. It shows all of decks that have cards due today."
                 },
                 {
                     element: '#btn-stats',
@@ -221,10 +230,91 @@ if (window.location.pathname.endsWith('index.html') || window.location.pathname 
                     element: '.page-header',
                     title: "Move Anywhere",
                     content: "Did you know? You can drag the widget from the header to place it anywhere on your screen."
+                },
+                {
+                    element: '#btn-sessions',
+                    title: "Next: Sessions Tour",
+                    content: "Now let's explore the Sessions feature! Click Next to continue the tour on the Sessions page.",
+                    navigateTo: 'sessions.html?startTour=true'
                 }
             ];
 
             const tour = new Tour(indexSteps);
+            window.currentTour = tour;
+            tour.start();
+        }
+    });
+}
+
+// Initialize on sessions.html
+if (window.location.pathname.endsWith('sessions.html')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('startTour') === 'true') {
+            const sessionSteps = [
+                {
+                    element: 'body',
+                    title: "Welcome to Sessions!",
+                    content: "Let's explore how to organize and manage your study sessions effectively."
+                },
+                {
+                    element: '.sidebar-header h2',
+                    title: "Session Library",
+                    content: "This is your session management area where you can organize and access all your study sessions."
+                },
+                {
+                    element: '#new-session-btn',
+                    title: "Create New Session",
+                    content: "Click here to create a new study session. You can group related decks together for focused study."
+                },
+                {
+                    element: '#add-folder-btn',
+                    title: "Add Folders",
+                    content: "Organize your sessions by creating folders. Click the + button to add a new folder."
+                },
+                {
+                    element: '#folders-list',
+                    title: "Folder Navigation",
+                    content: "Your folders appear here. Click on any folder to view sessions within it, or 'All Sessions' to see everything."
+                },
+                {
+                    element: '#current-view-title',
+                    title: "Current View",
+                    content: "Shows which folder or view you're currently browsing. The number indicates total sessions in this view."
+                },
+                {
+                    element: '#shuffle-sessions-btn',
+                    title: "Shuffle Sessions",
+                    content: "Randomize the order of your sessions! Great for variety in your study routine. Enable in settings first."
+                },
+                {
+                    element: '.content-header',
+                    title: "Session Cards Area",
+                    content: "Your sessions are displayed as cards in this main area. Each shows the session name, deck count, and current progress."
+                },
+                {
+                    element: 'body',
+                    title: "Session Cards",
+                    content: "Session cards appear here showing each session's details. Right-click on any session card to access options like activate, edit, move to folder, or delete."
+                },
+                {
+                    element: 'body',
+                    title: "Progress Indicator",
+                    content: "Each session card has a visual progress bar showing how much you've completed. Green means you're making great progress!"
+                },
+                {
+                    element: 'body',
+                    title: "Session Statistics",
+                    content: "Each session card shows quick stats including total cards, new cards, learning cards, and review cards for that session."
+                },
+                {
+                    element: '.back-link',
+                    title: "Return Home",
+                    content: "Click the Back button to return to the main dashboard when you're done managing sessions."
+                }
+            ];
+
+            const tour = new Tour(sessionSteps);
             window.currentTour = tour;
             tour.start();
         }
