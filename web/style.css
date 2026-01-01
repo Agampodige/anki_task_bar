@@ -24,7 +24,9 @@
     --learn-color: #F44336;
     --review-color: #4CAF50;
 
-    --font-family: 'Segoe UI', 'Nirmala UI', 'Iskoola Pota', Inter, -apple-system, system-ui, sans-serif;
+    --font-family: 'Segoe UI', 'Nirmala UI', 'Iskoola Pota', 'LKLUG', 'Sri Lanka', 'Dinamo', 'Yaldevi', 'KaputaUnicode', 'FM Abhaya', 'FMArundathi', 'BhashitaComplex', Inter, -apple-system, system-ui, sans-serif;
+    --line-height-base: 1.6;
+    --line-height-tight: 1.4;
     --radius: 12px;
 
     /* Glassmorphism Refinement */
@@ -157,6 +159,13 @@ body {
     /* Prevent scrollbar on main window */
     background: transparent;
     /* Let Qt transparency show through */
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    padding: 0;
+    line-height: var(--line-height-base);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Resizable window styles */
@@ -176,11 +185,6 @@ body.resize-vertical {
 
 body.resize-both {
     resize: both !important;
-}
-
-body.resizable {
-    overflow: visible !important; /* Allow scrollbars when resizable - force override */
-    cursor: default !important;
 }
 
 body.not-resizable {
@@ -209,20 +213,57 @@ body {
     color: var(--text-primary);
     padding: 0;
     margin: 0;
+    line-height: var(--line-height-base);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.app-container {
+    height: calc(100vh - 36px);
+    /* 32px title bar + 4px progress bar */
+    width: 100%;
+    margin-top: 36px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    position: relative;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-
     /* The visible container */
     background-color: var(--bg-color);
     border: 1px solid var(--border-color);
     border-radius: 0;
-    /* Rounded corners for the widget */
+    /* Rounded corners for widget */
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     /* Subtle inner highlight */
     position: relative;
     /* Context for absolute positioning if needed */
+}
+
+/* Sinhala text specific styling */
+.sinhala-text, 
+.task-name, 
+.deck-name, 
+.session-name,
+.modal-title,
+h1, h2, h3, h4, h5, h6 {
+    line-height: var(--line-height-base) !important;
+    word-spacing: 0.05em;
+    letter-spacing: 0.01em;
+}
+
+/* Compact mode adjustments */
+body.compact .sinhala-text,
+body.compact .task-name,
+body.compact .deck-name,
+body.compact .session-name {
+    line-height: var(--line-height-tight) !important;
 }
 
 /* --- Window Title Bar --- */

@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Random Session Arrangement feature
-- Session suffle Feature
+- Session shuffle Feature
 
 ### Fixed
-- 
+-       
 
 ### Changed
 - 
@@ -28,10 +28,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Enhanced mouse event tracking with detailed coordinate logging
 - System move and resize fallback detection
-- drag option to main window titile
+- drag option to main window title
 - copy sessions as todolist to clipboard item to setting page
-- keyboard short keys for session page
-- Ctrl+H(home)   Ctrl+S(session)  Escap(back) UpArrow(move up) DownArrow(Move Down) Enter(select/Active new session) 
+- Keyboard shortcuts for session page:
+  - Ctrl+H: Go to home page
+  - Ctrl+S: Go to sessions page
+  - Escape: Go back to home page
+  - Arrow keys: Navigate between sessions and folders
+  - Enter/Space: Activate selected session
+  - Tab: Switch between folders and sessions
+  - Ctrl+N: Create new session
+  - Ctrl+F: Add new folder
+  - Delete: Delete selected session or folder 
 
 ### Fixed
 - Window dragging functionality in title bar area
