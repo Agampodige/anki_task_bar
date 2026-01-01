@@ -1032,6 +1032,25 @@ class Bridge(QObject):
             traceback.print_exc()
             return json.dumps({"ok": False, "error": str(e)})
 
+    @pyqtSlot(str, result=str)
+    def shuffle_sessions(self, session_ids_json):
+        """Shuffle the order of sessions randomly."""
+        try:
+            import random
+            session_ids = json.loads(session_ids_json) if session_ids_json else []
+            if not isinstance(session_ids, list):
+                return json.dumps({"ok": False, "error": "Invalid session IDs format"})
+            
+            # Shuffle the list randomly
+            random.shuffle(session_ids)
+            
+            print(f"Shuffled {len(session_ids)} sessions")
+            return json.dumps({"ok": True, "shuffled_ids": session_ids})
+        except Exception as e:
+            print(f"Error in shuffle_sessions: {e}")
+            traceback.print_exc()
+            return json.dumps({"ok": False, "error": str(e)})
+
     @pyqtSlot(int, int)
     def apply_window_size_preset(self, width: int, height: int):
         """Apply a window size preset to resize the Qt window."""

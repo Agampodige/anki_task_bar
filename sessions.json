@@ -18,9 +18,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766935815996,
       "updated_at_ms": 1766935815996,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 56,
-      "done_cards": 0
+      "done_cards": 56
     },
     {
       "id": "1766936619253",
@@ -40,9 +40,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936619253,
       "updated_at_ms": 1766936619253,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 43,
-      "done_cards": 0
+      "done_cards": 43
     },
     {
       "id": "1766936663139",
@@ -62,9 +62,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936663140,
       "updated_at_ms": 1766936663140,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 45,
-      "done_cards": 0
+      "done_cards": 45
     },
     {
       "id": "1766936704084",
@@ -101,9 +101,9 @@
       "folder": "Genetics",
       "created_at_ms": 1766936733274,
       "updated_at_ms": 1766936733274,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 25,
-      "done_cards": 0
+      "done_cards": 25
     },
     {
       "id": "1766941062595",
@@ -123,9 +123,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941062595,
       "updated_at_ms": 1766941062595,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 61,
-      "done_cards": 0
+      "done_cards": 61
     },
     {
       "id": "1766941099674",
@@ -145,9 +145,9 @@
       "folder": "Applied",
       "created_at_ms": 1766941099674,
       "updated_at_ms": 1766941099674,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 51,
-      "done_cards": 0
+      "done_cards": 51
     },
     {
       "id": "1766941120372",
@@ -211,9 +211,9 @@
       "folder": "Evolution",
       "created_at_ms": 1766941278153,
       "updated_at_ms": 1766941278153,
-      "progress": 0.0,
+      "progress": 0.299,
       "total_cards": 167,
-      "done_cards": 0
+      "done_cards": 50
     },
     {
       "id": "1766941301577",
@@ -318,9 +318,9 @@
       "folder": "Environmental",
       "created_at_ms": 1766941551664,
       "updated_at_ms": 1766941551664,
-      "progress": 0.0,
+      "progress": 0.046,
       "total_cards": 240,
-      "done_cards": 0
+      "done_cards": 11
     },
     {
       "id": "1766941576191",
@@ -551,9 +551,9 @@
       "folder": "C-paper-point",
       "created_at_ms": 1766942029453,
       "updated_at_ms": 1766942029453,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 266,
-      "done_cards": 0
+      "done_cards": 266
     },
     {
       "id": "1766942053251",
@@ -573,9 +573,9 @@
       "folder": "C-paper-point",
       "created_at_ms": 1766942053251,
       "updated_at_ms": 1766942053251,
-      "progress": 0.0,
+      "progress": 0.049,
       "total_cards": 1335,
-      "done_cards": 0
+      "done_cards": 65
     },
     {
       "id": "1766942076011",
@@ -592,9 +592,9 @@
       "folder": "C-paper-point",
       "created_at_ms": 1766942076012,
       "updated_at_ms": 1766942207603,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 622,
-      "done_cards": 0
+      "done_cards": 622
     },
     {
       "id": "1766942291735",
@@ -629,9 +629,9 @@
       "folder": "C-other",
       "created_at_ms": 1766942291735,
       "updated_at_ms": 1766942291735,
-      "progress": 0.0,
-      "total_cards": 372,
-      "done_cards": 0
+      "progress": 1.0,
+      "total_cards": 222,
+      "done_cards": 222
     },
     {
       "id": "1766942489465",
@@ -686,9 +686,9 @@
       "folder": "B-paper-point",
       "created_at_ms": 1766942655190,
       "updated_at_ms": 1766942655190,
-      "progress": 0.0,
+      "progress": 0.029,
       "total_cards": 346,
-      "done_cards": 0
+      "done_cards": 10
     },
     {
       "id": "1766942859075",
@@ -705,9 +705,9 @@
       "folder": "B-others",
       "created_at_ms": 1766942859076,
       "updated_at_ms": 1766942859076,
-      "progress": 0.0,
+      "progress": 1.0,
       "total_cards": 219,
-      "done_cards": 0
+      "done_cards": 219
     },
     {
       "id": "1766943471659",
@@ -990,7 +990,7 @@
       "done_cards": 0
     }
   ],
-  "active_session_id": "1766941627054",
+  "active_session_id": "1766935815996",
   "folders": [
     "Genetics",
     "Applied",

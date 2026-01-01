@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appearanceToggle = document.getElementById("appearanceToggle");
     const confettiToggle = document.getElementById("confettiToggle");
     const hideCompletedSessionsToggle = document.getElementById("hideCompletedSessionsToggle");
+    const randomSessionsToggle = document.getElementById("randomSessionsToggle");
     const movableToggle = document.getElementById("movableToggle");
     const windowSizePreset = document.getElementById("windowSizePreset");
     const colorBtns = document.querySelectorAll('.color-btn');
@@ -122,7 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
         zoomLevel: 1.0,
         movable: true,
         windowSizePreset: 'custom',
-        hideCompletedSessions: false
+        hideCompletedSessions: false,
+        randomSessions: false
     };
 
     function updateZoomDisplay() {
@@ -149,7 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
             zoomLevel: currentZoom,
             movable: !!movableToggle?.checked,
             windowSizePreset: selectedPreset,
-            hideCompletedSessions: !!hideCompletedSessionsToggle?.checked
+            hideCompletedSessions: !!hideCompletedSessionsToggle?.checked,
+            randomSessions: !!randomSessionsToggle?.checked
         };
     }
 
@@ -209,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (appearanceToggle) appearanceToggle.checked = merged.appearance === 'light';
         if (movableToggle) movableToggle.checked = merged.movable !== false;
         if (hideCompletedSessionsToggle) hideCompletedSessionsToggle.checked = !!merged.hideCompletedSessions;
+        if (randomSessionsToggle) randomSessionsToggle.checked = !!merged.randomSessions;
         if (windowSizePreset) windowSizePreset.value = merged.windowSizePreset || 'custom';
 
         document.body.classList.toggle('locked', merged.movable === false);
@@ -246,9 +250,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bindUI() {
         // Bind all toggle switches
-        [hideToggle, sessionToggle, sessionsEnabledToggle, showStatsBarToggle, 
+        [hideToggle, sessionToggle, sessionsEnabledToggle, showStatsBarToggle,
          hideSearchBarToggle, compactModeToggle, confettiToggle, alwaysOnTopToggle,
-         appearanceToggle, movableToggle, hideCompletedSessionsToggle].forEach(toggle => {
+         appearanceToggle, movableToggle, hideCompletedSessionsToggle, randomSessionsToggle].forEach(toggle => {
             if (toggle) {
                 toggle.addEventListener('change', saveAllSettings);
             }

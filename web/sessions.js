@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Buttons
     const newSessionBtn = document.getElementById('new-session-btn');
     const addFolderBtn = document.getElementById('add-folder-btn');
+    const shuffleSessionsBtn = document.getElementById('shuffle-sessions-btn');
 
     // Modals
     const createFolderModal = document.getElementById('create-folder-modal');
@@ -106,10 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 appState.sessions = data.sessions || [];
                 appState.folders = data.folders || [];
                 appState.activeSessionId = data.active_session_id;
+                appState.settings = await loadSettings(); // Load settings to check random arrangement
 
                 console.log('Sessions loaded:', appState.sessions.length);
                 console.log('Folders loaded:', appState.folders.length);
                 console.log('Active session ID:', appState.activeSessionId);
+                console.log('Random sessions enabled:', appState.settings.randomSessions);
 
                 // Ensure all sessions have a folder property
                 appState.sessions.forEach(s => {
@@ -121,6 +124,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error(e);
             showToast('Failed to load data', 'error');
+        }
+    }
+
+    async function loadSettings() {
+        try {
+            if (window.py && typeof window.py.load_settings_from_file === 'function') {
+                return new Promise((resolve) => {
+                    window.py.load_settings_from_file((data) => {
+                        try {
+                            const settings = data ? JSON.parse(data) : {};
+                            resolve(settings);
+                        } catch (e) {
+                            resolve({});
+                        }
+                    });
+                });
+            } else {
+                return Promise.resolve({});
+            }
+        } catch (e) {
+            console.error('Error loading settings:', e);
+            return Promise.resolve({});
         }
     }
 
@@ -239,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log('Rendering sessions for view:', appState.currentView);
         console.log('Total sessions available:', appState.sessions.length);
+        console.log('Random arrangement enabled:', appState.settings?.randomSessions);
 
         // Filter Sessions
         let filtered = [];
@@ -251,6 +277,18 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             filtered = appState.sessions.filter(s => s.folder === appState.currentView);
             if (currentViewTitleEl) currentViewTitleEl.textContent = appState.currentView;
+        }
+
+        // Apply random arrangement if enabled
+        if (appState.settings?.randomSessions && filtered.length > 1) {
+            console.log('Applying random arrangement to', filtered.length, 'sessions');
+            // Shuffle the filtered sessions
+            const shuffled = [...filtered];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            filtered = shuffled;
         }
 
         console.log('Filtered sessions count:', filtered.length);
@@ -461,6 +499,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    function shuffleCurrentSessions() {
+        // Get current filtered sessions
+        let currentSessions = [];
+        if (appState.currentView === 'all') {
+            currentSessions = [...appState.sessions];
+        } else if (appState.currentView === 'uncategorized') {
+            currentSessions = [...appState.sessions.filter(s => !s.folder)];
+        } else {
+            currentSessions = [...appState.sessions.filter(s => s.folder === appState.currentView)];
+        }
+
+        if (currentSessions.length <= 1) {
+            showToast('Need at least 2 sessions to shuffle', 'error');
+            return;
+        }
+
+        // Shuffle sessions using Fisher-Yates algorithm for better randomness
+        for (let i = currentSessions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentSessions[i], currentSessions[j]] = [currentSessions[j], currentSessions[i]];
+        }
+
+        // Update the sessions in the current view
+        if (appState.currentView === 'all') {
+            appState.sessions = currentSessions;
+        } else if (appState.currentView === 'uncategorized') {
+            // Update uncategorized sessions
+            const otherSessions = appState.sessions.filter(s => s.folder);
+            appState.sessions = [...currentSessions, ...otherSessions];
+        } else {
+            // Update specific folder sessions
+            const otherSessions = appState.sessions.filter(s => s.folder !== appState.currentView);
+            appState.sessions = [...otherSessions, ...currentSessions];
+        }
+
+        showToast('Sessions shuffled', 'success');
+        renderApp();
+    }
+
     function deleteSession(id) {
         if (!confirm('Are you sure you want to delete this session?')) return;
 
@@ -558,10 +635,14 @@ document.addEventListener('DOMContentLoaded', () => {
         addFolderBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (newFolderInput) newFolderInput.value = '';
-            if (createFolderModal) {
-                createFolderModal.classList.remove('hidden');
-                setTimeout(() => newFolderInput && newFolderInput.focus(), 100);
-            }
+            if (createFolderModal) createFolderModal.classList.remove('hidden');
+            setTimeout(() => newFolderInput && newFolderInput.focus(), 100);
+        });
+    }
+
+    if (shuffleSessionsBtn) {
+        shuffleSessionsBtn.addEventListener('click', () => {
+            shuffleCurrentSessions();
         });
     }
 
