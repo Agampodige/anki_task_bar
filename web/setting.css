@@ -209,8 +209,10 @@ button.setting-card {
     font-size: 0.85rem;
     color: var(--text-secondary);
     user-select: none;
-    margin-left: 10px;
+
 }
+
+
 
 .settings-status[data-kind="ok"] {
     color: var(--accent-color);

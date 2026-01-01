@@ -1709,3 +1709,6 @@ mark.highlight {
 .task-tree{
     margin-top: 2px;
 }
+#session-create-status{
+    margin-left: 10px !important;
+}
