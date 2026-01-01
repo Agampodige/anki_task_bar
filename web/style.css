@@ -338,7 +338,7 @@ body.locked .drag-region {
     height: calc(100vh - 36px);
     /* 32px title bar + 4px progress bar */
     width: 100%;
-    margin-top: 36px;
+    margin-top: 32px;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -1705,4 +1705,7 @@ mark.highlight {
 /* Optional: Styling the arrow specifically */
 .back-link::before {
     margin-right: 5px;
+}
+.task-tree{
+    margin-top: 2px;
 }
