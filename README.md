@@ -1,7 +1,8 @@
-<img width="827" height="815" alt="image" src="https://github.com/user-attachments/assets/bf31e45e-04ab-439e-8d3e-5a4cca321044" /># Anki Task by Sene🦎
+# Anki Task by Sene🦎
 
 A futuristic, floating task bar for Anki that keeps your spaced repetition goals front and center without being intrusive.
-<img width="1647" height="2246" alt="123123" src="https://github.com/user-attachments/assets/3a61ed43-288b-4549-84a3-03d9201e6357" />
+
+<img width="2323" height="1827" alt="png" src="https://github.com/user-attachments/assets/de115526-4e26-4b40-a784-44913d4f7d49" />
 
 
 ## 💡 How to make it work for you
@@ -95,9 +96,20 @@ Contributions are welcome! Feel free to:
 - Suggest new features
 - Submit pull requests
 
-## 👤 Author
+## ☕ Support
 
-**Sene**
+If **AnkiTask** helps you stay consistent during exam season, consider supporting development:  
+<div style="margin-top:16px; text-align:center;">
+  <a href="https://ko-fi.com/senee" target="_blank" rel="noopener">
+    <img
+      src="https://ko-fi.com/img/githubbutton_sm.svg"
+      alt="Support me on Ko-fi"
+      style="height:36px;"
+    />
+  </a>
+</div>
+
+---
 
 ## 🙏 Acknowledgments
 
