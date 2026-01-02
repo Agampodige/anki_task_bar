@@ -30,8 +30,29 @@ __url__ = "https://github.com/Agampodige/anki_task_bar"
 import json
 from pathlib import Path
 
+def check_and_start_tour():
+    """Check if first run and start tour if needed"""
+    addon_dir = Path(__file__).parent
+    initialized_file = addon_dir / ".anki_task_bar_initialized"
+    
+    if not initialized_file.exists():
+        print("First time running Anki Taskbar - starting tour...")
+        # Create initialized file to prevent tour on next run
+        initialized_file.write_text("1")
+        # Load the tour page directly
+        html_path = find_web_file(addon_dir, "index.html")
+        if html_path and mw.taskbar_widget:
+            tour_url = QUrl.fromLocalFile(str(html_path))
+            tour_url.setQuery("startTour=true")
+            mw.taskbar_widget.web_view.load(tour_url)
+            return True
+    return False
+
 def toggle_taskbar():
     print(f"Toggle Taskbar Triggered! (v{__version__})")
+    
+    # Check if first run before widget creation
+    is_first_run = (Path(__file__).parent / ".anki_task_bar_initialized").exists() == False
     
     if mw.taskbar_widget is None:
         mw.taskbar_widget = Taskbar()
@@ -49,10 +70,14 @@ def toggle_taskbar():
         mw.taskbar_widget.show()
         mw.taskbar_widget.activateWindow()
 
-        # Soft refresh via JS to preserve scroll position
-        mw.taskbar_widget.web_view.page().runJavaScript(
-            "if(window.refreshData) window.refreshData();"
-        )
+        # Check if first run and start tour
+        if is_first_run:
+            check_and_start_tour()
+        else:
+            # Soft refresh via JS to preserve scroll position
+            mw.taskbar_widget.web_view.page().runJavaScript(
+                "if(window.refreshData) window.refreshData();"
+            )
 
 
 def open_taskbar_devtools():

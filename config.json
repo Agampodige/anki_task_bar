@@ -8,10 +8,10 @@
     "confettiEnabled": false,
     "alwaysOnTop": false,
     "theme": "green",
-    "appearance": "light",
+    "appearance": "dark",
     "zoomLevel": 1,
     "movable": true,
-    "windowSizePreset": "large",
+    "windowSizePreset": "xlarge",
     "hideCompletedSessions": true,
     "randomSessions": false
 }
