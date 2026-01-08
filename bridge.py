@@ -1,11 +1,13 @@
 from aqt.qt import QObject, pyqtSlot, QFileDialog, QUrl
 from aqt import mw
 import json
+import os
 import traceback
 from pathlib import Path
 from typing import Dict, Any, List
 from datetime import date
 from .daily_stats import DailyStatsDB
+from .hot_reload import HotReloadManager
 
 from aqt.utils import tooltip, showWarning
 import time
@@ -275,6 +277,16 @@ class Bridge(QObject):
 
         self.stats_db = DailyStatsDB(db_path)
 
+        # Initialize hot reload manager for development
+        web_dir = data_file.parent / "web"
+        self.hot_reload = HotReloadManager(web_dir, parent=self)
+        self.hot_reload.file_changed.connect(self._on_web_file_changed)
+        
+        # Enable hot reload in development mode (check if Anki is in debug mode)
+        if getattr(mw, 'isDev', False) or os.environ.get('ANKI_TASKBAR_DEV'):
+            self.hot_reload.enable()
+            print("Anki Taskbar: Hot reload enabled in development mode")
+
         try:
             if not self.sessions_path.exists():
                 self.sessions_path.write_text(
@@ -496,7 +508,7 @@ class Bridge(QObject):
     def _calculate_session_progress_stats(self, deck_ids: List[int]) -> Dict[str, Any]:
         """Calculate detailed progress stats for a list of decks."""
         if not deck_ids:
-            return {"progress": 0.0, "total_cards": 0, "done_cards": 0}
+            return {"progress": 1.0, "total_cards": 0, "done_cards": 0}
         
         try:
             current_counts = _get_deck_counts_map()
@@ -540,8 +552,8 @@ class Bridge(QObject):
             if total_due_start > 0:
                 progress = min(1.0, round(total_done / total_due_start, 3))
             elif total_due_start == 0 and total_done == 0:
-                # Nothing to do
-                progress = 0.0 # Or 1.0? 0.0 feels safer for "empty" state.
+                # Nothing to do - consider as completed
+                progress = 1.0
                 
             return {
                 "progress": progress,
@@ -1110,3 +1122,45 @@ class Bridge(QObject):
         except Exception as e:
             print(f"Error loading settings page: {e}")
             traceback.print_exc()
+
+    def _on_web_file_changed(self, file_path: str):
+        """Handle web file changes for hot reload."""
+        try:
+            if self.parent():
+                # Get current URL to determine which page is loaded
+                current_url = self.parent().web_view.url().toString()
+                
+                # Determine which HTML file to reload based on current page
+                if "index.html" in current_url or current_url.endswith("web/"):
+                    html_path = find_web_file(Path(__file__).parent, "index.html")
+                elif "sessions.html" in current_url:
+                    html_path = find_web_file(Path(__file__).parent, "sessions.html")
+                elif "setting.html" in current_url:
+                    html_path = find_web_file(Path(__file__).parent, "setting.html")
+                else:
+                    # Default to index.html
+                    html_path = find_web_file(Path(__file__).parent, "index.html")
+                
+                if html_path:
+                    self.parent().web_view.load(QUrl.fromLocalFile(str(html_path)))
+                    print(f"Hot reload: Reloaded page due to change in {Path(file_path).name}")
+        except Exception as e:
+            print(f"Error in hot reload: {e}")
+
+    @pyqtSlot()
+    def enable_hot_reload(self):
+        """Enable hot reload manually."""
+        if hasattr(self, 'hot_reload'):
+            self.hot_reload.enable()
+            print("Hot reload manually enabled")
+        else:
+            print("Hot reload manager not available")
+
+    @pyqtSlot()
+    def disable_hot_reload(self):
+        """Disable hot reload manually."""
+        if hasattr(self, 'hot_reload'):
+            self.hot_reload.disable()
+            print("Hot reload manually disabled")
+        else:
+            print("Hot reload manager not available")

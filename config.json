@@ -12,6 +12,6 @@
     "zoomLevel": 1,
     "movable": true,
     "windowSizePreset": "xlarge",
-    "hideCompletedSessions": true,
+    "hideCompletedSessions": false,
     "randomSessions": false
 }
