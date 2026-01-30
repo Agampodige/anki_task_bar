@@ -66,9 +66,9 @@ class Tour {
             <div class="tour-footer">
                 <span class="tour-steps">${this.currentStep + 1} / ${this.steps.length}</span>
                 <div class="tour-btn-group">
-                    <button class="btn secondary small" onclick="window.currentTour.skip()">Skip</button>
+                    <button class="btn secondary small" onclick="window.currentTour.skip()">${AnkiTaskbar.t('skip')}</button>
                     <button class="btn primary small" onclick="window.currentTour.next()">
-                        ${this.currentStep === this.steps.length - 1 ? 'Finish' : 'Next'}
+                        ${this.currentStep === this.steps.length - 1 ? AnkiTaskbar.t('finish_btn') : AnkiTaskbar.t('next')}
                     </button>
                 </div>
             </div>
@@ -139,14 +139,14 @@ class Tour {
         if (this.currentStep < this.steps.length - 1) {
             this.currentStep++;
             const step = this.steps[this.currentStep];
-            
+
             // Check if this step has a navigation instruction
             if (step.navigateTo) {
                 // Navigate to the next page with tour parameter
                 window.location.href = step.navigateTo;
                 return;
             }
-            
+
             this.showStep();
         } else {
             this.finish();

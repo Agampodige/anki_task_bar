@@ -44,6 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var appearanceToggle = document.getElementById("appearanceToggle");
+        var langSelector = document.getElementById("languageSelector");
+
         // Clone current settings
         var settings = JSON.parse(JSON.stringify(currentSettings));
 
@@ -51,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         settings.windowSizePreset = preset;
         settings.zoomLevel = zoom;
         settings.appearance = (appearanceToggle && appearanceToggle.checked) ? 'light' : 'dark';
+        settings.language = langSelector ? langSelector.value : 'en';
 
         for (var i = 0; i < toggles.length; i++) {
             var id = toggles[i];
@@ -66,17 +69,17 @@ document.addEventListener("DOMContentLoaded", function () {
         return settings;
     }
 
-    function saveAllSettings() {
+    function saveAllSettings(applyPreset) {
         var settings = getSettingsFromUI();
         currentSettings = settings;
         AnkiTaskbar.applyTheme(settings);
 
         AnkiTaskbar.callBackend('save_settings_to_file', [JSON.stringify(settings)]).then(function (res) {
-            if (res && res.ok) setStatus('Saved', 'ok');
-            else setStatus('Error', 'error');
+            if (res && res.ok) setStatus(AnkiTaskbar.t('saved_status'), 'ok');
+            else setStatus(AnkiTaskbar.t('error_status'), 'error');
         });
 
-        if (settings.windowSizePreset !== 'custom' && window.py && window.py.apply_window_size_preset) {
+        if (applyPreset && settings.windowSizePreset !== 'custom' && window.py && window.py.apply_window_size_preset) {
             var presets = {
                 small: [400, 300], medium: [600, 450], large: [800, 600],
                 xlarge: [1000, 750], compact: [350, 500], wide: [1200, 400], tall: [500, 800]
@@ -107,6 +110,11 @@ document.addEventListener("DOMContentLoaded", function () {
             appToggle.checked = currentSettings.appearance === 'light';
         }
 
+        var langSelector = document.getElementById("languageSelector");
+        if (langSelector) {
+            langSelector.value = currentSettings.language || 'en';
+        }
+
         var presetEl = document.getElementById("windowSizePreset");
         if (presetEl) presetEl.value = currentSettings.windowSizePreset || 'custom';
 
@@ -129,7 +137,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var appearanceToggle = document.getElementById("appearanceToggle");
     if (appearanceToggle) {
-        appearanceToggle.addEventListener('change', saveAllSettings);
+        appearanceToggle.addEventListener('change', function () { saveAllSettings(false); });
+    }
+
+    var langSelector = document.getElementById("languageSelector");
+    if (langSelector) {
+        langSelector.addEventListener('change', function () {
+            var lang = langSelector.value;
+            AnkiTaskbar.loadTranslations(lang, function () {
+                saveAllSettings(false);
+            });
+        });
     }
 
     // --- UI Listeners ---
@@ -139,14 +157,14 @@ document.addEventListener("DOMContentLoaded", function () {
             var el = document.getElementById(id);
             if (el) {
                 el.addEventListener('change', function () {
-                    saveAllSettings();
+                    saveAllSettings(false);
                 });
             }
         })();
     }
 
     var presetEl = document.getElementById("windowSizePreset");
-    if (presetEl) presetEl.addEventListener('change', saveAllSettings);
+    if (presetEl) presetEl.addEventListener('change', function () { saveAllSettings(true); });
 
     var colorBtns = document.querySelectorAll('.color-btn');
     for (var i = 0; i < colorBtns.length; i++) {
@@ -158,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     allBtns[j].classList.remove('selected');
                 }
                 btn.classList.add('selected');
-                saveAllSettings();
+                saveAllSettings(false);
             });
         })();
     }
@@ -171,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var zoom = (parseFloat(val.textContent) + 10) / 100;
             if (zoom <= 2.0) {
                 val.textContent = Math.round(zoom * 100) + '%';
-                saveAllSettings();
+                saveAllSettings(false);
             }
         });
     }
@@ -183,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
             var zoom = (parseFloat(val.textContent) - 10) / 100;
             if (zoom >= 0.5) {
                 val.textContent = Math.round(zoom * 100) + '%';
-                saveAllSettings();
+                saveAllSettings(false);
             }
         });
     }
@@ -199,6 +217,11 @@ document.addEventListener("DOMContentLoaded", function () {
         projectPageBtn.addEventListener('click', function () { if (window.py) window.py.open_link('https://github.com/Agampodige/anki_task_bar'); });
     }
 
+    var coffeeBtn = document.getElementById("buy-me-coffee");
+    if (coffeeBtn) {
+        coffeeBtn.addEventListener('click', function () { if (window.py) window.py.open_link('https://ko-fi.com/senee'); });
+    }
+
     var tourBtn = document.getElementById("start-tour");
     if (tourBtn) {
         tourBtn.addEventListener('click', function () { window.location.href = 'index.html?startTour=true'; });
@@ -207,14 +230,14 @@ document.addEventListener("DOMContentLoaded", function () {
     var exportSessionsBtn = document.getElementById("export-sessions");
     if (exportSessionsBtn) {
         exportSessionsBtn.addEventListener('click', function () {
-            AnkiTaskbar.callBackend('export_sessions').then(function (res) { if (res && res.ok) setStatus('Exported', 'ok'); });
+            AnkiTaskbar.callBackend('export_sessions').then(function (res) { if (res && res.ok) setStatus(AnkiTaskbar.t('saved_status'), 'ok'); });
         });
     }
 
     var importSessionsBtn = document.getElementById("import-sessions");
     if (importSessionsBtn) {
         importSessionsBtn.addEventListener('click', function () {
-            AnkiTaskbar.callBackend('import_sessions').then(function (res) { if (res && res.ok) setStatus('Imported', 'ok'); });
+            AnkiTaskbar.callBackend('import_sessions').then(function (res) { if (res && res.ok) setStatus(AnkiTaskbar.t('saved_status'), 'ok'); });
         });
     }
 

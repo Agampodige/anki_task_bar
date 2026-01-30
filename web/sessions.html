@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sessions</title>
+    <title data-i18n="sessions">Sessions</title>
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="sessions.css">
@@ -18,21 +18,21 @@
     </div>
     <div id="window-title-bar" class="window-title-bar">
         <div class="drag-region">
-            <span class="window-title">Anki Taskbar</span>
+            <span class="window-title" data-i18n="app_title">Anki Taskbar</span>
         </div>
         <div class="window-controls">
-            <button id="win-min" class="win-btn min-btn" title="Minimize">
+            <button id="win-min" class="win-btn min-btn" data-i18n-title="minimize">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor" d="M19 13H5v-2h14v2z" />
                 </svg>
             </button>
-            <button id="win-expand" class="win-btn expand-btn" title="Expand">
+            <button id="win-expand" class="win-btn expand-btn" data-i18n-title="expand">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                 </svg>
             </button>
-            <button id="win-close" class="win-btn close-btn" title="Close">
+            <button id="win-close" class="win-btn close-btn" data-i18n-title="close">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
@@ -48,23 +48,23 @@
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                     </svg>
-                    <span>Back</span>
+                    <span data-i18n="back">Back</span>
                 </a>
-                <h2>Library</h2>
+                <h2 data-i18n="library">Library</h2>
             </div>
 
             <div class="sidebar-actions">
-                <button id="new-session-btn" class="primary-btn full-width">
+                <button id="new-session-btn" class="primary-btn full-width" data-i18n="new_session">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                     </svg>
-                    New Session
+                    <span>New Session</span>
                 </button>
             </div>
 
             <div class="nav-section">
-                <div class="nav-label">FOLDERS <button id="add-folder-btn" class="icon-btn-tiny"
-                        title="Add Folder">+</button></div>
+                <div class="nav-label"><span data-i18n="folders">FOLDERS</span> <button id="add-folder-btn"
+                        class="icon-btn-tiny" data-i18n-title="add_folder">+</button></div>
                 <div id="folders-list" class="nav-list">
                     <!-- Folders populated here -->
                 </div>
@@ -75,21 +75,18 @@
         <div class="main-content">
             <div class="content-header">
                 <div class="header-left">
-                    <h1 id="current-view-title">All Sessions</h1>
+                    <h1 id="current-view-title" data-i18n="all_sessions">All Sessions</h1>
                     <span id="session-count-badge" class="count-badge">0</span>
                 </div>
                 <div class="header-actions">
-                    <button id="shuffle-sessions-btn" class="btn secondary" title="Shuffle session order">
+                    <button id="shuffle-sessions-btn" class="btn secondary" data-i18n-title="shuffle">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                             <path
                                 d="M12 2l3.09 6.26L22 9.27l-6.91-6.26L12 2zm0 14.66l6.91 6.26L12 22l-6.91-6.26L12 16.66z" />
                         </svg>
-                        Shuffle
+                        <span data-i18n="shuffle">Shuffle</span>
                     </button>
                 </div>
-                <!-- <div class="header-actions">
-                    <input type="text" id="search-sessions" placeholder="Search sessions..." class="search-input-small">
-                </div> -->
             </div>
 
             <div id="sessions-grid" class="sessions-grid">
@@ -103,11 +100,12 @@
     <!-- Create Folder Modal -->
     <div id="create-folder-modal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h3>Create Folder</h3>
-            <input type="text" id="new-folder-input" placeholder="Folder Name" class="modal-input" autofocus>
+            <h3 data-i18n="create_folder">Create Folder</h3>
+            <input type="text" id="new-folder-input" data-i18n="folder_name_placeholder" placeholder="Folder Name"
+                class="modal-input" autofocus>
             <div class="modal-footer">
-                <button class="btn secondary" data-action="cancel">Cancel</button>
-                <button class="btn primary" id="confirm-create-folder">Create</button>
+                <button class="btn secondary" data-action="cancel" data-i18n="cancel">Cancel</button>
+                <button class="btn primary" id="confirm-create-folder" data-i18n="create">Create</button>
             </div>
         </div>
     </div>
@@ -115,29 +113,29 @@
     <!-- Move Session Modal -->
     <div id="move-modal" class="modal-overlay hidden">
         <div class="modal-card">
-            <h3>Move Session</h3>
-            <p class="modal-subtitle">Select a destination folder</p>
+            <h3 data-i18n="move_session">Move Session</h3>
+            <p class="modal-subtitle" data-i18n="select_destination_folder">Select a destination folder</p>
             <div id="folder-selection-list" class="folder-selection-list">
                 <!-- List of folders to pick from -->
             </div>
             <div class="modal-footer">
-                <button class="btn secondary" id="cancel-move">Cancel</button>
+                <button class="btn secondary" id="cancel-move" data-i18n="cancel">Cancel</button>
             </div>
         </div>
     </div>
 
     <!-- Context Menu (Custom) -->
     <div id="context-menu" class="context-menu hidden">
-        <div class="menu-item" id="ctx-activate">Activate</div>
-        <div class="menu-item" id="ctx-edit">Edit</div>
-        <div class="menu-item" id="ctx-move">Move to Folder...</div>
+        <div class="menu-item" id="ctx-activate" data-i18n="activate">Activate</div>
+        <div class="menu-item" id="ctx-edit" data-i18n="edit">Edit</div>
+        <div class="menu-item" id="ctx-move" data-i18n="move_to_folder">Move to Folder...</div>
         <div class="menu-divider"></div>
-        <div class="menu-item destructive" id="ctx-delete">Delete</div>
+        <div class="menu-item destructive" id="ctx-delete" data-i18n="delete">Delete</div>
     </div>
 
     <!-- Folder Context Menu (Custom) -->
     <div id="folder-context-menu" class="context-menu hidden">
-        <div class="menu-item" id="folder-ctx-delete">Delete Folder</div>
+        <div class="menu-item" id="folder-ctx-delete" data-i18n="delete_folder">Delete Folder</div>
     </div>
 
     <!-- Status Toast -->

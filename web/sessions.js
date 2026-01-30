@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // "All Sessions" item
         var allItem = document.createElement('div');
         allItem.className = 'nav-item' + (!window.currentFolderId ? ' active' : '');
-        allItem.innerHTML = '<span>All Sessions</span>';
+        allItem.innerHTML = '<span>' + AnkiTaskbar.t('all_sessions') + '</span>';
         allItem.onclick = function () {
             window.currentFolderId = null;
             window.refreshData();
@@ -59,8 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 item.oncontextmenu = function (e) {
                     e.preventDefault();
                     showContextMenu(e, [
-                        { label: 'Rename', action: function () { renameFolder(folderName); } },
-                        { label: 'Delete', action: function () { deleteFolder(folderName); }, danger: true }
+                        { label: AnkiTaskbar.t('rename'), action: function () { renameFolder(folderName); } },
+                        { label: AnkiTaskbar.t('delete'), action: function () { deleteFolder(folderName); }, danger: true }
                     ]);
                 };
 
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var titleEl = document.getElementById('current-view-title');
-        if (titleEl) titleEl.textContent = window.currentFolderId || 'All Sessions';
+        if (titleEl) titleEl.textContent = window.currentFolderId || AnkiTaskbar.t('all_sessions');
 
         var badgeEl = document.getElementById('session-count-badge');
         if (badgeEl) badgeEl.textContent = String(sessions.length);
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (sessions.length === 0) {
             var empty = document.createElement('div');
             empty.className = 'empty-state';
-            empty.textContent = 'No sessions found in this folder.';
+            empty.textContent = AnkiTaskbar.t('no_sessions_found');
             fragment.appendChild(empty);
         } else {
             for (var i = 0; i < sessions.length; i++) {
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         '<div class="session-progress-bar" style="width: ' + progress + '%"></div>' +
                         '</div>' +
                         '</div>' +
-                        '<div class="card-meta">' + deckCount + ' Decks</div>';
+                        '<div class="card-meta">' + deckCount + ' ' + AnkiTaskbar.t('decks') + '</div>';
 
                     card.innerHTML = html;
 
@@ -141,10 +141,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     dots.onclick = function (e) {
                         e.stopPropagation();
                         showContextMenu(e, [
-                            { label: 'Edit', action: function () { editSession(s.id); } },
-                            { label: 'Move to Folder', action: function () { moveSession(s.id); } },
-                            { label: 'Duplicate', action: function () { duplicateSession(s.id); } },
-                            { label: 'Delete', action: function () { deleteSession(s.id); }, danger: true }
+                            { label: AnkiTaskbar.t('edit'), action: function () { editSession(s.id); } },
+                            { label: AnkiTaskbar.t('move_to_folder'), action: function () { moveSession(s.id); } },
+                            { label: AnkiTaskbar.t('duplicate'), action: function () { duplicateSession(s.id); } },
+                            { label: AnkiTaskbar.t('delete'), action: function () { deleteSession(s.id); }, danger: true }
                         ]);
                     };
 
@@ -262,12 +262,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 sessions[window.sessionFocusIndex].click();
             } else if (e.key === 'm' || e.key === 'c') {
                 // Open menu for focused card
-                var s = sessions[window.sessionFocusIndex];
-                if (s) {
-                    var menuBtn = s.querySelector('.card-menu-btn');
+                var sIdx = window.sessionFocusIndex;
+                if (sessions[sIdx]) {
+                    var menuBtn = sessions[sIdx].querySelector('.card-menu-btn');
                     if (menuBtn) {
                         var rect = menuBtn.getBoundingClientRect();
-                        showContextMenu({ pageX: rect.left, pageY: rect.bottom }, getContextMenuItemsForSession(window.sessionData.sessions[window.sessionFocusIndex].id));
+                        showContextMenu({ pageX: rect.left, pageY: rect.bottom }, getContextMenuItemsForSession(sessions[sIdx].id));
                     }
                 }
             }
@@ -278,10 +278,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getContextMenuItemsForSession(id) {
         return [
-            { label: 'Edit', action: function () { editSession(id); } },
-            { label: 'Move to Folder', action: function () { moveSession(id); } },
-            { label: 'Duplicate', action: function () { duplicateSession(id); } },
-            { label: 'Delete', action: function () { deleteSession(id); }, danger: true }
+            { label: AnkiTaskbar.t('edit'), action: function () { editSession(id); } },
+            { label: AnkiTaskbar.t('move_to_folder'), action: function () { moveSession(id); } },
+            { label: AnkiTaskbar.t('duplicate'), action: function () { duplicateSession(id); } },
+            { label: AnkiTaskbar.t('delete'), action: function () { deleteSession(id); }, danger: true }
         ];
     }
 
@@ -289,14 +289,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- Actions ---
     function renameFolder(currentName) {
-        var newName = prompt('New folder name:', currentName);
+        var newName = prompt(AnkiTaskbar.t('new_folder_name'), currentName);
         if (newName && newName !== currentName) {
             AnkiTaskbar.callBackend('rename_folder', [currentName, newName]).then(window.refreshData);
         }
     }
 
     function deleteFolder(name) {
-        if (confirm('Are you sure you want to delete this folder? Sessions will be moved to "All Sessions".')) {
+        if (confirm(AnkiTaskbar.t('delete_folder_confirm'))) {
             AnkiTaskbar.callBackend('delete_folder', [name]).then(window.refreshData);
         }
     }
@@ -307,7 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function deleteSession(id) {
-        if (confirm('Are you sure you want to delete this session?')) {
+        if (confirm(AnkiTaskbar.t('delete_session_confirm'))) {
             AnkiTaskbar.callBackend('delete_session', [String(id)]).then(window.refreshData);
         }
     }
@@ -318,7 +318,7 @@ document.addEventListener("DOMContentLoaded", function () {
             alert('Create a folder first!');
             return;
         }
-        var folderName = prompt('Enter folder name to move to (available: ' + folders.join(', ') + '):');
+        var folderName = prompt(AnkiTaskbar.t('select_destination_folder') + ' (available: ' + folders.join(', ') + '):');
         if (folderName !== null) {
             var allSessions = window.sessionData.sessions || [];
             var session = null;
@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var addFolderBtn = document.getElementById('add-folder-btn');
     if (addFolderBtn) {
         addFolderBtn.onclick = function () {
-            var name = prompt('Folder name:');
+            var name = prompt(AnkiTaskbar.t('folder_name_prompt'));
             if (name) {
                 AnkiTaskbar.callBackend('create_folder', [name]).then(window.refreshData);
             }

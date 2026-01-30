@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deck Selection</title>
+    <title data-i18n="select_decks">Deck Selection</title>
     <!-- Required for Python-JS communication -->
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <!-- Custom styles and scripts -->
@@ -19,21 +19,21 @@
     </div>
     <div id="window-title-bar" class="window-title-bar">
         <div class="drag-region">
-            <span class="window-title">Anki Taskbar</span>
+            <span class="window-title" data-i18n="app_title">Anki Taskbar</span>
         </div>
         <div class="window-controls">
-            <button id="win-min" class="win-btn min-btn" title="Minimize">
+            <button id="win-min" class="win-btn min-btn" data-i18n-title="minimize">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor" d="M19 13H5v-2h14v2z" />
                 </svg>
             </button>
-            <button id="win-expand" class="win-btn expand-btn" title="Expand">
+            <button id="win-expand" class="win-btn expand-btn" data-i18n-title="expand">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                 </svg>
             </button>
-            <button id="win-close" class="win-btn close-btn" title="Close">
+            <button id="win-close" class="win-btn close-btn" data-i18n-title="close">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
@@ -48,16 +48,16 @@
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                     </svg>
-                    <span>Back</span>
+                    <span data-i18n="back">Back</span>
                 </a>
-                <h1>Select Decks</h1>
+                <h1 data-i18n="select_decks">Select Decks</h1>
             </div>
             <button id="save-selection-btn" class="btn primary-action">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                     <path
                         d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
                 </svg>
-                <span>Save Selection</span>
+                <span data-i18n="save_selection">Save Selection</span>
             </button>
         </div>
 
@@ -68,8 +68,8 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input type="text" id="search-input" class="search-input" placeholder="Search decks..." autocomplete="off"
-                autocorrect="off" spellcheck="false">
+            <input type="text" id="search-input" class="search-input" data-i18n="search_decks_placeholder"
+                placeholder="Search decks..." autocomplete="off" autocorrect="off" spellcheck="false">
             <button id="search-clear" class="search-clear-btn" style="display: none;">&times;</button>
             <span class="search-hint">/</span>
         </div>
@@ -81,9 +81,9 @@
 
         <div class="session-create-row">
             <div class="input-with-action">
-                <input type="text" id="new-session-name" class="search-input" placeholder="New session name"
-                    autocomplete="off" />
-                <button id="create-session-btn" class="btn primary-action">
+                <input type="text" id="new-session-name" class="search-input" data-i18n="new_session_name_placeholder"
+                    placeholder="New session name" autocomplete="off" />
+                <button id="create-session-btn" class="btn primary-action" data-i18n="create_session">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                         <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                     </svg>
@@ -95,27 +95,28 @@
 
         <div class="toolbar glass">
             <div class="toolbar-group">
-                <div class="group-label">Selection</div>
+                <div class="group-label" data-i18n="selection">Selection</div>
                 <div class="btn-group">
-                    <button id="btn-all" class="btn small" title="Select All">All</button>
-                    <button id="btn-none" class="btn small" title="Deselect All">None</button>
-                    <button id="btn-invert" class="btn small" title="Invert Selection">Invert</button>
+                    <button id="btn-all" class="btn small" data-i18n-title="all" data-i18n="all">All</button>
+                    <button id="btn-none" class="btn small" data-i18n-title="none" data-i18n="none">None</button>
+                    <button id="btn-invert" class="btn small" data-i18n-title="invert"
+                        data-i18n="invert">Invert</button>
                 </div>
             </div>
             <div class="toolbar-group">
-                <div class="group-label">Tree</div>
+                <div class="group-label" data-i18n="tree">Tree</div>
                 <div class="btn-group">
-                    <button id="btn-expand-all" class="btn small secondary" title="Expand All Tree">
+                    <button id="btn-expand-all" class="btn small secondary" data-i18n-title="expand">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
                         </svg>
-                        <span>Expand</span>
+                        <span data-i18n="expand">Expand</span>
                     </button>
-                    <button id="btn-collapse-all" class="btn small secondary" title="Collapse All Tree">
+                    <button id="btn-collapse-all" class="btn small secondary" data-i18n-title="collapse">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                             <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z" />
                         </svg>
-                        <span>Collapse</span>
+                        <span data-i18n="collapse">Collapse</span>
                     </button>
                 </div>
             </div>
@@ -123,7 +124,7 @@
 
 
         <div id="empty-state" class="empty-state" style="display: none;">
-            <p>No decks found matching your search.</p>
+            <p data-i18n="no_decks_found_matching">No decks found matching your search.</p>
         </div>
         <div id="deck-tree-container"></div>
     </div>

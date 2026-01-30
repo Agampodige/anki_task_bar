@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     var ampm = hours >= 12 ? 'PM' : 'AM';
                     var displayHours = hours % 12 || 12;
                     var displayMinutes = minutes < 10 ? '0' + minutes : minutes;
-                    finishTimeStr = 'Finish: ' + displayHours + ':' + displayMinutes + ' ' + ampm;
+                    finishTimeStr = AnkiTaskbar.t('finish') + ': ' + displayHours + ':' + displayMinutes + ' ' + ampm;
                 }
 
                 window.selectedDecksStats = {
@@ -138,7 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (completedContainer) completedContainer.innerHTML = "";
 
             if (!data || data.length === 0) {
-                container.innerHTML = '<p class="placeholder">No decks selected. Go to "Manage Decks" to add tasks.</p>';
+                container.innerHTML = '<p class="placeholder">' + AnkiTaskbar.t('no_decks_selected') + '</p>';
                 if (completedSection) completedSection.style.display = 'none';
                 return;
             }
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Render Decks
             if (activeDecks.length === 0) {
-                container.innerHTML = '<p class="placeholder">All decks completed! 🎉</p>';
+                container.innerHTML = '<p class="placeholder">' + AnkiTaskbar.t('all_decks_completed') + '</p>';
                 if (window.triggerConfetti && AnkiTaskbar.settings.confettiEnabled !== false) {
                     window.triggerConfetti(100);
                 }
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 li.className = 'task-item completed';
                 li.className += ' priority-' + getPriority(t.deckId);
                 li.innerHTML = '<div class="task-progress-bar" style="width:100%"></div>' +
-                    '<div class="task-content"><span class="task-name">' + t.name + '</span><span class="counts status-completed">Completed</span></div>';
+                    '<div class="task-content"><span class="task-name">' + t.name + '</span><span class="counts status-completed">' + AnkiTaskbar.t('completed') + '</span></div>';
                 li.onclick = function () { if (window.py) window.py.start_review(String(t.deckId)); };
                 ul.appendChild(li);
             })();
@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         var refreshStats = function () {
             var t = window._todayTotals || { total_cards: 0, total_reviews: 0 };
-            if (titleEl) titleEl.textContent = mode === 0 ? 'Total Cards Today' : 'Total Reviews Today';
+            if (titleEl) titleEl.textContent = mode === 0 ? AnkiTaskbar.t('total_cards_today') : AnkiTaskbar.t('total_reviews_today');
             if (countDisp) countDisp.textContent = String(mode === 0 ? t.total_cards : t.total_reviews);
         };
 

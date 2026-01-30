@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var checkedLabels = document.querySelectorAll('input.deck-checkbox:checked');
         var count = checkedLabels.length;
         var counter = document.getElementById('selection-count');
-        if (counter) counter.textContent = count + ' deck' + (count !== 1 ? 's' : '') + ' selected';
+        if (counter) counter.textContent = AnkiTaskbar.t('n_decks_selected').replace('%n', count);
         var counterContainer = document.getElementById('selection-counter');
         if (counterContainer) counterContainer.style.display = count > 0 ? 'block' : 'none';
     }
@@ -168,7 +168,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     var idSet = {};
                     for (var j = 0; j < deckIds.length; j++) idSet[deckIds[j]] = true;
                     restoreCheckboxes(idSet);
-                    if (createBtn) createBtn.textContent = 'Save Changes';
+                    if (createBtn) {
+                        var span = createBtn.querySelector('span');
+                        if (span) span.textContent = AnkiTaskbar.t('save_changes');
+                        else createBtn.textContent = AnkiTaskbar.t('save_changes');
+                    }
                 }
             });
         } else {
@@ -202,14 +206,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 ids.push(Number(checkedInputs[i].value));
             }
             saveBtn.disabled = true;
-            saveBtn.textContent = 'Saving...';
+            var originalText = saveBtn.innerHTML;
+            saveBtn.textContent = AnkiTaskbar.t('saving');
             AnkiTaskbar.callBackend('save_selected_decks', [JSON.stringify(ids)]).then(function (res) {
                 if (res && res.ok) {
-                    saveBtn.textContent = 'Saved!';
+                    saveBtn.textContent = AnkiTaskbar.t('saved_status');
                     setTimeout(function () { window.location.href = 'index.html'; }, 500);
                 } else {
                     saveBtn.disabled = false;
-                    saveBtn.textContent = 'Error';
+                    saveBtn.innerHTML = originalText;
+                    setStatus(AnkiTaskbar.t('error_status'), 'error');
                 }
             });
         };
@@ -218,10 +224,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (createBtn) {
         createBtn.onclick = function () {
             var name = nameInput.value.trim();
-            if (!name) return setStatus('Name required', 'error');
+            if (!name) return setStatus(AnkiTaskbar.t('name_required'), 'error');
 
             var checkedInputs = document.querySelectorAll('input.deck-checkbox:checked');
-            if (checkedInputs.length === 0) return setStatus('Select decks', 'error');
+            if (checkedInputs.length === 0) return setStatus(AnkiTaskbar.t('select_decks_error'), 'error');
 
             var ids = [];
             for (var i = 0; i < checkedInputs.length; i++) {
@@ -233,12 +239,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             AnkiTaskbar.callBackend('upsert_session', [JSON.stringify(payload)]).then(function (res) {
                 if (res && res.ok) {
-                    setStatus(isEditing ? 'Saved' : 'Created', 'ok');
+                    setStatus(isEditing ? AnkiTaskbar.t('saved_status') : AnkiTaskbar.t('created'), 'ok');
                     sessionStorage.removeItem('editingSessionId');
                     setTimeout(function () { window.location.href = isEditing ? 'sessions.html' : 'index.html'; }, 1000);
                 } else {
                     createBtn.disabled = false;
-                    setStatus('Error', 'error');
+                    setStatus(AnkiTaskbar.t('error_status'), 'error');
                 }
             });
         };

@@ -11,8 +11,9 @@
     "appearance": "dark",
     "zoomLevel": 1,
     "movable": true,
-    "windowSizePreset": "xlarge",
+    "windowSizePreset": "large",
     "hideCompletedSessions": false,
     "randomSessions": false,
-    "confetti": false
+    "confetti": false,
+    "language": "en"
 }

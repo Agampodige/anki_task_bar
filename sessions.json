@@ -630,9 +630,9 @@
       "folder": "C-other",
       "created_at_ms": 1766942291735,
       "updated_at_ms": 1766942291735,
-      "progress": 0.788,
+      "progress": 1.0,
       "total_cards": 66,
-      "done_cards": 52
+      "done_cards": 66
     },
     {
       "id": "1766942489465",
@@ -851,12 +851,12 @@
       "folder": "C-paper-point",
       "created_at_ms": 1768789831857,
       "updated_at_ms": 1768789831857,
-      "progress": 0.017,
+      "progress": 1.0,
       "total_cards": 120,
-      "done_cards": 2
+      "done_cards": 120
     }
   ],
-  "active_session_id": "1768789831857",
+  "active_session_id": "1766942029452",
   "folders": [
     "Genetics",
     "Applied",

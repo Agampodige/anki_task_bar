@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taskbar Home</title>
+    <title data-i18n="app_title">Taskbar Home</title>
     <!-- Required for Python-JS communication -->
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <!-- Custom styles and scripts -->
@@ -20,21 +20,21 @@
     </div>
     <div id="window-title-bar" class="window-title-bar">
         <div class="drag-region">
-            <span class="window-title">Anki Taskbar</span>
+            <span class="window-title" data-i18n="app_title">Anki Taskbar</span>
         </div>
         <div class="window-controls">
-            <button id="win-min" class="win-btn min-btn" title="Minimize">
+            <button id="win-min" class="win-btn min-btn" data-i18n-title="minimize">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor" d="M19 13H5v-2h14v2z" />
                 </svg>
             </button>
-            <button id="win-expand" class="win-btn expand-btn" title="Expand">
+            <button id="win-expand" class="win-btn expand-btn" data-i18n-title="expand">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                 </svg>
             </button>
-            <button id="win-close" class="win-btn close-btn" title="Close">
+            <button id="win-close" class="win-btn close-btn" data-i18n-title="close">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
@@ -45,33 +45,34 @@
     <div class="app-container" style="padding: 20px;">
         <div class="page-header">
             <div class="header-left">
-                <h1>Today's Tasks</h1>
+                <h1 data-i18n="todays_tasks">Today's Tasks</h1>
             </div>
             <div class="header-actions">
                 <!-- Stats Button -->
-                <button id="btn-stats" class="icon-btn" title="View Stats">
+                <button id="btn-stats" class="icon-btn" data-i18n-title="view_stats">
                     <svg viewBox="0 0 24 24" width="24" height="24">
                         <path fill="currentColor"
                             d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" />
                     </svg>
                 </button>
                 <!-- Manage Decks Button -->
-                <a id="btn-manage" class="icon-btn" href="select-deck.html" title="Manage Decks">
+                <a id="btn-manage" class="icon-btn" href="select-deck.html" data-i18n-title="manage_decks">
                     <svg viewBox="0 0 24 24" width="24" height="24">
                         <path fill="currentColor"
                             d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
                     </svg>
                 </a>
-                <a id="btn-sessions" class="icon-btn" href="sessions.html" title="Sessions" style="display: none;">
+                <a id="btn-sessions" class="icon-btn" href="sessions.html" data-i18n-title="sessions"
+                    style="display: none;">
                     <svg viewBox="0 0 24 24" width="24" height="24">
                         <path fill="currentColor"
                             d="M4 6c0-1.1.9-2 2-2h9c1.1 0 2 .9 2 2v1h1c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2H9c-1.1 0-2-.9-2-2v-1H6c-1.1 0-2-.9-2-2V6zm3 10V6c0-.55.45-1 1-1h8v12c0 .55-.45 1-1 1H8c-.55 0-1-.45-1-1zm10 3V9c0-.55-1 1-1h1c.55 0 1 .45 1 1v10c0 .55.45 1-1 1h-1c-.55 0-1-.45-1-1z" />
                     </svg>
                 </a>
-                <a class="icon-btn" href="setting.html" title="Settings">
+                <a class="icon-btn" href="setting.html" data-i18n-title="settings">
                     <svg viewBox="0 0 24 24" width="24" height="24">
                         <path fill="currentColor"
-                            d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.11-0.2-0.36-0.28-0.57-0.2l-2.39,0.96c-0.5-0.38-1.04-0.69-1.63-0.92L14.5,2.5c-0.02-0.22-0.21-0.4-0.44-0.4h-3.84c-0.23,0-0.42,0.18-0.44,0.4L9.42,5.39c-0.59,0.23-1.13,0.54-1.63,0.92L5.4,5.35c-0.21-0.08-0.46,0-0.57,0.2L2.91,8.87c-0.11,0.2-0.06,0.47,0.12,0.61l2.03,1.58C5.02,11.37,5,11.69,5,12s0.02,0.63,0.06,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.11-0.2,0.36-0.28,0.57-0.2l2.39-0.96c0.5,0.38,1.04,0.69,1.63,0.92l0.36,2.89c0.02,0.22,0.21,0.4,0.44,0.4h3.84c0.23,0,0.42-0.18,0.44-0.4l0.36-2.89c0.59-0.23,1.13-0.54,1.63-0.92l2.39,0.96c0.21,0.08,0.46,0,0.57-0.2l1.92-3.32c0.11-0.2,0.06-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5S10.07,8.5,12,8.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z" />
+                            d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.11-0.2-0.36-0.28-0.57-0.2l-2.39,0.96c-0.5-0.38-1.04-0.69-1.63-0.92L14.5,2.5c-0.02-0.22-0.21-0.4-0.44-0.4h-3.84c-0.23,0-0.42,0.18-0.44,0.4L9.42,5.39c-0.59,0.23-1.13,0.54-1.63,0.92L5.4,5.35c-0.21-0.08-0.46,0-0.57,0.2L2.91,8.87c-0.11,0.2-0.06,0.47,0.12,0.61l2.03,1.58C5.02,11.37,5,11.69,5,12s0.02,0.63,0.06,0.94l-2.03,1.58c-0.18,1.4,0.23-0.41,0.12-0.61l1.92,3.32c0.11-0.2,0.36-0.28,0.57-0.2l2.39-0.96c0.5,0.38,1.04,0.69,1.63,0.92l0.36,2.89c0.02,0.22,0.21,0.4,0.44,0.4h3.84c0.23,0,0.42-0.18,0.44-0.4l0.36-2.89c0.59-0.23,1.13-0.54,1.63-0.92l2.39,0.96c0.21,0.08,0.46,0,0.57-0.2l1.92-3.32c0.11-0.2,0.06-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5S10.07,8.5,12,8.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z" />
                     </svg>
                 </a>
             </div>
@@ -88,7 +89,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-label">Decks</div>
+                    <div class="stat-label" data-i18n="decks">Decks</div>
                     <div id="stats-deck-count" class="stat-value">0</div>
                 </div>
             </div>
@@ -102,7 +103,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-label">Cards</div>
+                    <div class="stat-label" data-i18n="cards">Cards</div>
                     <div id="stats-cards-format" class="stat-value">0</div>
                 </div>
             </div>
@@ -117,7 +118,7 @@
                     </svg>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-label">Time</div>
+                    <div class="stat-label" data-i18n="time">Time</div>
                     <div id="stats-estimated-time" class="stat-value">~0m</div>
                 </div>
             </div>
@@ -132,8 +133,8 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="search-input" class="search-input" placeholder="Search decks..."
-                    autocomplete="off" autocorrect="off" spellcheck="false">
+                <input type="text" id="search-input" class="search-input" data-i18n="search_decks_placeholder"
+                    placeholder="Search decks..." autocomplete="off" autocorrect="off" spellcheck="false">
                 <span class="search-hint">/</span>
             </div>
         </div>
@@ -144,18 +145,18 @@
             <div id="task-list-container"></div>
 
             <div class="section-divider" id="completed-section">
-                <span class="section-title">✓ Completed</span>
+                <span class="section-title" data-i18n="completed">✓ Completed</span>
             </div>
             <div id="completed-list-container"></div>
         </div>
 
-        <button id="grind-btn">Back to Grinding</button>
+        <button id="grind-btn" data-i18n="back_to_grinding">Back to Grinding</button>
     </div>
 
     <!-- Stats Modal -->
     <div id="stats-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 id="stats-title">Cards Done Today</h2>
+            <h2 id="stats-title" data-i18n="cards_done_today">Cards Done Today</h2>
             <div id="total-done-count" class="big-number">0</div>
         </div>
     </div>

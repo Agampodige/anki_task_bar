@@ -4,6 +4,7 @@
 
 window.AnkiTaskbar = {
     settings: {},
+    translations: {},
 
     /**
      * Initialize QWebChannel and set up basic window functionality
@@ -95,7 +96,14 @@ window.AnkiTaskbar = {
     loadAndApplySettings: function (callback) {
         var self = this;
         if (!window.py || !window.py.load_settings_from_file) {
-            if (callback) callback({});
+            // Fallback for standalone mode: Try to load from localStorage or just use defaults
+            var saved = localStorage.getItem('anki_taskbar_settings');
+            var settings = saved ? JSON.parse(saved) : {};
+            self.settings = settings;
+            self.loadTranslations(settings.language || 'en', function () {
+                self.applyTheme(settings);
+                if (callback) callback(settings);
+            });
             return;
         }
 
@@ -103,13 +111,84 @@ window.AnkiTaskbar = {
             try {
                 var settings = data ? JSON.parse(data) : {};
                 self.settings = settings;
-                self.applyTheme(settings);
-                if (callback) callback(settings);
+
+                // Load translations first, then apply theme and UI
+                self.loadTranslations(settings.language || 'en', function () {
+                    self.applyTheme(settings);
+                    if (callback) callback(settings);
+                });
             } catch (e) {
                 console.error("Failed to parse settings:", e);
                 if (callback) callback({});
             }
         });
+    },
+
+    /**
+     * Load translation file
+     */
+    loadTranslations: function (lang, callback) {
+        var self = this;
+        var url = 'locales/' + lang + '.json';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        self.translations = JSON.parse(xhr.responseText);
+                        self.applyTranslations();
+                    } catch (e) {
+                        console.error("Failed to parse translation file:", e);
+                    }
+                }
+                if (callback) callback();
+            }
+        };
+        xhr.send();
+    },
+
+    /**
+     * Translate a key
+     */
+    t: function (key) {
+        return this.translations[key] || key;
+    },
+
+    /**
+     * Scan document for data-i18n attributes and apply translations
+     */
+    applyTranslations: function () {
+        var elements = document.querySelectorAll('[data-i18n]');
+        for (var i = 0; i < elements.length; i++) {
+            var el = elements[i];
+            var key = el.getAttribute('data-i18n');
+            var translation = this.t(key);
+
+            if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || el.type === 'password')) {
+                el.placeholder = translation;
+            } else {
+                // If it has children (icons etc), we might want to target a specific span or just use textContent carefully
+                // But for now, simple replace if no children
+                if (el.children.length === 0) {
+                    el.textContent = translation;
+                } else {
+                    // Search for a span or text node to replace?
+                    // Common pattern: <button> <svg> <span>Text</span> </button>
+                    var span = el.querySelector('span');
+                    if (span) span.textContent = translation;
+                }
+            }
+        }
+
+        // Also handle titles (tooltips)
+        var titled = document.querySelectorAll('[data-i18n-title]');
+        for (var i = 0; i < titled.length; i++) {
+            var el = titled[i];
+            var key = el.getAttribute('data-i18n-title');
+            el.title = this.t(key);
+        }
     },
 
     /**

@@ -118,6 +118,18 @@ class Taskbar(QWidget):
         try:
             cfg = self.bridge._read_settings()
             self.movable = cfg.get("movable", True)
+            
+            # Apply Window Size Preset on startup
+            preset = cfg.get("windowSizePreset", "custom")
+            if preset != "custom":
+                presets = {
+                    "small": (400, 300), "medium": (600, 450), "large": (800, 600),
+                    "xlarge": (1000, 750), "compact": (350, 500), "wide": (1200, 400), "tall": (500, 800)
+                }
+                size = presets.get(preset)
+                if size:
+                    self.resize(size[0], size[1])
+
         except:
             # Default settings
             self.movable = True

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Settings</title>
+    <title data-i18n="settings">Settings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -18,21 +18,21 @@
     </div>
     <div id="window-title-bar" class="window-title-bar">
         <div class="drag-region">
-            <span class="window-title">Anki Taskbar</span>
+            <span class="window-title" data-i18n="app_title">Anki Taskbar</span>
         </div>
         <div class="window-controls">
-            <button id="win-min" class="win-btn min-btn" title="Minimize">
+            <button id="win-min" class="win-btn min-btn" data-i18n-title="minimize">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor" d="M19 13H5v-2h14v2z" />
                 </svg>
             </button>
-            <button id="win-expand" class="win-btn expand-btn" title="Expand">
+            <button id="win-expand" class="win-btn expand-btn" data-i18n-title="expand">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
                 </svg>
             </button>
-            <button id="win-close" class="win-btn close-btn" title="Close">
+            <button id="win-close" class="win-btn close-btn" data-i18n-title="close">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                     <path fill="currentColor"
                         d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
@@ -48,9 +48,9 @@
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                         <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                     </svg>
-                    <span>Back</span>
+                    <span data-i18n="back">Back</span>
                 </a>
-                <h1>Settings</h1>
+                <h1 data-i18n="settings">Settings</h1>
             </div>
 
             <div id="settings-status" class="settings-status" aria-live="polite"></div>
@@ -59,11 +59,11 @@
         <div class="settings-grid">
             <!-- Window & Behavior -->
             <div class="settings-section">
-                <h2 class="section-title">Window & Behavior</h2>
+                <h2 class="section-title" data-i18n="window_behavior">Window & Behavior</h2>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Always on Top</div>
-                        <div class="setting-desc">Keep taskbar above other windows</div>
+                        <div class="setting-label" data-i18n="always_on_top">Always on Top</div>
+                        <div class="setting-desc" data-i18n="always_on_top_desc">Keep taskbar above other windows</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="alwaysOnTopToggle">
@@ -72,8 +72,8 @@
                 </div>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Movable (Drag to Move)</div>
-                        <div class="setting-desc">Disable to lock window position</div>
+                        <div class="setting-label" data-i18n="movable">Movable (Drag to Move)</div>
+                        <div class="setting-desc" data-i18n="movable_desc">Disable to lock window position</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="movableToggle">
@@ -82,8 +82,9 @@
                 </div>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Window Size Presets</div>
-                        <div class="setting-desc">Choose a predefined window size</div>
+                        <div class="setting-label" data-i18n="window_size_presets">Window Size Presets</div>
+                        <div class="setting-desc" data-i18n="window_size_presets_desc">Choose a predefined window size
+                        </div>
                     </div>
                     <div class="setting-control">
                         <select id="windowSizePreset" class="setting-select" aria-label="Window size preset">
@@ -100,8 +101,9 @@
                 </div>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Auto Hide on Review</div>
-                        <div class="setting-desc">Automatically hide when starting reviews</div>
+                        <div class="setting-label" data-i18n="auto_hide_review">Auto Hide on Review</div>
+                        <div class="setting-desc" data-i18n="auto_hide_review_desc">Automatically hide when starting
+                            reviews</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="sessionToggle">
@@ -112,11 +114,12 @@
 
             <!-- Dashboard & Content -->
             <div class="settings-section">
-                <h2 class="section-title">Dashboard & Content</h2>
+                <h2 class="section-title" data-i18n="dashboard_content">Dashboard & Content</h2>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Compact Mode</div>
-                        <div class="setting-desc">Smaller task items and tighter layout</div>
+                        <div class="setting-label" data-i18n="compact_mode">Compact Mode</div>
+                        <div class="setting-desc" data-i18n="compact_mode_desc">Smaller task items and tighter layout
+                        </div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="compactModeToggle">
@@ -126,8 +129,9 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Show Status Summary</div>
-                        <div class="setting-desc">Show decks, cards, and time estimate bar</div>
+                        <div class="setting-label" data-i18n="show_status_summary">Show Status Summary</div>
+                        <div class="setting-desc" data-i18n="show_status_summary_desc">Show decks, cards, and time
+                            estimate bar</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="showStatsBarToggle">
@@ -137,8 +141,9 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Hide Completed Decks</div>
-                        <div class="setting-desc">Show only decks with remaining cards</div>
+                        <div class="setting-label" data-i18n="hide_completed_decks">Hide Completed Decks</div>
+                        <div class="setting-desc" data-i18n="hide_completed_decks_desc">Show only decks with remaining
+                            cards</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="hideDecksToggle">
@@ -148,8 +153,9 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Enable Sessions</div>
-                        <div class="setting-desc">Create and activate groups of decks</div>
+                        <div class="setting-label" data-i18n="enable_sessions">Enable Sessions</div>
+                        <div class="setting-desc" data-i18n="enable_sessions_desc">Create and activate groups of decks
+                        </div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="sessionsEnabledToggle">
@@ -159,8 +165,9 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Hide Completed Sessions</div>
-                        <div class="setting-desc">Show only sessions with remaining cards</div>
+                        <div class="setting-label" data-i18n="hide_completed_sessions">Hide Completed Sessions</div>
+                        <div class="setting-desc" data-i18n="hide_completed_sessions_desc">Show only sessions with
+                            remaining cards</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="hideCompletedSessionsToggle">
@@ -170,8 +177,10 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Random Session Arrangement</div>
-                        <div class="setting-desc">Shuffle session order randomly</div>
+                        <div class="setting-label" data-i18n="random_session_arrangement">Random Session Arrangement
+                        </div>
+                        <div class="setting-desc" data-i18n="random_session_arrangement_desc">Shuffle session order
+                            randomly</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="randomSessionsToggle">
@@ -181,8 +190,8 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Confetti Effects</div>
-                        <div class="setting-desc">Celebrate completion</div>
+                        <div class="setting-label" data-i18n="confetti_effects">Confetti Effects</div>
+                        <div class="setting-desc" data-i18n="confetti_effects_desc">Celebrate completion</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="confettiToggle">
@@ -193,11 +202,28 @@
 
             <!-- Appearance & View -->
             <div class="settings-section">
-                <h2 class="section-title">Appearance & View</h2>
+                <h2 class="section-title" data-i18n="appearance_view">Appearance & View</h2>
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Light Theme</div>
-                        <div class="setting-desc">Switch between light and dark mode</div>
+                        <div class="setting-label" data-i18n="language">Language</div>
+                        <div class="setting-desc" data-i18n="language_desc">Select your preferred language</div>
+                    </div>
+                    <div class="setting-control">
+                        <select id="languageSelector" class="setting-select">
+                            <option value="en">English</option>
+                            <option value="si">සිංහල (Sinhala)</option>
+                            <option value="es">Español (Spanish)</option>
+                            <option value="fr">Français (French)</option>
+                            <option value="de">Deutsch (German)</option>
+                            <option value="zh">简体中文 (Chinese)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <div class="setting-label" data-i18n="light_theme">Light Theme</div>
+                        <div class="setting-desc" data-i18n="light_theme_desc">Switch between light and dark mode</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="appearanceToggle">
@@ -207,8 +233,8 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Zoom Level</div>
-                        <div class="setting-desc">Adjust UI scale</div>
+                        <div class="setting-label" data-i18n="zoom_level">Zoom Level</div>
+                        <div class="setting-desc" data-i18n="zoom_level_desc">Adjust UI scale</div>
                     </div>
                     <div class="zoom-controls">
                         <button class="btn small secondary" id="zoom-out">-</button>
@@ -219,8 +245,8 @@
 
                 <div class="setting-row">
                     <div class="setting-info">
-                        <div class="setting-label">Theme Accent</div>
-                        <div class="setting-desc">Select main accent color</div>
+                        <div class="setting-label" data-i18n="theme_accent">Theme Accent</div>
+                        <div class="setting-desc" data-i18n="theme_accent_desc">Select main accent color</div>
                     </div>
                     <div class="color-options" style="display: flex; gap: 8px;">
                         <div class="color-btn theme-green" data-color="green" title="Green"
@@ -241,34 +267,44 @@
 
             <!-- Data & Support -->
             <div class="settings-section">
-                <h2 class="section-title">Data & Support</h2>
+                <h2 class="section-title" data-i18n="data_support">Data & Support</h2>
                 <div class="data-actions-grid"
                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-                    <button type="button" id="export-sessions" class="btn secondary">Export Sessions</button>
-                    <button type="button" id="import-sessions" class="btn secondary">Import Sessions</button>
+                    <button type="button" id="export-sessions" class="btn secondary" data-i18n="export_sessions">Export
+                        Sessions</button>
+                    <button type="button" id="import-sessions" class="btn secondary" data-i18n="import_sessions">Import
+                        Sessions</button>
                     <button type="button" id="copy-sessions-todo" class="btn secondary" style="grid-column: 1 / -1;">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 6px;">
                             <path
                                 d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
                         </svg>
-                        Copy Session List as Todo
+                        <span data-i18n="copy_sessions_todo">Copy Session List as Todo</span>
                     </button>
                 </div>
 
                 <div class="link-card-grid" style="display: grid; gap: 10px;">
                     <div class="setting-card link-card" id="open-addon-folder" style="cursor: pointer;">
-                        <div class="setting-label">Open Add-on Folder</div>
+                        <div class="setting-label" data-i18n="open_addon_folder">Open Add-on Folder</div>
                         <span class="icon">›</span>
                     </div>
                     <div class="setting-card link-card" id="open-project-page" style="cursor: pointer;">
-                        <div class="setting-label">GitHub Project Page</div>
+                        <div class="setting-label" data-i18n="github_project_page">GitHub Project Page</div>
                         <span class="icon">›</span>
+                    </div>
+                    <div class="setting-card link-card" id="buy-me-coffee"
+                        style="cursor: pointer; border: 1px dashed var(--accent-color);">
+                        <div class="setting-label" style="color: var(--accent-color); font-weight: 600;">
+                            <span style="margin-right: 4px;">☕</span> <span data-i18n="buy_me_a_coffee">Buy me a
+                                coffee</span>
+                        </div>
+                        <span class="icon" style="color: var(--accent-color);">›</span>
                     </div>
                 </div>
 
                 <button type="button" id="start-tour" class="btn secondary"
                     style="width: 100%; margin-top: 10px; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 12px; border-radius: 8px; cursor: pointer;">
-                    <span>✨ Start Quick Tour</span>
+                    <span data-i18n="start_quick_tour">✨ Start Quick Tour</span>
                 </button>
             </div>
         </div>
