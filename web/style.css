@@ -101,7 +101,7 @@
     --accent-soft-hover: rgba(0, 150, 136, 0.25);
 }
 
-.app-container, 
+.app-container,
 #main-content-container,
 .window-title-bar,
 .drag-region {
@@ -171,7 +171,8 @@ body {
 /* Resizable window styles */
 
 body.resizable {
-    overflow: visible !important; /* Allow scrollbars when resizable - force override */
+    overflow: visible !important;
+    /* Allow scrollbars when resizable - force override */
     cursor: default !important;
 }
 
@@ -188,8 +189,10 @@ body.resize-both {
 }
 
 body.not-resizable {
-    overflow: hidden !important; /* Prevent scrollbars when not resizable - force override */
-    resize: none !important; /* Disable CSS resize */
+    overflow: hidden !important;
+    /* Prevent scrollbars when not resizable - force override */
+    resize: none !important;
+    /* Disable CSS resize */
     cursor: default !important;
 }
 
@@ -247,12 +250,17 @@ body {
 }
 
 /* Sinhala text specific styling */
-.sinhala-text, 
-.task-name, 
-.deck-name, 
+.sinhala-text,
+.task-name,
+.deck-name,
 .session-name,
 .modal-title,
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     line-height: var(--line-height-base) !important;
     word-spacing: 0.05em;
     letter-spacing: 0.01em;
@@ -299,7 +307,8 @@ body.compact .session-name {
     align-items: center;
     height: 100%;
     /* Leave a gap at the top and sides for resizing */
-    margin: 2px 0 0 2px; /* Reduced margin for better resize access */
+    margin: 2px 0 0 2px;
+    /* Reduced margin for better resize access */
     /* Enable drag region for window movement */
     -webkit-app-region: drag;
     padding-left: 8px;
@@ -333,6 +342,7 @@ body.locked .drag-region {
     -webkit-user-select: none;
     user-select: none;
 }
+
 /* --- App Container --- */
 .app-container {
     height: calc(100vh - 36px);
@@ -404,7 +414,9 @@ body.locked .drag-region {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     margin: 0 auto 10px auto;
     width: fit-content;
-    gap: 24px;
+    max-width: 95%;
+    gap: 16px;
+    /* Reduced from 24px */
     animation: slideDown 0.3s ease-out;
 }
 
@@ -516,7 +528,8 @@ body.locked .drag-region {
 }
 
 .stat-item.due .stat-icon-wrapper {
-    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+    background: linear-gradient(135deg, #00BCD4, #0097A7);
+    /* Cyan/Teal for Today's Done */
 }
 
 .hide-stats-btn {
@@ -1688,6 +1701,7 @@ mark.highlight {
     display: flex;
     gap: 10px;
 }
+
 /* Style for the back link/button */
 .back-link {
     display: inline-flex;
@@ -1714,9 +1728,11 @@ mark.highlight {
 .back-link::before {
     margin-right: 5px;
 }
-.task-tree{
+
+.task-tree {
     margin-top: 2px;
 }
-#session-create-status{
+
+#session-create-status {
     margin-left: 10px !important;
 }

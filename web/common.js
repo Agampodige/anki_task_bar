@@ -12,24 +12,35 @@ window.AnkiTaskbar = {
      */
     init: function (callback) {
         var self = this;
-        // Disable Ctrl+Scroll Zoom globally
-        window.addEventListener('wheel', function (e) {
-            if (e.ctrlKey) e.preventDefault();
-        }, { passive: false });
-
-        if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
-            new QWebChannel(qt.webChannelTransport, function (channel) {
-                window.py = channel.objects.py;
-
-                self.setupWindowControls();
-                self.setupShortcuts();
-
-                if (callback) callback(window.py);
-            });
-        } else {
-            console.warn("QWebChannel not found, running in standalone mode");
-            if (callback) callback(null);
+        if (this._initPromise) {
+            if (callback) this._initPromise.then(callback);
+            return this._initPromise;
         }
+
+        this._initPromise = new Promise(function (resolve) {
+            // Disable Ctrl+Scroll Zoom globally
+            window.addEventListener('wheel', function (e) {
+                if (e.ctrlKey) e.preventDefault();
+            }, { passive: false });
+
+            if (typeof QWebChannel !== 'undefined' && typeof qt !== 'undefined' && qt.webChannelTransport) {
+                new QWebChannel(qt.webChannelTransport, function (channel) {
+                    window.py = channel.objects.py;
+
+                    self.setupWindowControls();
+                    self.setupShortcuts();
+
+                    if (callback) callback(window.py);
+                    resolve(window.py);
+                });
+            } else {
+                console.warn("QWebChannel not found, running in standalone mode");
+                if (callback) callback(null);
+                resolve(null);
+            }
+        });
+
+        return this._initPromise;
     },
 
     /**

@@ -1,5 +1,15 @@
 {
     "package": "anki_task_bar",
     "name": "Daily Task Bar",
-    "files": ["__init__.py", "taskui.py", "bridge.py", "daily_stats.py", "web/index.html", "web/index.js", "web/confetti.js", "web/style.css", "web/select-deck.html", "web/select-deck.js", "web/setting.html", "web/setting.css", "web/sessions.html", "web/sessions.js", "web/sessions.css"]
+    "files": [
+        "__init__.py",
+        "taskui.py",
+        "bridge.py",
+        "daily_stats.py",
+        "managers.py",
+        "__version__.py",
+        "manifest.json",
+        "meta.json",
+        "web/"
+    ]
 }

@@ -1,7 +1,7 @@
 {
   "name": "Daily Task Bar",
-  "version": "1.02",
-  "author": "Sene",
+  "version": "1.3.0",
+  "author": "Agampodige",
   "description": "Shows selected decks as tasks with progress bars for today",
   "requirements": {
     "anki": ">=2.1"

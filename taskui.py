@@ -43,7 +43,7 @@ class Taskbar(QWidget):
         self.resize(500, 600) # Smaller default size for a widget
 
         # Floating, Frameless, Transparent, Resizable
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, False)
@@ -116,41 +116,49 @@ class Taskbar(QWidget):
     def load_settings(self):
         """Load window settings from bridge."""
         try:
-            cfg = self.bridge._read_settings()
+            cfg = self.bridge.settings.load()
             self.movable = cfg.get("movable", True)
             
             # Apply Window Size Preset on startup
             preset = cfg.get("windowSizePreset", "custom")
             if preset != "custom":
                 presets = {
-                    "small": (400, 300), "medium": (600, 450), "large": (800, 600),
-                    "xlarge": (1000, 750), "compact": (350, 500), "wide": (1200, 400), "tall": (500, 800)
+                    "small": (400, 300), "medium": (500, 650), "large": (800, 600),
+                    "xlarge": (1000, 750), "compact": (400, 550), "wide": (1200, 400), "tall": (500, 800)
                 }
                 size = presets.get(preset)
                 if size:
                     self.resize(size[0], size[1])
+            
+            self.set_always_on_top(cfg.get("alwaysOnTop", False), force_show=False)
 
-        except:
+        except Exception:
             # Default settings
             self.movable = True
+            self.set_always_on_top(False, force_show=False)
 
         # Enable mouse tracking for dragging
         self.setMouseTracking(True)
         self.web_view.setMouseTracking(True)
 
-    def set_always_on_top(self, enabled: bool):
+    def set_always_on_top(self, enabled: bool, force_show: bool = True):
         """Update window flags to toggle always on top status."""
-        flags = self.windowFlags()
+        current_flags = self.windowFlags()
+        
+        new_flags = current_flags
         if enabled:
-            flags |= Qt.WindowType.WindowStaysOnTopHint
+            new_flags |= Qt.WindowType.WindowStaysOnTopHint
         else:
-            flags &= ~Qt.WindowType.WindowStaysOnTopHint
+            new_flags &= ~Qt.WindowType.WindowStaysOnTopHint
         
-        # We must re-enable FramelessWindowHint and Tool as well since flag replacement can reset them
-        flags |= Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
+        # Ensure other necessary flags are preserved
+        new_flags |= Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool
         
-        self.setWindowFlags(flags)
-        self.show() # Necessary to make the window reappear with new flags
+        if current_flags != new_flags:
+            self.setWindowFlags(new_flags)
+            # Only show if explicitly requested or if already visible
+            if force_show or self.isVisible():
+                self.show()
 
     def toggle_expand(self):
         """Toggle between normal and expanded size."""
@@ -193,7 +201,7 @@ class Taskbar(QWidget):
         # Load settings from bridge
         movable = self.movable
         try:
-            cfg = self.bridge._read_settings()
+            cfg = self.bridge.settings.load()
             movable = cfg.get("movable", True)
             self.movable = movable
         except: 

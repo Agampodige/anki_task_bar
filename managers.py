@@ -6,18 +6,40 @@ from typing import Dict, Any, List
 from datetime import date
 from aqt import mw
 
+DEFAULT_SETTINGS = {
+    "theme": "green",
+    "appearance": "dark",
+    "autoHide": True,
+    "sessionsEnabled": True,
+    "showStatsBar": True,
+    "alwaysOnTop": False,
+    "hideSearchBar": False,
+    "compactMode": True,
+    "confetti": True,
+    "hideCompleted": False,
+    "hideCompletedSessions": False,
+    "randomSessions": False,
+    "movable": True,
+    "zoomLevel": 1.0,
+    "windowSizePreset": "medium",
+    "language": "en"
+}
+
 class SettingsManager:
     def __init__(self, settings_path: Path):
         self.settings_path = settings_path
 
     def load(self) -> Dict[str, Any]:
+        settings = DEFAULT_SETTINGS.copy()
         try:
-            if not self.settings_path.exists():
-                return {}
-            raw = self.settings_path.read_text(encoding="utf-8")
-            return json.loads(raw) if raw.strip() else {}
+            if self.settings_path.exists():
+                raw = self.settings_path.read_text(encoding="utf-8")
+                if raw.strip():
+                    loaded = json.loads(raw)
+                    settings.update(loaded)
         except Exception:
-            return {}
+            pass
+        return settings
 
     def save(self, settings: Dict[str, Any]):
         try:

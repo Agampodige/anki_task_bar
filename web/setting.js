@@ -61,7 +61,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (el) {
                 var settingsKey = id.replace('Toggle', '');
                 if (id === "hideDecksToggle") settingsKey = "hideCompleted";
-                if (id === "sessionToggle") settingsKey = "enableSessions";
+                if (id === "sessionToggle") settingsKey = "autoHide";
+                if (id === "sessionsEnabledToggle") settingsKey = "sessionsEnabled";
                 settings[settingsKey] = el.checked;
             }
         }
@@ -100,7 +101,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (el) {
                 var settingsKey = id.replace('Toggle', '');
                 if (id === "hideDecksToggle") settingsKey = "hideCompleted";
-                if (id === "sessionToggle") settingsKey = "enableSessions";
+                if (id === "sessionToggle") settingsKey = "autoHide";
+                if (id === "sessionsEnabledToggle") settingsKey = "sessionsEnabled";
                 el.checked = !!currentSettings[settingsKey];
             }
         }
@@ -252,9 +254,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     lines.push((s.progress >= 0.999 ? '\u2705 ' : '') + s.name);
                 }
                 var list = lines.join('\n');
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(list).then(function () { setStatus('Copied to clipboard', 'ok'); });
-                }
+                AnkiTaskbar.callBackend('set_clipboard', [list]).then(function () {
+                    setStatus('Copied to clipboard', 'ok');
+                });
             });
         });
     }

@@ -7,13 +7,13 @@ License: MIT
 """
 
 from aqt import mw
-from aqt.qt import QAction, QShortcut, QKeySequence, Qt
+from aqt.qt import QAction, QShortcut, QKeySequence, Qt, QUrl
 from aqt import gui_hooks
 from aqt.utils import qconnect
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEngineSettings
 
-from .taskui import Taskbar
+from .taskui import Taskbar, find_web_file
 from .__version__ import __version__, get_version_info
 
 # Global instance to manage state
@@ -101,15 +101,6 @@ def open_taskbar_devtools():
     mw.taskbar_devtools = devtools
 
 
-def save_daily_snapshot_on_close():
-    """Save daily snapshot when Anki profile is closing."""
-    try:
-        if mw.taskbar_widget and hasattr(mw.taskbar_widget, 'bridge'):
-            print("Saving daily snapshot on profile close...")
-            mw.taskbar_widget.bridge.save_daily_snapshot()
-    except Exception as e:
-        print(f"Error saving snapshot on close: {e}")
-
 
 def init_taskbar_menu():
     # Tools Menu
@@ -134,4 +125,3 @@ def init_taskbar_menu():
 
 
 gui_hooks.main_window_did_init.append(init_taskbar_menu)
-gui_hooks.profile_will_close.append(save_daily_snapshot_on_close)

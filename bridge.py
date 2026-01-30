@@ -1,11 +1,10 @@
-from aqt.qt import QObject, pyqtSlot, QFileDialog, QUrl
+from aqt.qt import QObject, pyqtSlot, QFileDialog, QUrl, QApplication
 from aqt import mw
 import json
 import traceback
 from pathlib import Path
 from typing import Dict, Any, List
 from datetime import date
-from .daily_stats import DailyStatsDB
 from .managers import SettingsManager, SessionManager, DeckManager
 
 from aqt.utils import tooltip, showWarning
@@ -32,7 +31,6 @@ class Bridge(QObject):
     def __init__(self, data_file: Path, parent=None):
         super().__init__(parent)
         self.data_file = data_file
-        self.stats_db = DailyStatsDB(data_file.parent / "daily_stats.db")
         self.settings = SettingsManager(data_file.parent / "config.json")
         self.sessions = SessionManager(data_file.parent / "sessions.json")
         self.decks = DeckManager()
@@ -187,7 +185,7 @@ class Bridge(QObject):
             mw.col.decks.select(did)
             mw.moveToState("overview")
             mw.activateWindow()
-            if self.settings.load().get("enableSessions", True) and self.parent():
+            if self.settings.load().get("autoHide", True) and self.parent():
                 self.parent().hide()
 
     @pyqtSlot()
@@ -210,6 +208,10 @@ class Bridge(QObject):
     @pyqtSlot(bool)
     def set_always_on_top(self, enabled):
         if hasattr(self.parent(), 'set_always_on_top'): self.parent().set_always_on_top(enabled)
+
+    @pyqtSlot(str)
+    def set_clipboard(self, text):
+        QApplication.clipboard().setText(text)
 
     @pyqtSlot(str)
     def save_settings_to_file(self, json_data):
@@ -261,37 +263,6 @@ class Bridge(QObject):
     def apply_window_size_preset(self, w, h):
         if self.parent(): self.parent().resize(max(w, 300), max(h, 200))
 
-    @pyqtSlot()
-    def save_daily_snapshot(self):
-        try:
-            tasks = self._get_expanded_tasks()
-            day = date.today().isoformat()
-            self.stats_db.save_daily_summary(day, sum(t['done'] for t in tasks), sum(1 for t in tasks if t['completed']))
-            for t in tasks:
-                self.stats_db.save_deck_history(day, t['deckId'], t['name'], t['dueStart'], t['done'], t['progress'], t['completed'])
-        except: traceback.print_exc()
-
-    @pyqtSlot(int, result=str)
-    def get_daily_stats(self, days=7):
-        return json.dumps(self.stats_db.get_daily_stats(days))
-
-    @pyqtSlot(int, int, result=str)
-    def get_deck_history(self, did, days=30):
-        return json.dumps(self.stats_db.get_deck_history(did, days))
-
-    @pyqtSlot(result=str)
-    def get_total_stats(self):
-        s = self.stats_db.get_total_stats()
-        s['current_streak'] = self.stats_db.get_current_streak()
-        return json.dumps(s)
-
-    @pyqtSlot(str, result=str)
-    def export_data_csv(self, path):
-        try:
-            self.stats_db.export_to_csv(Path(path), 365)
-            return json.dumps({"ok": True})
-        except Exception as e: return json.dumps({"ok": False, "error": str(e)})
-
     @pyqtSlot(result=str)
     def export_sessions(self):
         try:
@@ -310,7 +281,7 @@ class Bridge(QObject):
             return json.dumps({"ok": True})
         except Exception as e: return json.dumps({"ok": False, "error": str(e)})
 
-    @pyqtSlot(str, str, result=str)
+    @pyqtSlot(str, result=str)
     def move_session_to_folder(self, sid, folder):
         data = self.sessions.load()
         for s in data["sessions"]:
@@ -327,6 +298,19 @@ class Bridge(QObject):
         ids = json.loads(ids_json)
         random.shuffle(ids)
         return json.dumps({"ok": True, "shuffled_ids": ids})
+
+    @pyqtSlot(str, result=str)
+    def duplicate_session(self, sid):
+        data = self.sessions.load()
+        existing = next((s for s in data["sessions"] if str(s.get("id")) == str(sid)), None)
+        if not existing: return json.dumps({"ok": False})
+        import time
+        new_session = json.loads(json.dumps(existing))
+        new_session["id"] = str(int(time.time() * 1000))
+        new_session["name"] += " (Copy)"
+        data["sessions"].append(new_session)
+        self.sessions.save(data)
+        return json.dumps({"ok": True})
 
     def _load_page(self, name):
         if self.parent():

@@ -11,91 +11,71 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // --- Statistics Rendering ---
-    function updateSelectedDecksStats(data) {
+    function updateSelectedDecksStats(data, totals) {
         var statsBar = document.getElementById('selected-decks-stats');
         if (!statsBar) return;
 
-        var allDecks = data;
-        var totalDecks = allDecks.length;
+        var totalDecks = data.length;
         var totalCards = 0;
         var pendingCards = 0;
         var completedCards = 0;
 
-        for (var i = 0; i < allDecks.length; i++) {
-            var t = allDecks[i];
+        for (var i = 0; i < data.length; i++) {
+            var t = data[i];
             totalCards += (t.dueStart || 0);
             pendingCards += (t.dueNow || 0);
             completedCards += (t.done || 0);
         }
 
-        if (window.py && typeof window.py.get_today_review_totals === 'function') {
-            window.py.get_today_review_totals(function (jsonData) {
-                var totals = { total_cards: 0, total_reviews: 0, total_time_ms: 0 };
-                try { totals = JSON.parse(jsonData); } catch (e) { }
-
-                var secondsPerCard = 60;
-                if (totals.total_cards > 5 && totals.total_time_ms > 0) {
-                    secondsPerCard = (totals.total_time_ms / 1000) / totals.total_cards;
-                    secondsPerCard = Math.min(Math.max(secondsPerCard, 5), 180);
-                }
-
-                var estimatedSeconds = pendingCards * secondsPerCard;
-                var estimatedMinutes = Math.round(estimatedSeconds / 60);
-
-                var estimatedTime = estimatedMinutes < 1 ? (pendingCards > 0 ? '<1m' : '0m') :
-                    estimatedMinutes < 60 ? estimatedMinutes + 'm' :
-                        Math.floor(estimatedMinutes / 60) + 'h ' + (estimatedMinutes % 60) + 'm';
-
-                var finishTimeStr = '';
-                if (pendingCards > 0) {
-                    var finishDate = new Date(Date.now() + estimatedSeconds * 1000);
-                    var hours = finishDate.getHours();
-                    var minutes = finishDate.getMinutes();
-                    var ampm = hours >= 12 ? 'PM' : 'AM';
-                    var displayHours = hours % 12 || 12;
-                    var displayMinutes = minutes < 10 ? '0' + minutes : minutes;
-                    finishTimeStr = AnkiTaskbar.t('finish') + ': ' + displayHours + ':' + displayMinutes + ' ' + ampm;
-                }
-
-                window.selectedDecksStats = {
-                    totalDecks: totalDecks,
-                    totalCards: totalCards,
-                    completedCards: completedCards,
-                    estimatedTime: estimatedTime,
-                    finishTimeStr: finishTimeStr
-                };
-                _renderStatsUI();
-            });
-        } else {
-            window.selectedDecksStats = {
-                totalDecks: totalDecks,
-                totalCards: totalCards,
-                completedCards: completedCards,
-                estimatedTime: pendingCards + 'm',
-                finishTimeStr: ''
-            };
-            _renderStatsUI();
+        var secondsPerCard = 60;
+        if (totals && totals.total_cards > 5 && totals.total_time_ms > 0) {
+            secondsPerCard = (totals.total_time_ms / 1000) / totals.total_cards;
+            secondsPerCard = Math.min(Math.max(secondsPerCard, 5), 180);
         }
 
-        function _renderStatsUI() {
-            var stats = window.selectedDecksStats;
-            var deckCountEl = document.getElementById('stats-deck-count');
-            var cardsFormatEl = document.getElementById('stats-cards-format');
-            var timeEl = document.getElementById('stats-estimated-time');
+        var estimatedSeconds = pendingCards * secondsPerCard;
+        var estimatedMinutes = Math.round(estimatedSeconds / 60);
+        var estimatedTime = estimatedMinutes < 1 ? (pendingCards > 0 ? '<1m' : '0m') :
+            estimatedMinutes < 60 ? estimatedMinutes + 'm' :
+                Math.floor(estimatedMinutes / 60) + 'h ' + (estimatedMinutes % 60) + 'm';
 
-            if (deckCountEl) deckCountEl.textContent = String(stats.totalDecks);
-            if (cardsFormatEl) cardsFormatEl.textContent = String(stats.totalCards);
-            if (timeEl) {
-                if (stats.finishTimeStr) {
-                    timeEl.innerHTML = '<span>' + stats.estimatedTime + '</span><span class="finish-time">' + stats.finishTimeStr + '</span>';
-                } else {
-                    timeEl.textContent = stats.estimatedTime;
-                }
+        var finishTimeStr = '';
+        if (pendingCards > 0) {
+            var finishDate = new Date(Date.now() + estimatedSeconds * 1000);
+            var hours = finishDate.getHours();
+            var minutes = finishDate.getMinutes();
+            var ampm = hours >= 12 ? 'PM' : 'AM';
+            var displayHours = hours % 12 || 12;
+            var displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+            finishTimeStr = AnkiTaskbar.t('finish') + ': ' + displayHours + ':' + displayMinutes + ' ' + ampm;
+        }
+
+        var deckCountEl = document.getElementById('stats-deck-count');
+        var cardsFormatEl = document.getElementById('stats-cards-format');
+        var timeEl = document.getElementById('stats-estimated-time');
+        var doneTodayEl = document.getElementById('stats-total-done-today');
+
+        if (deckCountEl) deckCountEl.textContent = String(totalDecks);
+        if (cardsFormatEl) cardsFormatEl.textContent = String(totalCards);
+        if (timeEl) {
+            if (finishTimeStr) {
+                timeEl.innerHTML = '<span>' + estimatedTime + '</span><span class="finish-time">' + finishTimeStr + '</span>';
+            } else {
+                timeEl.textContent = estimatedTime;
             }
+        }
+        if (doneTodayEl && totals) {
+            doneTodayEl.textContent = String(totals.total_cards || 0);
+        }
 
-            var cfg = AnkiTaskbar.settings || {};
-            var showStatsBar = cfg.showStatsBar !== false;
-            statsBar.style.display = showStatsBar && stats.totalDecks > 0 ? 'flex' : 'none';
+        var cfg = AnkiTaskbar.settings || {};
+        var showStatsBar = cfg.showStatsBar !== false;
+
+        // Show if explicitly enabled OR if there are selected decks OR if we have significant progress today
+        if (showStatsBar && (totalDecks > 0 || (totals && totals.total_cards > 0))) {
+            statsBar.style.display = 'flex';
+        } else {
+            statsBar.style.display = 'none';
         }
     }
 
@@ -130,13 +110,17 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             window.taskData = data;
-            updateSelectedDecksStats(data);
+
+            AnkiTaskbar.callBackend('get_today_review_totals', []).then(function (totals) {
+                updateSelectedDecksStats(data, totals);
+            });
 
             var completedContainer = document.getElementById('completed-list-container');
             var completedSection = document.getElementById('completed-section');
             container.innerHTML = "";
             if (completedContainer) completedContainer.innerHTML = "";
 
+            _applyVisibilities();
             if (!data || data.length === 0) {
                 container.innerHTML = '<p class="placeholder">' + AnkiTaskbar.t('no_decks_selected') + '</p>';
                 if (completedSection) completedSection.style.display = 'none';
@@ -158,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Render Decks
             if (activeDecks.length === 0) {
                 container.innerHTML = '<p class="placeholder">' + AnkiTaskbar.t('all_decks_completed') + '</p>';
-                if (window.triggerConfetti && AnkiTaskbar.settings.confettiEnabled !== false) {
+                if (window.triggerConfetti && AnkiTaskbar.settings.confetti !== false) {
                     window.triggerConfetti(100);
                 }
             } else {
@@ -174,7 +158,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             renderCompleted(completedDecks, completedContainer, completedSection, getPriority);
-            _applyVisibilities();
         });
     };
 
@@ -333,20 +316,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function _applyVisibilities() {
-        var cfg = AnkiTaskbar.settings;
-        if (cfg.hideCompleted) {
+        var s = AnkiTaskbar.settings;
+        var sessionsEnabled = s.sessionsEnabled !== false;
+
+        var sessionsBtn = document.getElementById('btn-sessions');
+        var manageBtn = document.getElementById('btn-manage');
+
+        if (sessionsBtn) sessionsBtn.style.display = sessionsEnabled ? 'flex' : 'none';
+
+        // Keep Manage button visible even when sessions are enabled to help beginners find decks
+        if (manageBtn) manageBtn.style.display = 'flex';
+
+        if (s.hideCompleted) {
             var sec = document.getElementById('completed-section');
             var cont = document.getElementById('completed-list-container');
             if (sec) sec.style.display = 'none';
             if (cont) cont.style.display = 'none';
         }
-        var sBtn = document.getElementById('btn-sessions');
-        var mBtn = document.getElementById('btn-manage');
-        if (sBtn) sBtn.style.display = cfg.sessionsEnabled !== false ? 'flex' : 'none';
-        if (mBtn) mBtn.style.display = cfg.sessionsEnabled !== false ? 'none' : 'flex';
 
         var search = document.querySelector('.search-container');
-        if (search && search.parentNode) search.parentNode.style.display = cfg.hideSearchBar ? 'none' : 'block';
+        if (search && search.parentNode) search.parentNode.style.display = s.hideSearchBar ? 'none' : 'block';
     }
 
     // --- Search Logic ---
@@ -387,36 +376,4 @@ document.addEventListener("DOMContentLoaded", function () {
         grindBtn.onclick = function () { if (window.py) window.py.close_window(); };
     }
 
-    // Stats Modal
-    var statsBtn = document.getElementById('btn-stats');
-    var modal = document.getElementById('stats-modal');
-    if (statsBtn && modal) {
-        var content = modal.querySelector('.modal-content');
-        var countDisp = document.getElementById('total-done-count');
-        var titleEl = document.getElementById('stats-title');
-        var mode = 1; // 1: reviews, 0: cards
-
-        var refreshStats = function () {
-            var t = window._todayTotals || { total_cards: 0, total_reviews: 0 };
-            if (titleEl) titleEl.textContent = mode === 0 ? AnkiTaskbar.t('total_cards_today') : AnkiTaskbar.t('total_reviews_today');
-            if (countDisp) countDisp.textContent = String(mode === 0 ? t.total_cards : t.total_reviews);
-        };
-
-        statsBtn.onclick = function (e) {
-            e.stopPropagation();
-            AnkiTaskbar.callBackend('get_today_review_totals', []).then(function (t) {
-                window._todayTotals = t;
-                refreshStats();
-                modal.classList.add('visible');
-            });
-        };
-        if (content) {
-            content.onclick = function (e) {
-                e.stopPropagation();
-                mode = 1 - mode;
-                refreshStats();
-            };
-        }
-        modal.onclick = function () { modal.classList.remove('visible'); };
-    }
 });
