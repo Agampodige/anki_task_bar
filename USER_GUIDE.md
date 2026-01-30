@@ -4,7 +4,19 @@ Welcome to **Anki Taskbar**, a futuristic, floating interface designed to keep y
 
 ---
 
-## 🚀 Getting Started
+## � Table of Contents
+- [Getting Started](#-getting-started)
+- [Core Interface](#-core-interface)
+- [Deck Selection & Management](#-deck-selection--management)
+- [The Sessions System](#-the-sessions-system)
+- [Settings & Customization](#-settings--customization)
+- [Shortcuts](#-shortcuts)
+- [Pro Tips](#-pro-tips)
+
+---
+
+## �🚀 Getting Started
+<a name="-getting-started"></a>
 
 ### Installation
 1.  **From `.ankiaddon` file**:
@@ -21,6 +33,7 @@ When you first open Anki Taskbar, a **Quick Tour** will automatically start to g
 ---
 
 ## 🖥️ Core Interface
+<a name="-core-interface"></a>
 
 The Taskbar is designed to be a minimal, floating widget.
 
@@ -35,7 +48,24 @@ The Taskbar is designed to be a minimal, floating widget.
 
 ---
 
+## 🎴 Deck Selection & Management
+<a name="-deck-selection--management"></a>
+
+Choose exactly which decks you want to focus on using the **Select Decks** page.
+
+### Selection Tools
+-   **Search**: Use the search bar to quickly find specific decks by name.
+-   **Bulk Actions**: Use the **All**, **None**, or **Invert** buttons to quickly manage large lists.
+-   **Tree Navigation**: Expand or collapse deck hierarchies to see sub-decks. Use **Expand All** or **Collapse All** for quick viewing.
+-   **Direct Session Creation**: You can name your selection and click **Create Session** to instantly save it as a new session in your library.
+
+### Saving
+-   **Save Selection**: After picking your decks, click **Save Selection** to update the main dashboard. The widget will now only track progress for these specific decks.
+
+---
+
 ## 🗃️ The Sessions System
+<a name="-the-sessions-system"></a>
 
 Sessions allow you to group multiple decks into custom "study units."
 
@@ -53,6 +83,7 @@ Sessions allow you to group multiple decks into custom "study units."
 ---
 
 ## ⚙️ Settings & Customization
+<a name="-settings--customization"></a>
 
 Anki Taskbar is highly customizable to fit your screen and style.
 
@@ -75,6 +106,7 @@ Anki Taskbar is highly customizable to fit your screen and style.
 ---
 
 ## ⌨️ Shortcuts
+<a name="-shortcuts"></a>
 
 | Shortcut | Action |
 | :--- | :--- |
@@ -85,6 +117,8 @@ Anki Taskbar is highly customizable to fit your screen and style.
 ---
 
 ## 💡 Pro Tips
+<a name="-pro-tips"></a>
+
 -   **Controller Support**: Use tools like **AntiMicroX** or **JoyToKey** to map `Alt + Q` and navigation keys to a gaming controller for a console-like study experience.
 -   **Global Progress**: Watch the progress bar at the very top of the widget to see how close you are to finishing your ENTIRE daily goal.
 
