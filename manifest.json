@@ -5,11 +5,11 @@
         "__init__.py",
         "taskui.py",
         "bridge.py",
-        "daily_stats.py",
         "managers.py",
         "__version__.py",
         "manifest.json",
         "meta.json",
+        "USER_GUIDE.md",
         "web/"
     ]
 }

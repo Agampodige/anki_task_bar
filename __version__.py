@@ -2,11 +2,21 @@
 Version information for Anki Taskbar
 """
 
-__version__ = "1.3.0"
-__version_info__ = (1, 3, 0)
+__version__ = "1.3.1"
+__version_info__ = (1, 3, 1)
 
 # Version history
 VERSION_HISTORY = {
+    "1.3.1": {
+        "date": "2026-01-30",
+        "changes": [
+            "Added comprehensive User Guide (USER_GUIDE.md)",
+            "Integrated User Guide link into Settings page",
+            "Improved English and other language translations",
+            "Added Deck Selection feature documentation",
+            "Updated manifest and cleanup defunct files"
+        ]
+    },
     "1.3.0": {
         "date": "2026-01-30",
         "changes": [

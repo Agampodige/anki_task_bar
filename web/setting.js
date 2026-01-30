@@ -219,6 +219,13 @@ document.addEventListener("DOMContentLoaded", function () {
         projectPageBtn.addEventListener('click', function () { if (window.py) window.py.open_link('https://github.com/Agampodige/anki_task_bar'); });
     }
 
+    var userGuideBtn = document.getElementById("open-user-guide");
+    if (userGuideBtn) {
+        userGuideBtn.addEventListener('click', function () {
+            if (window.py) window.py.open_link('https://github.com/Agampodige/anki_task_bar/blob/master/USER_GUIDE.md');
+        });
+    }
+
     var coffeeBtn = document.getElementById("buy-me-coffee");
     if (coffeeBtn) {
         coffeeBtn.addEventListener('click', function () { if (window.py) window.py.open_link('https://ko-fi.com/senee'); });

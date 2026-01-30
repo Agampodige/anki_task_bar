@@ -1,7 +1,7 @@
 """
 Anki Taskbar - A modern task management interface for Anki
 
-Version: 1.0.1
+Version: 1.3.1
 Author: Agampodige
 License: MIT
 """

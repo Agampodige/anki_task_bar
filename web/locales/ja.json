@@ -105,5 +105,6 @@
     "next": "次へ",
     "finish_btn": "終了",
     "buy_me_a_coffee": "コーヒーを奢る",
-    "copied_to_clipboard": "クリップボードにコピーしました"
+    "copied_to_clipboard": "クリップボードにコピーしました",
+    "user_guide": "ユーザーガイド"
 }

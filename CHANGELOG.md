@@ -6,20 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [unreleased]
+## [v1.3.1] - 2026-01-30
 
 ### Added
-- Random Session Arrangement feature
-- Session shuffle Feature
-- Quick tour to introduce session page
-
-### Fixed
-- Small btn lightheme issue fixed
-- deck select status fixed
-- deck ui overlap fixed (special tanks @Namelesstogo)
+- Comprehensive User Guide (`USER_GUIDE.md`)
+- User Guide link integration in Settings page
+- "Select Deck" features documentation
+- Multi-language localization for User Guide link
 
 ### Changed
-- 
+- Improved all language translations
+- Updated manifest and addon packaging
+
+### Removed
+- Defunct `daily_stats.py` file
+
+## [v1.3.0] - 2026-01-30
+
+### Added
+- Multi-language support (English, Sinhala, Spanish, French, German, Chinese, Japanese)
+- Support Link (Buy me a coffee) to settings
+
+### Fixed
+- Improved Session page stability and performance
+- Optimized frontend communications and bridge logic
+- Fixed various UI and internationalization issues
+
+## [v1.2.1] - 2026-01-30
 
 ### Removed
 - 
