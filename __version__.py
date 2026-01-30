@@ -2,11 +2,21 @@
 Version information for Anki Taskbar
 """
 
-__version__ = "1.2.1"
-__version_info__ = (1, 2, 1)
+__version__ = "1.3.0"
+__version_info__ = (1, 3, 0)
 
 # Version history
 VERSION_HISTORY = {
+    "1.3.0": {
+        "date": "2026-01-30",
+        "changes": [
+            "Added Multi-language support (English, Sinhala, Spanish, French, German, Chinese, Japanese)",
+            "Added Support Link (Buy me a coffee) to settings",
+            "Improved Session page stability and performance",
+            "Optimized frontend communications and bridge logic",
+            "Fixed various UI and internationalization issues"
+        ]
+    },
     "1.2.1": {
         "date": "2026-01-01",
         "changes": [
