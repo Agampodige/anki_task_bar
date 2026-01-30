@@ -307,7 +307,7 @@
     padding: 14px;
     position: relative;
     transition: all 0.2s ease;
-    cursor: default;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -380,7 +380,11 @@
     color: var(--text-secondary);
 }
 
+
 .card-menu-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -390,40 +394,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.card-menu-btn:hover {
-    background: var(--accent-soft);
-    color: var(--accent-color);
-}
-
-.card-footer {
-    display: flex;
-    justify-content: flex-end;
-    /* Align active tag to the right */
-    align-items: center;
-    margin-top: auto;
-    padding-top: 8px;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
-    min-height: 24px;
-    /* Ensure some height even if empty */
-}
-
-.active-tag {
-    font-size: 0.65rem;
-    color: var(--accent-color);
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-    background: var(--accent-soft);
-    padding: 2px 8px;
-    border-radius: 10px;
-    animation: pulse 2s infinite;
+    z-index: 6;
 }
 
 @keyframes pulse {

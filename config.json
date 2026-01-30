@@ -13,5 +13,6 @@
     "movable": true,
     "windowSizePreset": "xlarge",
     "hideCompletedSessions": false,
-    "randomSessions": false
+    "randomSessions": false,
+    "confetti": false
 }
